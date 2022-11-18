@@ -19,3 +19,17 @@ class ChangePasswordRequest(BaseModel):
 class ForgotPassword(BaseModel):
     pass 
 
+class CreateUser(User):
+    pass
+
+class ReadUser(User):
+    user_id : int
+
+class UserUpdate(User):
+    first_name : Optional[str] =None
+    last_name:Optional[str] =None
+    email :Optional[str] =None
+    password : Optional[str] =None
+
+    class config:
+        orm_mode = True 
