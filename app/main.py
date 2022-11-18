@@ -2,9 +2,9 @@ from fastapi import FastAPI, status
 from fastapi.middleware.cors import CORSMiddleware
 
 
-import app.models
+from model import *
 #from app.routers import users, auth, question
-from app.database import engine, SessionLocal
+from database import engine, SessionLocal
 app = FastAPI()
 
 
