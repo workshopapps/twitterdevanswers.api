@@ -1,5 +1,6 @@
 from sqlalchemy import Column, Integer, String, Boolean, ForeignKey, DateTime
 from sqlalchemy.orm import relationship
+from sqlalchemy.sql import func 
 from sqlalchemy.sql.sqltypes import TIMESTAMP
 from sqlalchemy.sql.expression import text
 from database import Base
@@ -18,7 +19,6 @@ class User(Base):
     role= Column(String(100))
     image_url = Column(String(300))
 
-
 class Question(Base):
     __tablename__ = "question"
     question_id = Column(Integer, primary_key=True, nullable=False)
@@ -26,7 +26,7 @@ class Question(Base):
     content = Column(String(2000), nullable = False)
     answered = Column(Boolean, server_default = 'FALSE', nullable=False)
     created_at = Column(TIMESTAMP(timezone=True), nullable=False, server_default = text('now()'))
-    updated_at = Column()
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
     owner = relationship('User')
 
     

@@ -8,7 +8,7 @@ class UserSignInRequest(BaseModel):
     firstname: str
     lastname: str
     password: str
-    email: str
+    email: EmailStr
     imageURL: str
 
 class UserSignInResponse(BaseModel):
@@ -18,3 +18,4 @@ class ChangePasswordRequest(BaseModel):
     pass 
 class ForgotPassword(BaseModel):
     pass 
+

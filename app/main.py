@@ -2,13 +2,13 @@ from fastapi import FastAPI, status
 from fastapi.middleware.cors import CORSMiddleware
 
 
-from model import *
+import model
 #from app.routers import users, auth, question
 from database import engine, SessionLocal
 app = FastAPI()
 
 
-#models.Base.metadata.create_all(bind=engine)
+model.Base.metadata.create_all(bind=engine)
 origins = []
 
 app.add_middleware(
@@ -20,9 +20,3 @@ app.add_middleware(
 
 )
 
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
