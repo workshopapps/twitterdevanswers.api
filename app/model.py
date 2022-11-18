@@ -18,6 +18,7 @@ class User(Base):
     role= Column(String(100))
     image_url = Column(String(300))
 
+
 class Question(Base):
     __tablename__ = "question"
     question_id = Column(Integer, primary_key=True, nullable=False)
