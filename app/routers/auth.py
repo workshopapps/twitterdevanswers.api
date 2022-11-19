@@ -1,13 +1,25 @@
 from fastapi import APIRouter, Depends, HTTPException, status, Response
+import yagmail
+from app.config import Settings
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 
 from app import database, schema, model, utils, oauth
 
+app_passwd = Settings.app_passwd
+
 router = APIRouter(
     prefix='/auth',
     tags=['Authentication'])
 
+def send_reset_mail(user, token):
+    msg = f''' 
+           To reset your password visit the following link:
+            {router.url_path_for(forget_password)}/{token}    
+            If you did not make this request then simply ignore this email) '''
+    
+    with yagmail.SMTP('shakurahack17@gmail.com', app_passwd) as yag:
+        yag.send(to=user.email, subject ='Passowrd Reset Request', contents=msg)
 @router.post('/signin', )
 def user_login(user_credentials: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(database.get_db)):
     user = db.query(model.User).filter(model.User.email == user_credentials.username).first()
@@ -65,4 +77,26 @@ def change_password(update_password: schema.ChangePasswordRequest, db: Session =
     return {'sucess': True, 'message': 'Password Changed'}
 
 
+@router.post('/forget-password')
+def forget_password(email: schema.Email, db:Session = Depends(database.get_db), current_user: int = Depends(oauth.get_current_user)):
+    user = db.query(model.User).filter(model.User.email == email).first()
+    if user is None:
+         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"User with email: {user.email} does not exit")
 
+    token = oauth.create_access_token({'user_id': user.user_id})
+
+    send_reset_mail(user.email, token)
+
+
+    return {'success': True, 'message': 'token sent to provided email'}
+@router.post('forgot-password/{token}')
+def verify_password_toke(token: str, password = schema.ForgotPassword, db:Session = Depends(database.get_db)):
+
+    id =  oauth.verify_access_token(token)
+    user = db.query(model.User).filter(model.User.user_id == id).first()
+    if user is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Check token again")
+    user.password = utils.hash(password.newPassword)
+    db.commit() 
+
+    return { 'success': True,'message': 'Password Changed' }

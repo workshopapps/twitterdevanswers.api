@@ -17,9 +17,10 @@ class UserSignInResponse(BaseModel):
 class ChangePasswordRequest(BaseModel):
     oldPassword : str
     newPassword : str
-    confirmPassword: str
+    confirmPassword: newPassword
 class ForgotPassword(BaseModel):
-    pass 
+    newPassword : str
+    confirmPassword: newPassword
 
 class NotificationBase(BaseModel):
     owner_id: int
@@ -36,3 +37,8 @@ class Notification(NotificationBase):
 
     class Config:
         orm_mode = True
+class Email(BaseModel):
+    email: EmailStr
+
+class TokenData(BaseModel):
+    id: Optional[str] = None
