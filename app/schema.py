@@ -13,16 +13,24 @@ class UserSignInRequest(BaseModel):
     imageURL: str
 
 
+class UserUpdate(UserSignInRequest):
+    pass
+
+
 class UserSignInResponse(BaseModel):
     pass
 
+
 class UserBase(UserSignInRequest):
-    user_id : int
+    user_id: int
+
     class Config:
         orm_mode = True
 
+
 class ReadUser(UserBase):
     pass
+
 
 class ChangePasswordRequest(BaseModel):
     oldPassword: str
@@ -52,8 +60,8 @@ class Question(BaseModel):
     owner_id: int
     content: str
     answered: bool
-    created_at: TIMESTAMP
-    updated_at: TIMESTAMP
+    created_at: datetime
+    updated_at: datetime
 
 
 class Answer(BaseModel):
@@ -61,17 +69,27 @@ class Answer(BaseModel):
     id: int
     owner_id: int
     question_id: int
-    owner = relationship('User')
-    question = relationship('question')
+    owner: User
+    question: Question
 
 
-class Notification(BaseModel):
-
-    id: int
+class NotificationBase(BaseModel):
     owner_id: int
     content_id: int
-    owner = relationship('user')
-    content = relationship('answer')
+    type: str
+    title: str
+
+
+class NotificationCreate(NotificationBase):
+    pass
+
+
+class Notification(NotificationBase):
+    notification_id: int
+    unread: bool = True
+
+    class Config:
+        orm_mode = True
 
 
 class Tag(BaseModel):
@@ -83,5 +101,5 @@ class Tag(BaseModel):
 class contenTag(BaseModel):
     question_id: int
     tag_id: int
-    question = relationship('question')
-    tag = relationship('tag')
+    question: Question
+    tag: Tag
