@@ -14,7 +14,7 @@ router = APIRouter(
 
 
 # Get all users
-@router.get('/', response_model=List[schema.UserBase])
+@router.get('/')
 def fetch_users(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
     return crud.get_users(db, skip=skip, limit=limit)
 
