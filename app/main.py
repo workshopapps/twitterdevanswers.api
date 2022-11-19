@@ -3,7 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 
 import model
-#from app.routers import users, auth, question
+from app.routers import user, notification, questions
 from database import engine, SessionLocal
 app = FastAPI()
 
@@ -19,6 +19,5 @@ app.add_middleware(
     allow_headers = ["*"]
 
 )
-
-
+app.include_router(user.router)
 

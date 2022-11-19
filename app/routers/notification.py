@@ -18,7 +18,7 @@ MESSAGE_STREAM_RETRY_TIMEOUT = 15000  # milisecond
 
 logger = logging.getLogger()
 
-def create_notification(db: Session, notification: schema.NotificationCreate ):
+def create_notification(notification:schema.NotificationCreate, db: Session = Depends(get_db) ):
     """
     This is background function that should be run after a post request has been made to answer a user's question.
     A NotificationCreate schema should be passed with filled data.
