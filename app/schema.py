@@ -1,7 +1,8 @@
 from pydantic import BaseModel, EmailStr
 from pydantic.types import conint
 from datetime import datetime
-from typing import Optional 
+from typing import Optional
+
 
 class UserSignInRequest(BaseModel):
     username: str
@@ -10,6 +11,7 @@ class UserSignInRequest(BaseModel):
     password: str
     email: EmailStr
     imageURL: str
+
 
 class UserSignInResponse(BaseModel):
     pass
@@ -23,22 +25,63 @@ class ReadUser(UserBase):
     pass
 
 class ChangePasswordRequest(BaseModel):
-    pass 
-class ForgotPassword(BaseModel):
-    pass 
+    oldPassword: str
+    newPassword: str
+    confirmPassword: str
 
-class NotificationBase(BaseModel):
+
+class ForgotPassword(BaseModel):
+    pass
+
+
+class User(BaseModel):
+    id:  int
+    user_name: str
+    first_name: str
+    last_name: str
+    email: str
+    password_hash: str
+    account_balance: int
+    role: str
+    image_url: str
+
+
+class Question(BaseModel):
+
+    id: int
+    owner_id: int
+    content: str
+    answered: bool
+    created_at: TIMESTAMP
+    updated_at: TIMESTAMP
+
+
+class Answer(BaseModel):
+
+    id: int
+    owner_id: int
+    question_id: int
+    owner = relationship('User')
+    question = relationship('question')
+
+
+class Notification(BaseModel):
+
+    id: int
     owner_id: int
     content_id: int
-    type: str
-    title: str
+    owner = relationship('user')
+    content = relationship('answer')
 
-class NotificationCreate(NotificationBase):
-    pass 
 
-class Notification(NotificationBase):
-    notification_id: int
-    unread: bool = True
+class Tag(BaseModel):
 
-    class Config:
-        orm_mode = True
+    tag_id: int
+    tag_name: str
+
+
+class contenTag(BaseModel):
+    question_id: int
+    tag_id: int
+    question = relationship('question')
+    tag = relationship('tag')
