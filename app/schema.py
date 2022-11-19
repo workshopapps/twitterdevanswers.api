@@ -14,6 +14,14 @@ class UserSignInRequest(BaseModel):
 class UserSignInResponse(BaseModel):
     pass
 
+class UserBase(UserSignInRequest):
+    user_id : int
+    class Config:
+        orm_mode = True
+
+class ReadUser(UserBase):
+    pass
+
 class ChangePasswordRequest(BaseModel):
     pass 
 class ForgotPassword(BaseModel):
