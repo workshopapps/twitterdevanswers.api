@@ -6,23 +6,12 @@ from models import *
 
 router = APIRouter(
     prefix='/users',
-    tags=['Users']
+    tags=['User']
 )
 
-
-# Create/Add a User
-@router.post('/',status_code=status.HTTP_201_CREATED,response_model=schema.ReadUser)
-def create_user(user:schema.CreateUser , db:Session = Depends(get_db)):
-    #  Get new Users mail
-    new_user = db.query(models.User).filter(models.User.email == email).first()    
-    # check if user is already registered
-    if new_user:
-        raise HTTPException(status_code=400, detail= " User has already been created")
-    return crud.create_user(db, user=user)
-
-
+   
 # Get all users
-@router.get('/',response_model=list[schema.UserSignInRequest])   
+@router.get('/',response_model=list[schema.UserBase]) 
 def fetch_users(skip: int = 0,limit: int = 100,db: Session = Depends(get_db)):
     return crud.get_users(db,skip=skip,limit=limit)
 
@@ -37,7 +26,7 @@ def fetch_user(user_id:int,db: Session = Depends(get_db)):
 
 
 # update a user
-@router.patch('/{user_id}',response_model =ReadUser)      
+@router.patch('/{user_id}',response_model=schema.ReadUser)      
 def update_user(user:UserUpdate,user_id:int,db: Session = Depends(get_db)):
     user = db.query(models.User).filter(models.User.user_id == user_id).first() 
     if user is None:
