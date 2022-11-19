@@ -1,29 +1,27 @@
-class SignUp(Base):
-    __tablename__ = "signup"
-    id = Column(Integer, primary_key=True, nullable=False)
-    username = Column(String(15), nullable=False)
-    first_name = Column(String(30), nullable=False)
-    last_name = Column(String(30), nullable=False)
-    email = Column(String(100), nullable=False, unique=True)
-    password = Column(String, nullable=False)
-    image_url = Column(String(300))
+from typing import Union
 
-class SignIn(Base):
-    __tablename__ = "signin"
-    id = Column(Integer, primary_key=True, nullable=False)
-    email = Column(String(100), nullable=False, unique=True)
-    password = Column(String, nullable=False)
-
-class ChangePassword(Base):
-    __tablename__ = "changepassword"
-    id = Column(Integer, primary_key=True, nullable=False)
-    oldpassword = Column(String(8),nullable=False)
-    newpassword = Column(String(8), nullable=False)
-
-
-class ForgotPassword(Base):
-    __tablename__ = "forgot_password"
-    id = Column(Integer, primary_key=True, nullable=False)
+app = FastAPI()
+@app.route('/signup',  methods=['POST'])
+def sign_up():
+    from auth import SignUp
+    all_json = request.get_json()
+    user_name = all_json.get('user_name')
+    #first_name = all_json.get('first_name')
+    # last_name = all_json.get('last_name')
+    # email = all_json.get('email')
+    # password_hash = all_json.get('password_hash')
+    # image_url = all_json.get('image')
     
+
+    usr = db.session.query(User).filter_by(user_name=user_name).first()
+    print(usr) 
+
+    if not usr:
+        new_user = User(**all_json)
+        db.session.add(new_user)
+        db.session.commit()
+        return {"usr": "Signup successful"}
+    else:
+        return {'Error': "Username already exist"}, 409
 
 
