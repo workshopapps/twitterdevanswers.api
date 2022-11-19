@@ -21,6 +21,55 @@ class ChangePasswordRequest(BaseModel):
 class ForgotPassword(BaseModel):
     pass 
 
+<<<<<<< HEAD
+class User(BaseModel):
+    id :  int
+    user_name: str
+    first_name: str
+    last_name : str
+    email: str
+    password_hash : str
+    account_balance: int
+    role: str
+    image_url: str
+
+
+class Question(BaseModel):
+   
+    id : int
+    owner_id: int
+    content : str
+    answered :bool
+    created_at: TIMESTAMP
+    updated_at: TIMESTAMP
+
+class Answer(BaseModel):
+   
+    id:int 
+    owner_id: int
+    question_id:int
+    owner = relationship('User')
+    question = relationship('question')
+
+class Notification(BaseModel):
+
+    id : int
+    owner_id : int
+    content_id: int 
+    owner = relationship('user')
+    content = relationship('answer')
+
+class Tag(BaseModel):
+   
+    tag_id: int 
+    tag_name: str 
+
+class contenTag(BaseModel):
+    question_id : int 
+    tag_id: int 
+    question = relationship('question')
+    tag = relationship('tag')
+=======
 class NotificationBase(BaseModel):
     owner_id: int
     content_id: int
@@ -36,3 +85,4 @@ class Notification(NotificationBase):
 
     class Config:
         orm_mode = True
+>>>>>>> b80b82bf9cfa547fedd6e6788536d788f4a8a52f
