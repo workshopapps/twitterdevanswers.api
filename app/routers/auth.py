@@ -13,6 +13,7 @@ router = APIRouter(
     tags=['Authentication'])
 
 
+# send reset email
 def send_reset_mail(user, token):
     msg = f''' 
            To reset your password visit the following link:
