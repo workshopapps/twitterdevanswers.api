@@ -15,7 +15,9 @@ class UserSignInResponse(BaseModel):
     pass
 
 class ChangePasswordRequest(BaseModel):
-    pass 
+    oldPassword : str
+    newPassword : str
+    confirmPassword: str
 class ForgotPassword(BaseModel):
     pass 
 
