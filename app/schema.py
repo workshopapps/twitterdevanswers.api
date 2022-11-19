@@ -33,8 +33,12 @@ class ReadUser(UserBase):
 
 
 class ChangePasswordRequest(BaseModel):
-    oldPassword: str
-    newPassword: str
+    oldPassword : str
+    newPassword : str
+    confirmPassword: newPassword
+class ForgotPassword(BaseModel):
+    newPassword : str
+    confirmPassword: newPassword
     confirmPassword: str
 
 
@@ -72,7 +76,6 @@ class Answer(BaseModel):
     owner: User
     question: Question
 
-
 class NotificationBase(BaseModel):
     owner_id: int
     content_id: int
@@ -90,6 +93,11 @@ class Notification(NotificationBase):
 
     class Config:
         orm_mode = True
+class Email(BaseModel):
+    email: EmailStr
+
+class TokenData(BaseModel):
+    id: Optional[str] = None
 
 
 class Tag(BaseModel):
@@ -103,3 +111,4 @@ class contenTag(BaseModel):
     tag_id: int
     question: Question
     tag: Tag
+

@@ -13,6 +13,7 @@ class Settings(BaseSettings):
     secret_key: str
     algorithm: str
     access_token_expire_minutes: str
+    app_passwd: str
     test_database_username: str
     test_database_password: str
     test_database_hostname: str
