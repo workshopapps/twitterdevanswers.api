@@ -33,11 +33,11 @@ fake_db = {
 }
 
 
-# def test_read_main():
-#     response = client.get("/")
-#     assert response.status_code == 200
-#     print(response.json())
-#     assert response.json() == {"msg": ""}
+def test_read_main():
+    response = client.get("/")
+    assert response.status_code == 200
+    print(response.json())
+    assert response.json() == {"success": True, "data": []}
 
 
 def test_bad_token():
