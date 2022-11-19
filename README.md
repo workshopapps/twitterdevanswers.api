@@ -26,7 +26,7 @@ Clone this github repo
 
 ###   Install Dependencies
 
-After this repo has been successfully cloned , here are the instructions you need to follow 
+After this repo has been successfully cloned , here are the instructions you need to follow :-
 
 Create Virtual environment
 
