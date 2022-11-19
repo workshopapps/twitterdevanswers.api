@@ -4,7 +4,10 @@ from typing import List
 from models import *
 
 
-router = APIRouter()
+router = APIRouter(
+    prefix='/users',
+    tags=['Users']
+)
 
 
 # Create/Add a User
