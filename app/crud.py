@@ -1,16 +1,8 @@
 from sqlalchemy.orm import Session
 import model, schema
 
-# create user
-def create_user(db: Session, user: schema.CreateUser):
-    user_password = utils.hash(user.password)
-    new_user = model.User(**user.dict())
-    db.add(new_user)
-    db.commit()
-    db.refresh(new_user)
-    return new_user
 
-#  get a user
+
 def get_user(db: Session, user_id: int):
     user = db.query(model.User).filter(model.User.id == user_id).first()
     return user
