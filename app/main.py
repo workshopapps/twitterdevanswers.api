@@ -9,7 +9,6 @@ from app.database import engine, SessionLocal
 app = FastAPI()
 
 
-# model.Base.metadata.create_all(bind=engine)
 origins = ['*']
 
 app.add_middleware(
