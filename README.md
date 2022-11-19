@@ -1,11 +1,11 @@
-##  Dev Ask Backend
+#  Dev Ask Backend
 
-These are instructions on how to run this app on your Local Machine for Development purposes
+These instructions will get you a copy of Dev Ask project up and running on your local machine for development and testing purposes. 
 
 
-##   Steps on How to Successfully clone and run this app
+##   Steps on Setting Up and running this Project Successfully
 
-##   Clone Repo
+###   Clone Repo
 
 Make sure you have python installed on your system
 
@@ -24,7 +24,7 @@ Clone this github repo
      git pull origin dev
     
 
-##   Install Dependencies
+###   Install Dependencies
 
 After this repo has been successfully cloned , here are the instructions you need to follow 
 
@@ -53,10 +53,11 @@ Install Dependencies
 
      pip install -r requirements.txt
 
-Run App 
+Run App
 
     uvicorn app.main:app --reload
 
+###   Running the tests
+Run the command below in the root folder to execute the written tests
 
-
-
+    pytest tests
