@@ -34,7 +34,7 @@ def fetch_user(user_id:int,db: Session = Depends(get_db)):
 
 
 # update a user
-@router.patch('/update/{user_id}',response_model =ReadUser)      
+@router.patch('/{user_id}',response_model =ReadUser)      
 def update_user(user:UserUpdate,user_id:int,db: Session = Depends(get_db)):
     user = db.query(models.User).filter(models.User.user_id == user_id).first() 
     if user is None:
@@ -42,7 +42,7 @@ def update_user(user:UserUpdate,user_id:int,db: Session = Depends(get_db)):
     return crud.update_user(db,user=user,user_id=user_id)   
 
 # delete a user
-@router.delete('/del/{user_id}')   
+@router.delete('/{user_id}')   
 def delete_user(user_id:int, db: Session = Depends(get_db)):
     delete_user = crud.delete_user(db, user_id=user_id)
     if not delete_user:
