@@ -46,6 +46,9 @@ class Notification(Base):
     content_id =Column(Integer, ForeignKey("answer.answer_id", ondelete="CASCADE"), nullable=False)
     owner = relationship('user')
     content = relationship('answer')
+    type = Column(String(200), nullable=False)
+    unread = Column(Boolean, default=True)
+    title = Column(String(200), nullable=False)
 
 
 

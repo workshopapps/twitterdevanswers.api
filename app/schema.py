@@ -19,3 +19,18 @@ class ChangePasswordRequest(BaseModel):
 class ForgotPassword(BaseModel):
     pass 
 
+class NotificationBase(BaseModel):
+    owner_id: int
+    content_id: int
+    type: str
+    title: str
+
+class NotificationCreate(NotificationBase):
+    pass 
+
+class Notification(NotificationBase):
+    notification_id: int
+    unread: bool = True
+
+    class Config:
+        orm_mode = True
