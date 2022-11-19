@@ -77,7 +77,7 @@ def get_all_questions(db: Session = Depends(get_db)):
     get_all_questions = db.query(model.Question).all()
     return {"success": True, "data": [
             {
-                "questionid": get_all_questions.question_id,
+                "questionid": get_all_questions.id,
                 "content": get_all_questions.content,
                 "answered": True,
                 "createdAt": get_all_questions.created_at,

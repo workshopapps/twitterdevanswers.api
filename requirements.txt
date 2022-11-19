@@ -3,6 +3,7 @@ attrs==19.3.0
 Automat==0.8.0
 autopep8==1.7.0
 blinker==1.4
+cachetools==5.2.0
 certifi==2019.11.28
 chardet==3.0.4
 click==8.1.3
@@ -12,6 +13,8 @@ command-not-found==0.3
 configobj==5.0.6
 constantly==15.1.0
 cryptography==2.8
+cssselect==1.2.0
+cssutils==2.6.0
 dbus-python==1.2.16
 distlib==0.3.6
 distro==1.4.0
@@ -45,6 +48,7 @@ language-selector==0.1
 launchpadlib==1.10.13
 lazr.restfulclient==0.14.2
 lazr.uri==1.0.3
+lxml==4.9.1
 MarkupSafe==2.1.1
 more-itertools==4.2.0
 mysqlclient==2.1.1
@@ -58,6 +62,7 @@ pexpect==4.6.0
 Pillow==9.2.0
 platformdirs==2.5.2
 pluggy==1.0.0
+premailer==3.10.0
 psycopg-binary==3.1.4
 psycopg2-binary==2.9.5
 pyasn1==0.4.2
@@ -111,5 +116,6 @@ watchfiles==0.18.1
 websockets==10.4
 Werkzeug==2.2.2
 wsproto==0.15.0
+yagmail==0.15.293
 zipp==3.10.0
 zope.interface==4.7.1
