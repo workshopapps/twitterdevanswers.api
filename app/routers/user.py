@@ -4,61 +4,52 @@ from typing import List
 from models import *
 
 
-router = APIRouter()
+router = APIRouter(
+    prefix='/users',
+    tags=['Users']
+)
+
 
 # Create/Add a User
-@router.post('/user/',response_model=ReadUser)
-def create_user(new_user:CreateUser):
-    with Session(engine) as session:
-        db = User.from_orm(new_user)
-        session.add(new_user)
-        print('commiting....')
-        session.commit()
-        print('commited :)')
-        session.refresh()
-        return {"success":True,"data":new_user}
+@router.post('/',status_code=status.HTTP_201_CREATED,response_model=schema.ReadUser)
+def create_user(user:schema.CreateUser , db:Session = Depends(get_db)):
+    #  Get new Users mail
+    new_user = db.query(models.User).filter(models.User.email == email).first()    
+    # check if user is already registered
+    if new_user:
+        raise HTTPException(status_code=400, detail= " User has already been created")
+    return crud.create_user(db, user=user)
+
 
 # Get all users
-@router.get('/users')   
-def fetch_users():
-    with Session(engine) as session:
-        users = session.exec(select(User)).all()
-        return { "success":True, 'data':user }
-  
+@router.get('/',response_model=list[schema.UserSignInRequest])   
+def fetch_users(skip: int = 0,limit: int = 100,db: Session = Depends(get_db)):
+    return crud.get_users(db,skip=skip,limit=limit)
+
 
 # Get a User  
-@router.get('/user/{user_id}')
-def fetch_a_user(user_id:int):
-     with Session(engine) as session:
-        if user:
-             user = session.get(User,user_id)
+@router.get('/{user_id}')
+def fetch_user(user_id:int,db: Session = Depends(get_db)):
+    user = crud.get_user(db, user_id=user_id)
+    if not user:
         raise HTTPException( status = 404 , detail = f" user with user_id : {user_id} not found")
-        return{"success":True,'data':user}
+    return{"success":True,'data':user}
+
 
 # update a user
-@router.patch('/user/update/{user_id}',response_model =ReadUser)      
-def update_user(user_update:UserUpdate,user_id:int):
-    with Session(engine) as session :
-        db = session.get(User,user_id)
-        if not db :
-            raise HTTPException(status_code=404, detail="User not found")
-        user_data = user_update.dict(exclude_unset=True)
-        for key, value in user_data.items():
-            setattr(db, key, value)
-        session.add(db)
-        session.commit()
-        session.refresh(db)
-        return {"success":True,"message": "Profile Updated","data": db}
-
+@router.patch('/{user_id}',response_model =ReadUser)      
+def update_user(user:UserUpdate,user_id:int,db: Session = Depends(get_db)):
+    user = db.query(models.User).filter(models.User.user_id == user_id).first() 
+    if user is None:
+        raise HTTPException(status_code=404, detail="User not found")            
+    return crud.update_user(db,user=user,user_id=user_id)   
 
 # delete a user
-@router.delete('/user/del/{user_id}')   
-def delete_user(user_id:int):
-     with Session(engine) as session:
-        user = session.get(User, user_id)
-        if not user:
-            raise HTTPException( status = 404 , detail = f"user with user_id : {user_id} does not exist")  
-        session.delete(user)
-        session.commit()
-        return { "sucess" : True , "message" : "profile removed"}
+@router.delete('/{user_id}')   
+def delete_user(user_id:int, db: Session = Depends(get_db)):
+    delete_user = crud.delete_user(db, user_id=user_id)
+    if not delete_user:
+        raise HTTPException( status = 404 , detail = f"user with user_id : {user_id} does not exist")  
+    return delete_user
+
 

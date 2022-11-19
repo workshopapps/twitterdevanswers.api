@@ -19,6 +19,7 @@ class ChangePasswordRequest(BaseModel):
 class ForgotPassword(BaseModel):
     pass 
 
+<<<<<<< HEAD
 class User(BaseModel):
     id :  int
     user_name: str
@@ -66,3 +67,20 @@ class contenTag(BaseModel):
     tag_id: int 
     question = relationship('question')
     tag = relationship('tag')
+=======
+class NotificationBase(BaseModel):
+    owner_id: int
+    content_id: int
+    type: str
+    title: str
+
+class NotificationCreate(NotificationBase):
+    pass 
+
+class Notification(NotificationBase):
+    notification_id: int
+    unread: bool = True
+
+    class Config:
+        orm_mode = True
+>>>>>>> b80b82bf9cfa547fedd6e6788536d788f4a8a52f
