@@ -8,6 +8,7 @@ from ..database import get_db
 from .. import model
 from .. import schema
 from typing import List
+from app import oauth
 
 router = APIRouter(
     prefix="/notification",
@@ -38,10 +39,6 @@ def create_notification(notification: schema.NotificationCreate, db: Session = D
     return db_notification
 
 
-def get_user_id():
-    # Some jwt verification code should occur here and it should return the user_id or raise an HTTP Unauthorized Exception
-    return 1
-
 
 async def get_notifications(id: int, db: Session):
     """
@@ -71,7 +68,7 @@ def set_unread_to_false(id: int, db: Session):
 
 
 @router.get("/")
-async def notification_stream(request: Request, user_id: int = Depends(get_user_id), db: Session = Depends(get_db)):
+async def notification_stream(request: Request, user = Depends(oauth.get_current_user), db: Session = Depends(get_db)):
     """
     Periodically streams the user's notifications to the client using SSE.
     """
@@ -83,7 +80,7 @@ async def notification_stream(request: Request, user_id: int = Depends(get_user_
                 break
 
             # Gets the user's notifications
-            notifications, number_of_unread = await get_notifications(id=user_id, db=db)
+            notifications, number_of_unread = await get_notifications(id=user.user_id, db=db)
             data = {"number_of_unread": number_of_unread,
                     "notifications": notifications}
 
