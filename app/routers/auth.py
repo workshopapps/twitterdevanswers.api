@@ -23,7 +23,7 @@ def send_reset_mail(user, token):
         yag.send(to=user.email, subject='Passowrd Reset Request', contents=msg)
 
 
-@router.post('/signin', )
+@router.post('/signin')
 def user_login(user_credentials: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(database.get_db)):
     user = db.query(model.User).filter(
         model.User.email == user_credentials.username).first()
@@ -104,7 +104,7 @@ def forget_password(email: schema.Email, db: Session = Depends(database.get_db),
 
 
 @router.post('forgot-password/{token}')
-def verify_password_toke(token: str, password=schema.ForgotPassword, db: Session = Depends(database.get_db)):
+def verify_password_token(token: str, password: schema.ForgotPassword, db: Session = Depends(database.get_db)):
 
     id = oauth.verify_access_token(token)
     user = db.query(model.User).filter(model.User.user_id == id).first()
