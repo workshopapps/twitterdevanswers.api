@@ -28,6 +28,7 @@ fastapi==0.82.0
 filelock==3.8.0
 Flask==2.2.2
 greenlet==2.0.1
+gunicorn==20.1.0
 h11==0.14.0
 httpcore==0.16.1
 httplib2==0.14.0
