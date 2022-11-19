@@ -31,7 +31,7 @@ class User(BaseModel):
     image_url: str
 
 
-class Question(Base):
+class Question(BaseModel):
    
     id : int
     owner_id: int
@@ -40,7 +40,7 @@ class Question(Base):
     created_at: TIMESTAMP
     updated_at: TIMESTAMP
 
-class Answer(Base):
+class Answer(BaseModel):
    
     id:int 
     owner_id: int
@@ -48,7 +48,7 @@ class Answer(Base):
     owner = relationship('User')
     question = relationship('question')
 
-class Notification(Base):
+class Notification(BaseModel):
 
     id : int
     owner_id : int
@@ -56,12 +56,12 @@ class Notification(Base):
     owner = relationship('user')
     content = relationship('answer')
 
-class Tag(Base):
+class Tag(BaseModel):
    
     tag_id: int 
     tag_name: str 
 
-class contenTag(Base):
+class contenTag(BaseModel):
     
     question_id : int 
     tag_id: int 
