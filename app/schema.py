@@ -62,7 +62,6 @@ class Tag(BaseModel):
     tag_name: str 
 
 class contenTag(BaseModel):
-    
     question_id : int 
     tag_id: int 
     question = relationship('question')
