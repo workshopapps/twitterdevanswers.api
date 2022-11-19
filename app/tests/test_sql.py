@@ -1,15 +1,16 @@
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
+from app.config import settings
 
 from ..database import Base
 from ..main import app
 from ..database import get_db
 
-SQLALCHEMY_DATABASE_URL = "f'postgresql://{settings.test_database_username}:{settings.test_database_password}@{settings.test_database_hostname}:{settings.test_database_port}/{settings.test_database_name}'"
+SQLALCHEMY_DATABASE_URL = f'postgresql://{settings.test_database_username}:{settings.test_database_password}@{settings.test_database_hostname}:{settings.test_database_port}/{settings.test_database_name}'
 
 engine = create_engine(
-    SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False}
+    SQLALCHEMY_DATABASE_URL
 )
 TestingSessionLocal = sessionmaker(
     autocommit=False, autoflush=False, bind=engine)
@@ -46,7 +47,7 @@ def test_create_user():
         "/users/",
         json=dummy_user
     )
-    assert response.status_code == 200, response.text
+    assert response.status_code == 200
     data = response.json()
     assert data["email"] == "deadpool@example.com"
     assert "id" in data
