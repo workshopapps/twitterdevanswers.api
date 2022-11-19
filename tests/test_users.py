@@ -39,11 +39,11 @@ def test_nonexistent_user():
     }
 
 
-# def test_create_user_with_bad_token():
-#     """Tests if client is creating a user with bad token"""
-#     response = client.get("/users", headers={"X-Token": "corusant"})
-#     assert response.status_code == 400
-#     assert response.json() == {"detail": "Invalid X-Token header"}
+def test_create_user_with_bad_token():
+    """Tests if client is creating a user with bad token"""
+    response = client.get("/users", headers={"X-Token": "corusant"})
+    assert response.status_code == 400
+    assert response.json() == {"detail": "Invalid X-Token header"}
 
 
 def test_creating_existing_user():

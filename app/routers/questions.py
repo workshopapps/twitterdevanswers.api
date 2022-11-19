@@ -46,16 +46,17 @@ def delete_question(question_id, db: Session = Depends(get_db)):
 
 @router.get("/question/{question_id}", status_code=status.HTTP_200_OK)
 def get_question(question_id, db: Session = Depends(get_db)):
-    get_question = db.query(model.Question).filter(
+    get_question_db = db.query(model.Question).filter(
         model.Question.id == question_id).first
-    if get_question:
+    print(dir(get_question))
+    if get_question_db:
         db.commit()
         return {"success": True, "data": {
-            "questionid": get_question.question_id,
-            "content": get_question.content,
+            "questionid": get_question_db.question_id,
+            "content": get_question_db.content,
             "answered": True,
-            "createdAt": get_question.created_at,
-            "updatedAT": get_question.updated_at,
+            "createdAt": get_question_db.created_at,
+            "updatedAT": get_question_db.updated_at,
             "answers": [],
         }
         }
@@ -74,15 +75,15 @@ def update_question(question_id, request: schema.Question, db: Session = Depends
 
 @router.get("/", status_code=status.HTTP_200_OK)
 def get_all_questions(db: Session = Depends(get_db)):
-    get_all_questions = db.query(model.Question).all()
-    return {"success": True, "data": [
-            {
-                "questionid": get_all_questions.id,
-                "content": get_all_questions.content,
-                "answered": True,
-                "createdAt": get_all_questions.created_at,
-                "updatedAt": get_all_questions.updated_at,
-                "answers": []
-            }
-            ]
+    get_all_questions_db = db.query(model.Question).all()
+    return {"success": True, "data": get_all_questions_db
+            # {
+            #     "questionid": get_all_questions_db.question_id,
+            #     "content": get_all_questions_db.content,
+            #     "answered": True,
+            #     "createdAt": get_all_questions_db.created_at,
+            #     "updatedAt": get_all_questions_db.updated_at,
+            #     "answers": []
+            # }
+            # ]
             }
