@@ -12,9 +12,8 @@ from app import oauth
 
 router = APIRouter(
     prefix="/notification",
-    tags=[{
-        "name": "Notification",
-        "description": "Implementing **CRUD** Notification operations here ,  uses Authentication"  
+    tags=['Notification'],
+    description = ['Implementing **CRUD** Notification operations here ,  uses Authentication']
 
     }]
 )
