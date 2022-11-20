@@ -10,20 +10,23 @@ description = """
 Dev Ask Api does the following functions
 
 ## Auth
+This endpoint will handle all authorization requests including sign up, sign in, change password etc.
 
-The user can  **sign in** to Dev Ask
-The user can **sign out** of Dev Ask
-The user is able to **Change Password**
+## Users 
+    These endpoint perform CRUD operations involving the user 
+## Questions 
+     These endpoint perform CRUD operations involving the questions asked by the user 
+## Answer
+     These endpoint perform CRUD operations involving the answer to the questions asked by the user 
 
-## Users , Questions , Answer
-
-You will be able to perform CRUD Operations on Every Function:
-
+Other Endpoints are implemented below 
+ 
+## HTTP Methods
+    The following methods are used in this api :- 
 * **GET** 
 * **POST** 
 * **UPDATE** 
 * **DELETE** 
-and other operations like :-
 * **PATCH** 
 
 """
