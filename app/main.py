@@ -15,14 +15,14 @@ The user can  **sign in** to Dev Ask
 The user can **sign out** of Dev Ask
 The user is able to **Change Password**
 
-## Users , Questions , Answer
+## Users,Questions,Answers
 
 You will be able to perform CRUD Operations on Every Function:
 
 * **GET** 
-* **POST ** 
-* **Update ** 
-* **DELETE ** 
+* **POST** 
+* **Update** 
+* **DELETE** 
 and other operations like :-
 * **PATCH** 
 
