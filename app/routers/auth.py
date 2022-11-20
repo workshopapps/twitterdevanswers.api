@@ -10,8 +10,7 @@ app_passwd = settings.app_passwd
 
 router = APIRouter(
     prefix='/auth',
-    tags=['Authentication'],
-    description = ['Authentication Operations , The **Sign in / Sign Out** logics are present in this endpoint']
+    tags=['Authentication']
 )
 
 

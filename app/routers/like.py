@@ -7,8 +7,7 @@ from ..database import get_db
 
 router = APIRouter(
     prefix="/like",
-    tags=["Like"],
-    description = ['Implementation of Like functionalities']
+    tags=["Like"]
 )
 
 

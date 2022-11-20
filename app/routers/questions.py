@@ -8,9 +8,8 @@ from app import oauth
 
 router = APIRouter(
     prefix='/questions',
-    tags=['Questions'],
-    description= ['Implementing **CRUD** Question operations here']  
-    )
+    tags=['Questions']
+)
 
 
 @router.post("/", status_code=status.HTTP_201_CREATED)
