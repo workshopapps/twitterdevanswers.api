@@ -3,7 +3,7 @@ from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from sqlalchemy.sql.sqltypes import TIMESTAMP
 from sqlalchemy.sql.expression import text
-from app.database import Base
+from app.database import Base, engine
 
 
 class User(Base):
@@ -40,7 +40,15 @@ class Answer(Base):
     question_id = Column(Integer, ForeignKey(
         "question.question_id", ondelete="CASCADE"), nullable=False)
     owner = relationship('User')
-    question = relationship('question')
+    question = relationship('Question')
+
+
+class Like(Base):
+    __tablename__ = "likes"
+    user_id = Column(Integer, ForeignKey(
+        'user.user_id', ondelete="CASCADE"), primary_key=True)
+    question_id = Column(Integer, ForeignKey(
+        'question.question_id', ondelete="CASCADE"), primary_key=True)
 
 
 class Notification(Base):
@@ -50,8 +58,8 @@ class Notification(Base):
         "user.user_id", ondelete="CASCADE"), nullable=False)
     content_id = Column(Integer, ForeignKey(
         "answer.answer_id", ondelete="CASCADE"), nullable=False)
-    owner = relationship('user')
-    content = relationship('answer')
+    owner = relationship('User')
+    content = relationship('Answer')
     type = Column(String(200), nullable=False)
     unread = Column(Boolean, default=True)
     title = Column(String(200), nullable=False)
@@ -69,5 +77,8 @@ class contenTag(Base):
         "question.question_id", ondelete="CASCADE"),  primary_key=True, nullable=False)
     tag_id = Column(Integer, ForeignKey(
         "tag.tag_id", ondelete="CASCADE"), nullable=False)
-    question = relationship('question')
-    tag = relationship('tag')
+    question = relationship('Question')
+    tag = relationship('Tag')
+
+
+Base.metadata.create_all(bind=engine)

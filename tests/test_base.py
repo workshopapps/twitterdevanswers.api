@@ -34,13 +34,15 @@ fake_db = {
 
 
 def test_read_main():
+    """Tests the root endpoint"""
     response = client.get("/")
     assert response.status_code == 200
     print(response.json())
-    assert response.json() == {"msg": ""}
+    assert response.json() == {"success": True, "data": []}
 
 
 def test_bad_token():
-    response = client.get("/", headers={"X-Token": "therepublic"})
+    """Tests the authorization tokens"""
+    response = client.get("/", headers={"Authorization-Token": "therepublic"})
     assert response.status_code == 400
     assert response.json() == {"detail": "Invalid X-Token header"}

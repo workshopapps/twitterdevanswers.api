@@ -12,8 +12,9 @@ import oauth
 
 router = APIRouter(
     prefix="/notification",
-    tags=["Notification"]
+    tags=['Notification']
 )
+
 
 MESSAGE_STREAM_DELAY = 2  # second
 MESSAGE_STREAM_RETRY_TIMEOUT = 15000  # milisecond
@@ -39,8 +40,12 @@ def create_notification(notification: schema.NotificationCreate, db: Session = D
     return db_notification
 
 
+<<<<<<< HEAD
 
 async def get_notifications(id: int, db: Session = Depends(get_db)):
+=======
+async def get_notifications(id: int, db: Session):
+>>>>>>> afb193f4074ffdb1b152c3d9084a49e8b3fa3787
     """
     This function is responsible for querying the database for the users notifications
     """
@@ -68,7 +73,11 @@ def set_unread_to_false(id: int, db: Session):
 
 
 @router.get("/")
+<<<<<<< HEAD
 async def notification_stream(request: Request, db: Session = Depends(get_db), token: str = Query(default=..., title="Bearer token", description="The JWT authorization token")):
+=======
+async def notification_stream(request: Request, user=Depends(oauth.get_current_user), db: Session = Depends(get_db)):
+>>>>>>> afb193f4074ffdb1b152c3d9084a49e8b3fa3787
     """
     Periodically streams the user's notifications to the client using SSE.
     """

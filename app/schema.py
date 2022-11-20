@@ -6,11 +6,11 @@ from typing import Optional
 
 class UserSignInRequest(BaseModel):
     username: str
-    firstname: str
-    lastname: str
+    first_name: str
+    last_name: str
     password: str
     email: EmailStr
-    imageURL: str
+    image_url: str
 
 
 class UserUpdate(UserSignInRequest):
@@ -39,6 +39,12 @@ class ChangePasswordRequest(BaseModel):
 
 
 class ForgotPassword(BaseModel):
+    newPassword: str
+    confirmPassword: str
+    confirmPassword: str
+
+
+class ForgotPassword(BaseModel):
     pass
 
 
@@ -55,9 +61,6 @@ class User(BaseModel):
 
 
 class Question(BaseModel):
-
-    id: int
-    owner_id: int
     content: str
     answered: bool
     created_at: datetime
@@ -71,6 +74,11 @@ class Answer(BaseModel):
     question_id: int
     owner: User
     question: Question
+
+
+class Like(BaseModel):
+    question_id: int
+    dir: conint(le=1)
 
 
 class NotificationBase(BaseModel):
@@ -90,6 +98,14 @@ class Notification(NotificationBase):
 
     class Config:
         orm_mode = True
+
+
+class Email(BaseModel):
+    email: EmailStr
+
+
+class TokenData(BaseModel):
+    id: Optional[str] = None
 
 
 class Tag(BaseModel):
