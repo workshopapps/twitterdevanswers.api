@@ -10,10 +10,9 @@ app_passwd = settings.app_passwd
 
 router = APIRouter(
     prefix='/auth',
-    tags=[{
-        "name": "Authentication",
-        "description": "Authentication Operations , The **Sign in / Sign Out** logics are present in this endpoint",
-    }])
+    tags=['Authentication']
+    description = ['Authentication Operations , The **Sign in / Sign Out** logics are present in this endpoint']
+)
 
 
 def send_reset_mail(user, token):
