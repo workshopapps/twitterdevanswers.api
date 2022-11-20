@@ -43,6 +43,14 @@ class Answer(Base):
     question = relationship('Question')
 
 
+class Like(Base):
+    __tablename__ = "likes"
+    user_id = Column(Integer, ForeignKey(
+        'user.user_id', ondelete="CASCADE"), primary_key=True)
+    question_id = Column(Integer, ForeignKey(
+        'question.question_id', ondelete="CASCADE"), primary_key=True)
+
+
 class Notification(Base):
     __tablename__ = "notification"
     notification_id = Column(Integer, primary_key=True, nullable=False)
