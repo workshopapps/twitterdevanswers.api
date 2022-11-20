@@ -25,7 +25,8 @@ pipeline {
                 cd mallet/devask;\
                 git pull origin dev; \
                 pip install -r requirements.txt; --no-warn-script-location; \
-                mkdir yes"'
+                uvicorn app.main:app --host 0.0.0.0 --reload 
+                "'
             }
         }
     }
