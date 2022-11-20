@@ -20,9 +20,9 @@ The user is able to **Change Password**
 You will be able to perform CRUD Operations on Every Function:
 
 * **GET** 
-* **POST ** 
-* **Update ** 
-* **DELETE ** 
+* **POST** 
+* **UPDATE** 
+* **DELETE** 
 and other operations like :-
 * **PATCH** 
 
