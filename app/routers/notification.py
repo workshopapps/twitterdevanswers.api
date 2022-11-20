@@ -14,8 +14,6 @@ router = APIRouter(
     prefix="/notification",
     tags=['Notification'],
     description = ['Implementing **CRUD** Notification operations here ,  uses Authentication']
-
-    }]
 )
 
 
