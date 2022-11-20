@@ -22,10 +22,10 @@ pipeline {
             }
             steps {
                 sh 'ssh -o StrictHostKeyChecking=no deployment-user@52.203.249.167 "source venv/bin/activate; \
-                cd devask; \
+                cd mallet/devask;\
                 git pull origin dev; \
                 pip install -r requirements.txt; --no-warn-script-location; \
-                echo success"'
+                mkdir yes"'
             }
         }
     }
