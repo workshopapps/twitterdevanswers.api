@@ -12,8 +12,7 @@ from app import oauth
 
 router = APIRouter(
     prefix="/notification",
-    tags=['Notification'],
-    description = ['Implementing **CRUD** Notification operations here ,  uses Authentication']
+    tags=['Notification']
 )
 
 
@@ -39,7 +38,6 @@ def create_notification(notification: schema.NotificationCreate, db: Session = D
     db.commit()
     db.refresh(db_notification)
     return db_notification
-
 
 
 async def get_notifications(id: int, db: Session):
@@ -70,7 +68,7 @@ def set_unread_to_false(id: int, db: Session):
 
 
 @router.get("/")
-async def notification_stream(request: Request, user = Depends(oauth.get_current_user), db: Session = Depends(get_db)):
+async def notification_stream(request: Request, user=Depends(oauth.get_current_user), db: Session = Depends(get_db)):
     """
     Periodically streams the user's notifications to the client using SSE.
     """
