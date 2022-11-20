@@ -40,12 +40,7 @@ def create_notification(notification: schema.NotificationCreate, db: Session = D
     return db_notification
 
 
-<<<<<<< HEAD
-
 async def get_notifications(id: int, db: Session = Depends(get_db)):
-=======
-async def get_notifications(id: int, db: Session):
->>>>>>> afb193f4074ffdb1b152c3d9084a49e8b3fa3787
     """
     This function is responsible for querying the database for the users notifications
     """
@@ -56,7 +51,7 @@ async def get_notifications(id: int, db: Session):
     return notifications, number_of_unread
 
 
-def set_unread_to_false(id: int, db: Session):
+def set_unread_to_false(id: int, db: Session = Depends(get_db)):
     """
     This function sets the unread attribute of the specified notification item to False
     """
@@ -73,11 +68,7 @@ def set_unread_to_false(id: int, db: Session):
 
 
 @router.get("/")
-<<<<<<< HEAD
 async def notification_stream(request: Request, db: Session = Depends(get_db), token: str = Query(default=..., title="Bearer token", description="The JWT authorization token")):
-=======
-async def notification_stream(request: Request, user=Depends(oauth.get_current_user), db: Session = Depends(get_db)):
->>>>>>> afb193f4074ffdb1b152c3d9084a49e8b3fa3787
     """
     Periodically streams the user's notifications to the client using SSE.
     """
@@ -120,7 +111,7 @@ async def mark_read(
     db: Session = Depends(get_db)
 ):
     """Sets the unread attribute of the specified notification to False."""
-    result = set_unread_to_false(id=notification_id, db=db)
+    result = set_unread_to_false(id=notification_id)
     if result is False:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                             detail="Notification Id is invalid.")
