@@ -35,7 +35,7 @@ def like(like: schema.Like, db: Session = Depends(get_db), current_user: int = D
         db.add(new_like)
         db.commit()
 
-        return {"message": "successfully added Like"}
+        return {"message": "successfully added Like to Question"}
     else:
         if not found_like:
             raise HTTPException(
