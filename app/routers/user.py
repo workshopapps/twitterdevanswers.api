@@ -9,7 +9,12 @@ from .. import schema
 
 router = APIRouter(
     prefix='/users',
-    tags=['User']
+    tags=[ 
+        {
+        "name": "Users",
+        "description": "Implementing **CRUD** User operations here "
+        }
+    ]
 )
 
 
