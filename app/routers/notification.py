@@ -1,14 +1,14 @@
-from fastapi import APIRouter, Request, Depends, status, Path, HTTPException
+from fastapi import APIRouter, Request, Depends, status, Path, HTTPException, Query
 from fastapi.encoders import jsonable_encoder
 from sse_starlette.sse import EventSourceResponse
 import asyncio
 import logging
 from sqlalchemy.orm import Session
-from ..database import get_db
-from .. import model
-from .. import schema
+from database import get_db
+import model
+import schema
 from typing import List
-from app import oauth
+import oauth
 
 router = APIRouter(
     prefix="/notification",
@@ -40,12 +40,12 @@ def create_notification(notification: schema.NotificationCreate, db: Session = D
 
 
 
-async def get_notifications(id: int, db: Session):
+async def get_notifications(id: int, db: Session = Depends(get_db)):
     """
     This function is responsible for querying the database for the users notifications
     """
     db.commit()
-    notifications = db.query(model.Notification).all()
+    notifications = db.query(model.Notification).filter(model.Notification.owner_id==id).all()
     number_of_unread = len(
         [notification for notification in notifications if notification.unread == True])
     return notifications, number_of_unread
@@ -68,25 +68,27 @@ def set_unread_to_false(id: int, db: Session):
 
 
 @router.get("/")
-async def notification_stream(request: Request, user = Depends(oauth.get_current_user), db: Session = Depends(get_db)):
+async def notification_stream(request: Request, db: Session = Depends(get_db), token: str = Query(default=..., title="Bearer token", description="The JWT authorization token")):
     """
     Periodically streams the user's notifications to the client using SSE.
     """
 
-    async def event_generator():
+    async def event_generator(user_id: int):
         while True:
             if await request.is_disconnected():
                 logger.debug("Request disconnected")
                 break
 
             # Gets the user's notifications
-            notifications, number_of_unread = await get_notifications(id=user.user_id, db=db)
-            data = {"number_of_unread": number_of_unread,
-                    "notifications": notifications}
+            notifications, number_of_unread = await get_notifications(id=user_id)
+            data = {
+                    "number_of_unread": number_of_unread,
+                    "notifications": notifications
+            }
 
             # Streams the data to the client
             yield {
-                "event": "new_message",
+                "event": "new_notification",
                 "data": jsonable_encoder(data),
                 "id": "message_id",
                 "retry": MESSAGE_STREAM_RETRY_TIMEOUT
@@ -94,7 +96,12 @@ async def notification_stream(request: Request, user = Depends(oauth.get_current
 
             await asyncio.sleep(MESSAGE_STREAM_DELAY)
 
-    return EventSourceResponse(event_generator())
+    try:
+        credentials_exception = HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Authorization token invalid")
+        token = oauth.verify_access_token(token=token, credentials_exception=credentials_exception)
+    except:
+        raise credentials_exception
+    return EventSourceResponse(event_generator(token.id))
 
 
 @router.patch("/read/{notification_id}", status_code=status.HTTP_200_OK)
