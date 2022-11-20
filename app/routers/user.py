@@ -9,7 +9,8 @@ from .. import schema
 
 router = APIRouter(
     prefix='/users',
-    tags=['Users']
+    tags=['Users'],
+    description = ['Implementing **CRUD** User operations here']
 )
 
 
