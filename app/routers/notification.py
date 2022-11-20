@@ -4,11 +4,11 @@ from sse_starlette.sse import EventSourceResponse
 import asyncio
 import logging
 from sqlalchemy.orm import Session
-from database import get_db
-import model
-import schema
+from app.database import get_db
+from app import model
+from app import schema
 from typing import List
-import oauth
+from app import oauth
 
 router = APIRouter(
     prefix="/notification",
@@ -45,7 +45,8 @@ async def get_notifications(id: int, db: Session = Depends(get_db)):
     This function is responsible for querying the database for the users notifications
     """
     db.commit()
-    notifications = db.query(model.Notification).filter(model.Notification.owner_id==id).all()
+    notifications = db.query(model.Notification).filter(
+        model.Notification.owner_id == id).all()
     number_of_unread = len(
         [notification for notification in notifications if notification.unread == True])
     return notifications, number_of_unread
@@ -82,8 +83,8 @@ async def notification_stream(request: Request, db: Session = Depends(get_db), t
             # Gets the user's notifications
             notifications, number_of_unread = await get_notifications(id=user_id)
             data = {
-                    "number_of_unread": number_of_unread,
-                    "notifications": notifications
+                "number_of_unread": number_of_unread,
+                "notifications": notifications
             }
 
             # Streams the data to the client
@@ -97,8 +98,10 @@ async def notification_stream(request: Request, db: Session = Depends(get_db), t
             await asyncio.sleep(MESSAGE_STREAM_DELAY)
 
     try:
-        credentials_exception = HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Authorization token invalid")
-        token = oauth.verify_access_token(token=token, credentials_exception=credentials_exception)
+        credentials_exception = HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED, detail="Authorization token invalid")
+        token = oauth.verify_access_token(
+            token=token, credentials_exception=credentials_exception)
     except:
         raise credentials_exception
     return EventSourceResponse(event_generator(token.id))
