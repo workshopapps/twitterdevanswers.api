@@ -35,7 +35,7 @@ def fetch_user(user_id: int, db: Session = Depends(get_db)):
 
 
 # update a user
-@router.patch('/{user_id}', response_model=schema.ReadUser)
+@router.patch('/{user_id}', response_model=schema.UserUpdate)
 def update_user(user: schema.UserUpdate, user_id: int, db: Session = Depends(get_db)):
     user = db.query(User).filter(User.user_id == user_id).first()
     if user is None:
