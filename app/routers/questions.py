@@ -6,9 +6,12 @@ from .. import schema
 from app.database import get_db
 
 router = APIRouter(
-    prefix='',
-    tags=['Question']
-)
+    prefix='/questions',
+    tags=[{
+        "name": "Questions",
+        "description": "Implementing **CRUD** Question operations here "  
+      }])
+
 
 
 @router.post("/", status_code=status.HTTP_201_CREATED)
