@@ -23,9 +23,9 @@ pipeline {
             steps {
                 sh 'ssh -o StrictHostKeyChecking=no deployment-user@52.203.249.167 "source venv/bin/activate; \
                 cd devask; \
-                git pull origin master; \
+                git pull origin dev; \
                 pip install -r requirements.txt; --no-warn-script-location; \
-                unicorn app.main:app --host 0.0.0.0 --reload "'
+                echo success"'
             }
         }
     }
