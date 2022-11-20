@@ -26,7 +26,7 @@ def send_reset_mail(user, token):
 @router.post('/signin')
 def user_login(user_credentials: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(database.get_db)):
     user = db.query(model.User).filter(
-        model.User.email == user_credentials.username).first()
+        model.User.username == user_credentials.username).first()
 
     if not user:
         raise HTTPException(
@@ -44,7 +44,7 @@ def user_login(user_credentials: OAuth2PasswordRequestForm = Depends(), db: Sess
                 'firstName': user.first_name,
                 'lastName': user.last_name,
                 'email': user.email,
-                'imageUrl': user.imageUrl
+                'image_url': user.image_url
             },
             'token': access_token
             }
@@ -53,12 +53,16 @@ def user_login(user_credentials: OAuth2PasswordRequestForm = Depends(), db: Sess
 @router.post('/signup', status_code=status.HTTP_201_CREATED)
 def user_signnup(user_credentials: schema.UserSignInRequest, db: Session = Depends(database.get_db)):
     user_credentials.password = utils.hash(user_credentials.password)
+    user = db.query(model.User).filter(
+        model.User.email == user_credentials.email).first()
+    if user:
+        return HTTPException(status_code=400, detail={"msg": "User already exists"})
     new_user = model.User(**user_credentials.dict())
     db.add(new_user)
     db.commit()
     db.refresh(new_user)
     user = db.query(model.User).filter(
-        model.User.email == user_credentials.username).first()
+        model.User.email == user_credentials.email).first()
     access_token = oauth.create_access_token(data={'user_id': user.user_id})
     return {
         'Success': True,
@@ -66,10 +70,10 @@ def user_signnup(user_credentials: schema.UserSignInRequest, db: Session = Depen
         'data':
         {
             'userName': user_credentials.username,
-            'firstName': user_credentials.firstname,
-            'lastName': user_credentials.lastname,
+            'firstName': user_credentials.first_name,
+            'lastName': user_credentials.last_name,
             'email': user_credentials.email,
-            'imageUrl': user_credentials.imageURL
+            'imageUrl': user_credentials.image_url
         },
         'Token': access_token}
 
@@ -78,10 +82,10 @@ def user_signnup(user_credentials: schema.UserSignInRequest, db: Session = Depen
 def change_password(update_password: schema.ChangePasswordRequest, db: Session = Depends(database.get_db), current_user: int = Depends(oauth.get_current_user)):
     user = db.query(model.User).filter(
         model.User.user_id == current_user).first()
-    if user.id is None:
+    if user.user_id is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
-                            detail=f"User with id: {user.id} does not exit")
-    if user.id != current_user:
+                            detail=f"User with user_id: {user.user_id} does not exit")
+    if user.user_id != current_user:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
                             detail=f"You are not authorised to perform the required action")
     user.password = update_password.newPassword
@@ -106,8 +110,8 @@ def forget_password(email: schema.Email, db: Session = Depends(database.get_db),
 @router.post('forgot-password/{token}')
 def verify_password_token(token: str, password: schema.ForgotPassword, db: Session = Depends(database.get_db)):
 
-    id = oauth.verify_access_token(token)
-    user = db.query(model.User).filter(model.User.user_id == id).first()
+    user_id = oauth.verify_access_token(token)
+    user = db.query(model.User).filter(model.User.user_id == user_id).first()
     if user is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail=f"Check token again")
