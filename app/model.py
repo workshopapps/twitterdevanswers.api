@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Boolean, ForeignKey, DateTime, Text
+from sqlalchemy import Column, Integer, String, Boolean, ForeignKey, DateTime
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from sqlalchemy.sql.sqltypes import TIMESTAMP
@@ -39,7 +39,6 @@ class Answer(Base):
         "user.user_id", ondelete="CASCADE"), nullable=False)
     question_id = Column(Integer, ForeignKey(
         "question.question_id", ondelete="CASCADE"), nullable=False)
-    content = Column(Text, nullable=False)
     owner = relationship('User')
     question = relationship('Question')
 
