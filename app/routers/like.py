@@ -30,7 +30,7 @@ def like(like: schema.Like, db: Session = Depends(get_db), current_user: int = D
             raise HTTPException(status_code=status.HTTP_409_CONFLICT,
                                 detail=f"user {current_user.user_id} has already voted on post {like.question_id}")
 
-        new_like = model.Like(post_id=like.question_id,
+        new_like = model.Like(question_id=like.question_id,
                               user_id=current_user.user_id)
         db.add(new_like)
         db.commit()
