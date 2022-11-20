@@ -4,6 +4,7 @@ from .. import model
 from app.database import engine
 from .. import schema
 from app.database import get_db
+from app import oauth
 
 router = APIRouter(
     prefix='',
@@ -12,9 +13,10 @@ router = APIRouter(
 
 
 @router.post("/", status_code=status.HTTP_201_CREATED)
-def add_question(request: schema.Question, db: Session = Depends(get_db)):
+def add_question(request: schema.Question, db: Session = Depends(get_db), current_user: int = Depends(oauth.get_current_user)):
+    request["owner_id"] = current_user
     ask_question = model.Question(content=request.content,
-                                  body=request.answered, user_id=request.user_id)
+                                  body=request.answered, owner_id=request.owner_id)
     db.add(ask_question)
     db.commit()
     db.refresh(ask_question)

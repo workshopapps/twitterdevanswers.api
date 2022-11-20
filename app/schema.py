@@ -61,6 +61,7 @@ class User(BaseModel):
 
 
 class Question(BaseModel):
+    owner_id: int
     content: str
     answered: bool
     created_at: datetime
