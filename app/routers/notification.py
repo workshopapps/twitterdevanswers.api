@@ -12,8 +12,13 @@ from app import oauth
 
 router = APIRouter(
     prefix="/notification",
-    tags=["Notification"]
+    tags=[{
+        "name": "Notification",
+        "description": "Implementing **CRUD** Notification operations here ,  uses Authentication"  
+
+    }]
 )
+
 
 MESSAGE_STREAM_DELAY = 2  # second
 MESSAGE_STREAM_RETRY_TIMEOUT = 15000  # milisecond
