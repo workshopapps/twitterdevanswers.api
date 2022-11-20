@@ -7,10 +7,9 @@ from app.database import get_db
 
 router = APIRouter(
     prefix='/questions',
-    tags=[{
-        "name": "Questions",
-        "description": "Implementing **CRUD** Question operations here "  
-      }])
+    tags=['Questions'],
+    description= ['Implementing **CRUD** Question operations here']  
+    )
 
 
 
