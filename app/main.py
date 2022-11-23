@@ -1,7 +1,7 @@
 from fastapi import FastAPI, status
 from fastapi.middleware.cors import CORSMiddleware
-from app.routers import user, notification, questions, auth, like
-from app.database import engine, SessionLocal
+from routers import user, notification, questions, auth, like
+from database import engine, SessionLocal
 
 #  Description of Dev ASk Api
 
