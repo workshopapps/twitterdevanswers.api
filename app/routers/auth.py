@@ -58,7 +58,13 @@ def user_signnup(user_credentials: schema.UserSignInRequest, db: Session = Depen
         model.User.email == user_credentials.email).first()
     if user:
         return HTTPException(status_code=400, detail={"msg": "User already exists"})
-    new_user = model.User(**user_credentials.dict())
+    new_user = model.User( username = user_credentials.username, 
+                                first_name = user_credentials.first_name, 
+                                last_name =  user_credentials.last_name,
+                                email = user_credentials.email, 
+                                password = user_credentials.password, 
+                                image_url = user_credentials.image_url
+                                )
     db.add(new_user)
     db.commit()
     db.refresh(new_user)
