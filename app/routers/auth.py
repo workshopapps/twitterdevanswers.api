@@ -4,7 +4,7 @@ from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 import yagmail
 
-from app import database, schema, model, utils, oauth
+import database, schema, model, utils, oauth
 
 app_passwd = settings.app_passwd
 
