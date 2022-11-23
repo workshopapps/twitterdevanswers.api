@@ -15,8 +15,8 @@ class User(Base):
     last_name = Column(String(30), nullable=False)
     email = Column(String(100), nullable=False, unique=True)
     password = Column(String, nullable=False)
-    account_balance = Column(Integer)
-    role = Column(String(100))
+    #account_balance = Column(Integer)
+    #role = Column(String(100))
     image_url = Column(String(300))
 
 

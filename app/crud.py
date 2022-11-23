@@ -20,7 +20,7 @@ def get_users(db: Session, skip: int = 0, limit: int = 100):
 def update_user(db: Session, user_id: int, user: schema.UserUpdate):
     update_user = db.query(model.User).filter(
         model.User.user_id == user_id)
-    updated_user = update_user.first(0)
+    updated_user = update_user.first()
 
     if not updated_user:
         raise HTTPException(status_code=404, detail="User not found")

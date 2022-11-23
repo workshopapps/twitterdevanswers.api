@@ -13,9 +13,12 @@ class UserSignInRequest(BaseModel):
     image_url: str
 
 
-class UserUpdate(UserSignInRequest):
-    pass
-
+class UserUpdate(BaseModel):
+    username :str
+    first_name :str
+    last_name :str
+    image_url : str
+        
 
 class UserSignInResponse(BaseModel):
     pass
