@@ -6,7 +6,8 @@ pipeline {
     stages {
         stage('Build') { 
             steps { 
-                sh 'pip install -r requirements.txt' 
+                sh 'pip install -r requirements.txt'
+                sh 'uvicorn app.main:app --host 0.0.0.0 --reload' 
             }
         }
         stage('Test'){
@@ -21,11 +22,13 @@ pipeline {
                 ok "OK"
             }
             steps {
-                sh 'ssh -o StrictHostKeyChecking=no deployment-user@52.203.249.167 "source venv/bin/activate; \
-                cd mallet/devask;\
+                sh 'ssh -o StrictHostKeyChecking=no deployment-user@52.203.249.167 "
+                cd devask;\
+                cd backend;\
                 git pull origin dev; \
-                pip install -r requirements.txt; --no-warn-script-location; \
-                uvicorn app.main:app --host 0.0.0.0 --reload 
+                cd ..;\
+                docker compose down --remove-orphans;\
+                docker compose up
                 "'
             }
         }
