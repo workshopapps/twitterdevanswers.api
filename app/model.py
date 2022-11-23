@@ -31,7 +31,7 @@ class Question(Base):
     created_at = Column(TIMESTAMP(timezone=True),
                         nullable=False, server_default=text('now()'))
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
-    owner = relationship('User')
+    owner = relationship('app.model.User')
 
 
 class Answer(Base):
@@ -46,8 +46,8 @@ class Answer(Base):
     created_at = Column(TIMESTAMP(timezone=True),
                         nullable=False, server_default=text('now()'))
     is_answer = Column(Boolean,)
-    owner = relationship('User')
-    question = relationship('Question')
+    owner = relationship('app.model.User')
+    question = relationship('app.model.Question')
 
 
 class Like(Base):
@@ -67,8 +67,8 @@ class Notification(Base):
         "user.user_id", ondelete="CASCADE"), nullable=False)
     content_id = Column(Integer, ForeignKey(
         "answer.answer_id", ondelete="CASCADE"), nullable=False)
-    owner = relationship('User')
-    content = relationship('Answer')
+    owner = relationship('app.model.User')
+    content = relationship('app.model.Answer')
     type = Column(String(200), nullable=False)
     unread = Column(Boolean, default=True)
     title = Column(String(200), nullable=False)
@@ -89,8 +89,8 @@ class contenTag(Base):
         "question.question_id", ondelete="CASCADE"),  primary_key=True, nullable=False)
     tag_id = Column(Integer, ForeignKey(
         "tag.tag_id", ondelete="CASCADE"), nullable=False)
-    question = relationship('Question')
-    tag = relationship('Tag')
+    question = relationship('app.model.Question')
+    tag = relationship('app.model.Tag')
 
 
-Base.metadata.create_all(bind=engine)
+#Base.metadata.create_all(bind=engine)
