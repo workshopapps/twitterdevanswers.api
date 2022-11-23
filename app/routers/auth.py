@@ -41,6 +41,7 @@ def user_login(user_credentials: OAuth2PasswordRequestForm = Depends(), db: Sess
 
     return {'success': True, 'Message': 'user signed in successfully ',
             'data': {
+                'user_id' : user.user_id
                 'userName': user.username,
                 'firstName': user.first_name,
                 'lastName': user.last_name,
@@ -76,6 +77,7 @@ def user_signnup(user_credentials: schema.UserSignInRequest, db: Session = Depen
         'Message': 'user added successfully',
         'data':
         {
+            'user_id' : user.user_id
             'userName': user_credentials.username,
             'firstName': user_credentials.first_name,
             'lastName': user_credentials.last_name,
