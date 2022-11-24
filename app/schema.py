@@ -1,7 +1,7 @@
 from pydantic import BaseModel, EmailStr, validator
 from pydantic.types import conint
 from datetime import datetime
-from typing import Optional
+from typing import Optional, List
 
 
 class UserSignInRequest(BaseModel):
@@ -114,19 +114,33 @@ class Email(BaseModel):
 class TokenData(BaseModel):
     id: Optional[str] = None
 
+#class Tag(BaseModel):
+#
+#    tag_id: int
+#    tag_name: str
+#
+#
+#class contenTag(BaseModel):
+#    question_id: int
+#    tag_id: int
+#    question: Question
+#    tag: Tag
 
-class Tag(BaseModel):
-
-    tag_id: int
+class TagBase(BaseModel):
     tag_name: str
 
+class TagCreate(TagBase):
+    pass
 
-class contenTag(BaseModel):
-    question_id: int
+class Tag(TagBase):
     tag_id: int
-    question: Question
-    tag: Tag
 
+    class Config:
+        orm_mode = True
+
+class AddTag(BaseModel):
+    tag_id: int
+    question_id: int
 
 class AnswerBase(BaseModel):
     """ Answer BaseModel for Add Answer endpoint """

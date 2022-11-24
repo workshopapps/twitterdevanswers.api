@@ -1,9 +1,9 @@
-from sqlalchemy import Column, Integer, String, Boolean, ForeignKey, DateTime
+from sqlalchemy import Column, Integer, String, Boolean, ForeignKey, DateTime, Table
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from sqlalchemy.sql.sqltypes import TIMESTAMP
 from sqlalchemy.sql.expression import text
-from app.database import Base, engine
+from database import Base, engine
 
 
 class User(Base):
@@ -32,6 +32,7 @@ class Question(Base):
                         nullable=False, server_default=text('now()'))
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
     owner = relationship('app.model.User')
+    tags = relationship("app.model.Tag", secondary="question_tags", back_populates="questions")
 
 
 class Answer(Base):
@@ -87,23 +88,36 @@ class Notification(Base):
     title = Column(String(200), nullable=False)
 
 
+question_tags = Table(
+    "question_tags", 
+    Base.metadata,
+    Column("question_id", ForeignKey("question.question_id"), primary_key = True),
+    Column("tag_id", ForeignKey("tag.tag_id"), primary_key = True)
+)
+
 class Tag(Base):
-    __tablename__ = 'tag'
-    __table_args__ = {'extend_existing': True}
+    __tablename__ = "tag"
+    __table_args__ = {"extend_existing": True}
     tag_id = Column(Integer, primary_key=True, nullable=False)
     tag_name = Column(String(40), nullable=False)
+    questions = relationship("app.model.Question", secondary="question_tags", back_populates="tags")
 
+#class Tag(Base):
+#    __tablename__ = 'tag'
+#    __table_args__ = {'extend_existing': True}
+#    tag_id = Column(Integer, primary_key=True, nullable=False)
+#    tag_name = Column(String(40), nullable=False)
+#
+#
+#class contenTag(Base):
+#
+#    __tablename__ = 'contenTag'
+#    __table_args__ = {'extend_existing': True}
+#    question_id = Column(Integer, ForeignKey(
+#        "question.question_id", ondelete="CASCADE"),  primary_key=True, nullable=False)
+#    tag_id = Column(Integer, ForeignKey(
+#        "tag.tag_id", ondelete="CASCADE"), nullable=False)
+#    question = relationship('app.model.Question')
+#    tag = relationship('app.model.Tag')
 
-class contenTag(Base):
-
-    __tablename__ = 'contenTag'
-    __table_args__ = {'extend_existing': True}
-    question_id = Column(Integer, ForeignKey(
-        "question.question_id", ondelete="CASCADE"),  primary_key=True, nullable=False)
-    tag_id = Column(Integer, ForeignKey(
-        "tag.tag_id", ondelete="CASCADE"), nullable=False)
-    question = relationship('app.model.Question')
-    tag = relationship('app.model.Tag')
-
-
-Base.metadata.create_all(bind=engine)
+#Base.metadata.create_all(bind=engine)
