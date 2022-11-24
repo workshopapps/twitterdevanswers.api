@@ -20,6 +20,16 @@ class User(Base):
     image_url = Column(String(300), default="default.jpg")
 
 
+class Following(Base):
+    __tablename__ = "following"
+    user_from = Column(Integer, ForeignKey(
+        "user.user_id", ondelete="CASCADE"
+    ), nullable=False, primary_key=True)
+    target_user = Column(Integer, ForeignKey(
+        "user.user_id", ondelete="CASCADE"
+    ), nullable=False, primary_key=True)
+
+
 class Question(Base):
     __tablename__ = "question"
     __table_args__ = {'extend_existing': True}

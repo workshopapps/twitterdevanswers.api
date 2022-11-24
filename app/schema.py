@@ -8,7 +8,7 @@ class UserSignInRequest(BaseModel):
     username: str
     email: EmailStr
     password: str
-    confirmPassword : str
+    confirmPassword: str
 
     @validator('confirmPassword')
     def passwords_match(cls, v, values, **kwargs):
@@ -126,3 +126,43 @@ class contenTag(BaseModel):
     tag_id: int
     question: Question
     tag: Tag
+
+
+class AnswerBase(BaseModel):
+    """ Answer BaseModel for Add Answer endpoint """
+
+    question_id: int
+    content: str
+
+
+class CreateAnswer(AnswerBase):
+    """ Answer BaseModel for Add Answer endpoint """
+    pass
+
+
+class UpdateAnswerBase(BaseModel):
+    """ Answer BaseModel for Update Answer endpoint """
+
+    content: str
+
+
+class UpdateAnswer(UpdateAnswerBase):
+    """ Answer BaseModel for Update Answer endpoint """
+    pass
+
+
+class AnswerVoteBase(BaseModel):
+    """ Answer Vote BaseModel for Add Answer Vote endpoint """
+
+    answer_id: int
+    vote_type: str
+
+
+class AnswerVote(AnswerVoteBase):
+    """ Answer Vote BaseModel for Add Answer Vote endpoint """
+    pass
+
+
+class Follow(BaseModel):
+    user_from: int
+    target_user: int
