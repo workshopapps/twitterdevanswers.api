@@ -1,20 +1,22 @@
+import sys
+sys.path.append('..')
 from fastapi import FastAPI, Depends, HTTPException, APIRouter
 from sqlalchemy.orm import Session
 from typing import List
-from ..model import *
-from ..database import get_db
-from .. import crud
-from .. import schema
+from app.model import *
+from app.database import get_db
+from app import crud
+from app import schema
 
 
 router = APIRouter(
     prefix='/users',
-    tags=['User']
+    tags=['Users']
 )
 
 
 # Get all users
-@router.get('/', response_model=List[schema.UserBase])
+@router.get('/')
 def fetch_users(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
     return crud.get_users(db, skip=skip, limit=limit)
 
@@ -30,7 +32,7 @@ def fetch_user(user_id: int, db: Session = Depends(get_db)):
 
 
 # update a user
-@router.patch('/{user_id}', response_model=schema.ReadUser)
+@router.patch('/{user_id}', response_model=schema.UserUpdate)
 def update_user(user: schema.UserUpdate, user_id: int, db: Session = Depends(get_db)):
     user = db.query(User).filter(User.user_id == user_id).first()
     if user is None:

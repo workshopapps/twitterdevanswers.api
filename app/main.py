@@ -1,12 +1,40 @@
 from fastapi import FastAPI, status
 from fastapi.middleware.cors import CORSMiddleware
+from routers import user, notification, questions, auth, like, answer
+from database import engine, SessionLocal
 
+#  Description of Dev ASk Api
 
-from app.routers import user, notification, questions, auth
-from app.database import engine, SessionLocal
+description = """
 
+Dev Ask Api does the following functions
 
-app = FastAPI()
+## Auth
+This endpoint will handle all authorization requests including sign up, sign in, change password etc.
+
+## Users 
+    These endpoint perform CRUD operations involving the user 
+## Questions 
+     These endpoint perform CRUD operations involving the questions asked by the user 
+## Answer
+     These endpoint perform CRUD operations involving the answer to the questions asked by the user 
+
+Other Endpoints are implemented below 
+ 
+## HTTP Methods
+    The following methods are used in this api :- 
+* **GET** 
+* **POST** 
+* **UPDATE** 
+* **DELETE** 
+* **PATCH** 
+
+"""
+
+app = FastAPI(
+    title="DEV ASK",
+    description=description,
+)
 
 
 origins = ['*']
@@ -24,6 +52,8 @@ app.include_router(user.router)
 app.include_router(questions.router)
 app.include_router(notification.router)
 app.include_router(auth.router)
+app.include_router(like.router)
+app.include_router(answer.router)
 
 
 @app.get("/")

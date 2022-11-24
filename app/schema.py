@@ -6,16 +6,19 @@ from typing import Optional
 
 class UserSignInRequest(BaseModel):
     username: str
-    firstname: str
-    lastname: str
+    first_name: str
+    last_name: str
     password: str
     email: EmailStr
-    imageURL: str
+    image_url: str
 
 
-class UserUpdate(UserSignInRequest):
-    pass
-
+class UserUpdate(BaseModel):
+    username :str
+    first_name :str
+    last_name :str
+    image_url : str
+        
 
 class UserSignInResponse(BaseModel):
     pass
@@ -61,9 +64,6 @@ class User(BaseModel):
 
 
 class Question(BaseModel):
-
-    id: int
-    owner_id: int
     content: str
     answered: bool
     created_at: datetime
@@ -77,6 +77,11 @@ class Answer(BaseModel):
     question_id: int
     owner: User
     question: Question
+
+
+class Like(BaseModel):
+    question_id: int
+    dir: conint(le=1)
 
 
 class NotificationBase(BaseModel):
@@ -117,3 +122,38 @@ class contenTag(BaseModel):
     tag_id: int
     question: Question
     tag: Tag
+
+
+class AnswerBase(BaseModel):
+    """ Answer BaseModel for Add Answer endpoint """
+
+    question_id: int
+    content: str
+
+
+class CreateAnswer(AnswerBase):
+    """ Answer BaseModel for Add Answer endpoint """
+    pass
+
+
+class UpdateAnswerBase(BaseModel):
+    """ Answer BaseModel for Update Answer endpoint """
+
+    content: str
+
+
+class UpdateAnswer(UpdateAnswerBase):
+    """ Answer BaseModel for Update Answer endpoint """
+    pass
+
+
+class AnswerVoteBase(BaseModel):
+    """ Answer Vote BaseModel for Add Answer Vote endpoint """
+
+    answer_id: int
+    vote_type: str
+
+
+class AnswerVote(AnswerVoteBase):
+    """ Answer Vote BaseModel for Add Answer Vote endpoint """
+    pass
