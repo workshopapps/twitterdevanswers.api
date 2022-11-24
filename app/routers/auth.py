@@ -71,6 +71,7 @@ def user_signnup(user_credentials: schema.UserSignInRequest, db: Session = Depen
             'user_id' : user.user_id,
             'userName': user.username,
             'email': user.email,
+
         },
         'Token': access_token}
 
