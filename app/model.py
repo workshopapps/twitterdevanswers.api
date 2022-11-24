@@ -19,7 +19,7 @@ class User(Base):
     location = Column(String(100),nullable=True)
     created_at = Column(TIMESTAMP(timezone=True),
                         nullable=False, server_default=text('now()'))
-
+    account_balance = Column(Integer, server_default = Integer(1000))
 
 class Question(Base):
     __tablename__ = "question"
@@ -44,6 +44,7 @@ class Answer(Base):
     content = Column(String(2000))
     created_at = Column(TIMESTAMP(timezone=True),
                         nullable=False, server_default=text('now()'))
+    is_answered = Column(Boolean,server_default='TRUE')
     owner = relationship('User')
     question = relationship('Question')
 
