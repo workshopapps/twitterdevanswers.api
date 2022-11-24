@@ -106,4 +106,4 @@ class contenTag(Base):
     tag = relationship('app.model.Tag')
 
 
-#Base.metadata.create_all(bind=engine)
+# Base.metadata.create_all(bind=engine)
