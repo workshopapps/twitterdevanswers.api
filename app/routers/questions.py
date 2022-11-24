@@ -1,8 +1,8 @@
 from fastapi import APIRouter, Depends, status, HTTPException
 from sqlalchemy.orm import Session
-from .. import model
+from app import model
 from app.database import engine
-from .. import schema
+from app import schema
 from app.database import get_db
 from app import oauth
 
@@ -83,13 +83,4 @@ def update_question(question_id, request: schema.Question, db: Session = Depends
 def get_all_questions(db: Session = Depends(get_db)):
     get_all_questions_db = db.query(model.Question).all()
     return {"success": True, "data": get_all_questions_db
-            # {
-            #     "questionid": get_all_questions_db.question_id,
-            #     "content": get_all_questions_db.content,
-            #     "answered": True,
-            #     "createdAt": get_all_questions_db.created_at,
-            #     "updatedAt": get_all_questions_db.updated_at,
-            #     "answers": []
-            # }
-            # ]
             }
