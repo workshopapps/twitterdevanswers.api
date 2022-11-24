@@ -18,10 +18,10 @@ class UserSignInRequest(BaseModel):
 
 
 class UserUpdate(BaseModel):
-    username :str
+    username :Optional[str] = None
     first_name :str
     last_name :str
-    image_url : str
+    image_url : Optional[str] = None
         
 
 class UserSignInResponse(BaseModel):
@@ -48,7 +48,7 @@ class ChangePasswordRequest(BaseModel):
 class ForgotPassword(BaseModel):
     newPassword: str
     confirmPassword: str
-    confirmPassword: str
+    
 
 
 class ForgotPassword(BaseModel):
@@ -69,9 +69,9 @@ class User(BaseModel):
 
 class Question(BaseModel):
     content: str
-    answered: bool
-    created_at: datetime
-    updated_at: datetime
+    answered: bool = False
+    created_at: Optional[datetime] = None
+    updated_at: Optional[datetime] = None
 
 
 class Answer(BaseModel):

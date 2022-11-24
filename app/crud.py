@@ -17,16 +17,15 @@ def get_users(db: Session, skip: int = 0, limit: int = 100):
 
 
 # Update a user
-def update_user(db: Session, user_id: int, user: schema.UserUpdate):
+def update_user(db: Session, user_id: int, user_credentials: schema.UserUpdate):
     update_user = db.query(model.User).filter(
         model.User.user_id == user_id)
     updated_user = update_user.first()
 
     if not updated_user:
         raise HTTPException(status_code=404, detail="User not found")
-    update_data = user.dict(exclude_unset=True)
-    update_user.filter(model.User.user_id == user_id).update(
-        update_data, synchronize_session=False)
+    #update_data = user.dict()
+    update_user.filter(model.User.user_id == user_id).update(user_credentials.dict(), synchronize_session=False)
     db.commit()
     db.refresh(updated_user)
     return {"success": True, "message": "Profile Updated", "data": updated_user}

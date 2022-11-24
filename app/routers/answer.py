@@ -30,9 +30,9 @@ def list_answer(question_id: int, db: Session = Depends(get_db)):
     db_question = get_question(db=db, question_id=question_id)
     if db_question is None:
         raise HTTPException(status_code=404, detail="Invalid Question ID")
-    return db.query(model.Answer).filter(model.Answer.question_id == question_id).order_by(
-        desc(model.Answer.vote)).all()
-    # return db.query(model.Answer).filter(model.Answer.question_id == question_id).all()
+    #return db.query(model.Answer).filter(model.Answer.question_id == question_id).order_by(
+    #    desc(model.Answer.vote)).all()
+    return db.query(model.Answer).filter(model.Answer.question_id == question_id).all()
 
 
 @router.post("/")

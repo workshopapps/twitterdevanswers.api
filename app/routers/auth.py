@@ -118,8 +118,8 @@ def verify_password_token(token: str,  password: schema.ForgotPassword, db: Sess
             status_code=status.HTTP_404_NOT_FOUND, detail=f"Check token again")
     user.password = utils.hash(password.newPassword)
     db.commit()
-
     return {'success': True, 'message': 'Password Changed'}
+
 
 def send_reset_mail(user, url):
     
