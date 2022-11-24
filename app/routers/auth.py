@@ -31,10 +31,10 @@ def user_login(user_credentials: OAuth2PasswordRequestForm = Depends(), db: Sess
 
     if not user:
         raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN, detail=f"Invalide Credentials")
+            status_code=status.HTTP_403_FORBIDDEN, detail=f"Invalid Credentials")
     if not utils.verify(user_credentials.password, user.password):
         raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN, detail=f"Invalide Credentials")
+            status_code=status.HTTP_403_FORBIDDEN, detail=f"Invalid Credentials")
 
     access_token = oauth.create_access_token(data={'user_id': user.user_id}
                                              )
@@ -42,10 +42,7 @@ def user_login(user_credentials: OAuth2PasswordRequestForm = Depends(), db: Sess
     return {'success': True, 'Message': 'user signed in successfully ',
             'data': {
                 'userName': user.username,
-                'firstName': user.first_name,
-                'lastName': user.last_name,
                 'email': user.email,
-                'image_url': user.image_url
             },
             'token': access_token
             }
@@ -59,11 +56,8 @@ def user_signnup(user_credentials: schema.UserSignInRequest, db: Session = Depen
     if user:
         return HTTPException(status_code=400, detail={"msg": "User already exists"})
     new_user = model.User( username = user_credentials.username, 
-                                first_name = user_credentials.first_name, 
-                                last_name =  user_credentials.last_name,
                                 email = user_credentials.email, 
-                                password = user_credentials.password, 
-                                image_url = user_credentials.image_url
+                                password = user_credentials.password 
                                 )
     db.add(new_user)
     db.commit()
@@ -77,10 +71,7 @@ def user_signnup(user_credentials: schema.UserSignInRequest, db: Session = Depen
         'data':
         {
             'userName': user_credentials.username,
-            'firstName': user_credentials.first_name,
-            'lastName': user_credentials.last_name,
             'email': user_credentials.email,
-            'imageUrl': user_credentials.image_url
         },
         'Token': access_token}
 
