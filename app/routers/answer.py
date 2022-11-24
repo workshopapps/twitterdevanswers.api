@@ -1,8 +1,9 @@
-from fastapi import Depends, HTTPException, APIRouter
+from fastapi import Depends, HTTPException, APIRouter, BackgroundTasks
 from sqlalchemy import desc
 from sqlalchemy.orm import Session
 from app.database import get_db
 from app import model, schema, oauth
+from app.routers.notification import create_notification
 
 router = APIRouter(
     prefix='/answer',
@@ -35,7 +36,7 @@ def list_answer(question_id: int, db: Session = Depends(get_db)):
 
 
 @router.post("/")
-def create_answer(answer: schema.CreateAnswer, db: Session = Depends(get_db),
+def create_answer(answer: schema.CreateAnswer, background_task: BackgroundTasks, db: Session = Depends(get_db),
                   current_user: int = Depends(oauth.get_current_user)):
     """ Add answer endpoint for a specific question """
 
@@ -50,6 +51,16 @@ def create_answer(answer: schema.CreateAnswer, db: Session = Depends(get_db),
     db.add(db_answer)
     db.commit()
     db.refresh(db_answer)
+
+    #This automatically creates a notification by calling create_notification as a background function which runs after returning a response
+    notification = schema.NotificationCreate(
+        owner_id=db_question.owner_id, 
+        content_id=db_answer.answer_id, 
+        type="Answer",
+        title=f"@{current_user.username} provided an answer to your question.",
+    )
+    background_task.add_task(create_notification, notification=notification, db=db)
+
     return db_answer
 
 
