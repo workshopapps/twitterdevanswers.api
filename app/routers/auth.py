@@ -14,13 +14,13 @@ router = APIRouter(
     tags=['Authentication']
 )
 
-
 # send reset email
 def send_reset_mail(user, token):
     msg = f''' 
            To reset your password visit the following link:
             {router.url_path_for(forget_password)}/{token}    
             If you did not make this request then simply ignore this email) '''
+
 
 
 @router.post('/signin')
@@ -30,10 +30,10 @@ def user_login(user_credentials: OAuth2PasswordRequestForm = Depends(), db: Sess
 
     if not user:
         raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN, detail=f"Invalide Credentials")
+            status_code=status.HTTP_403_FORBIDDEN, detail=f"Invalid Credentials")
     if not utils.verify(user_credentials.password, user.password):
         raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN, detail=f"Invalide Credentials")
+            status_code=status.HTTP_403_FORBIDDEN, detail=f"Invalid Credentials")
 
     access_token = oauth.create_access_token(data={'user_id': user.user_id}
                                              )
@@ -42,10 +42,7 @@ def user_login(user_credentials: OAuth2PasswordRequestForm = Depends(), db: Sess
             'data': {
                 'user_id': user.user_id,
                 'userName': user.username,
-                'firstName': user.first_name,
-                'lastName': user.last_name,
                 'email': user.email,
-                'image_url': user.image_url
             },
             'token': access_token
             }
@@ -79,7 +76,6 @@ def user_signnup(user_credentials: schema.UserSignInRequest, db: Session = Depen
             'user_id': user.user_id,
             'userName': user.username,
             'email': user.email,
-
         },
         'Token': access_token}
 

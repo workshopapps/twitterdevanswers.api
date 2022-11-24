@@ -8,16 +8,18 @@ from database import Base, engine
 
 class User(Base):
     __tablename__ = "user"
-    __table_args__ = {'extend_existing': True}
     user_id = Column(Integer, primary_key=True, nullable=False)
     username = Column(String(15), nullable=False)
     first_name = Column(String(30), nullable=False, default="firstname")
     last_name = Column(String(30), nullable=False, default="lastname")
     email = Column(String(100), nullable=False, unique=True)
+    description = Column(String(400),nullable=True)
     password = Column(String, nullable=False)
-    #account_balance = Column(Integer)
-    #role = Column(String(100))
-    image_url = Column(String(300), default="default.jpg")
+    image_url = Column(String(300),default="default.jpg")
+    location = Column(String(100),nullable=True)
+    created_at = Column(TIMESTAMP(timezone=True),
+                        nullable=False, server_default=text('now()'))
+    account_balance = Column(Integer, default = 1000)
 
 
 class Following(Base):
@@ -32,7 +34,6 @@ class Following(Base):
 
 class Question(Base):
     __tablename__ = "question"
-    __table_args__ = {'extend_existing': True}
     question_id = Column(Integer, primary_key=True, nullable=False)
     owner_id = Column(Integer, ForeignKey(
         "user.user_id", ondelete="CASCADE"), nullable=False)
@@ -47,7 +48,6 @@ class Question(Base):
 
 class Answer(Base):
     __tablename__ = "answer"
-    __table_args__ = {'extend_existing': True}
     answer_id = Column(Integer, primary_key=True, nullable=False)
     owner_id = Column(Integer, ForeignKey(
         "user.user_id", ondelete="CASCADE"), nullable=False)
@@ -56,7 +56,7 @@ class Answer(Base):
     content = Column(String(2000))
     created_at = Column(TIMESTAMP(timezone=True),
                         nullable=False, server_default=text('now()'))
-    is_answer = Column(Boolean, nullable=True)
+    is_answered = Column(Boolean,nullable=True)
     vote = Column(Integer)
     owner = relationship('app.model.User')
     question = relationship('app.model.Question')
@@ -76,7 +76,6 @@ class AnswerVote(Base):
 
 
 class Like(Base):
-    __table_args__ = {'extend_existing': True}
     __tablename__ = "likes"
     user_id = Column(Integer, ForeignKey(
         'user.user_id', ondelete="CASCADE"), primary_key=True)
@@ -86,14 +85,13 @@ class Like(Base):
 
 class Notification(Base):
     __tablename__ = "notification"
-    __table_args__ = {'extend_existing': True}
     notification_id = Column(Integer, primary_key=True, nullable=False)
     owner_id = Column(Integer, ForeignKey(
         "user.user_id", ondelete="CASCADE"), nullable=False)
     content_id = Column(Integer, ForeignKey(
         "answer.answer_id", ondelete="CASCADE"), nullable=False)
-    owner = relationship('app.model.User')
-    content = relationship('app.model.Answer')
+    owner = relationship('User')
+    content = relationship('Answer')
     type = Column(String(200), nullable=False)
     unread = Column(Boolean, default=True)
     title = Column(String(200), nullable=False)
@@ -107,28 +105,20 @@ question_tags = Table(
 )
 
 class Tag(Base):
-    __tablename__ = "tag"
-    __table_args__ = {"extend_existing": True}
+    __tablename__ = 'tag'
     tag_id = Column(Integer, primary_key=True, nullable=False)
     tag_name = Column(String(40), nullable=False)
-    questions = relationship("app.model.Question", secondary="question_tags", back_populates="tags")
 
-#class Tag(Base):
-#    __tablename__ = 'tag'
-#    __table_args__ = {'extend_existing': True}
-#    tag_id = Column(Integer, primary_key=True, nullable=False)
-#    tag_name = Column(String(40), nullable=False)
-#
-#
-#class contenTag(Base):
-#
-#    __tablename__ = 'contenTag'
-#    __table_args__ = {'extend_existing': True}
-#    question_id = Column(Integer, ForeignKey(
-#        "question.question_id", ondelete="CASCADE"),  primary_key=True, nullable=False)
-#    tag_id = Column(Integer, ForeignKey(
-#        "tag.tag_id", ondelete="CASCADE"), nullable=False)
-#    question = relationship('app.model.Question')
-#    tag = relationship('app.model.Tag')
 
-#Base.metadata.create_all(bind=engine)
+class contenTag(Base):
+    __tablename__ = 'contenTag'
+    question_id = Column(Integer, ForeignKey(
+        "question.question_id", ondelete="CASCADE"),  primary_key=True, nullable=False)
+    tag_id = Column(Integer, ForeignKey(
+        "tag.tag_id", ondelete="CASCADE"), nullable=False)
+    question = relationship('Question')
+    tag = relationship('Tag')
+
+
+Base.metadata.create_all(bind=engine)
+

@@ -18,10 +18,13 @@ class UserSignInRequest(BaseModel):
 
 
 class UserUpdate(BaseModel):
-    username: str
-    first_name: str
-    last_name: str
-    image_url: str
+    username :str
+    first_name :str
+    last_name :str
+    description:str
+    image_url : str
+    location :str
+        
 
 
 class UserSignInResponse(BaseModel):
@@ -61,11 +64,10 @@ class User(BaseModel):
     first_name: str
     last_name: str
     email: str
-    password_hash: str
-    account_balance: int
-    role: str
+    description : str
     image_url: str
-
+    location : str
+    account_balance :int
 
 class Question(BaseModel):
     content: str
