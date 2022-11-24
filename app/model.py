@@ -45,9 +45,22 @@ class Answer(Base):
     content = Column(String(2000))
     created_at = Column(TIMESTAMP(timezone=True),
                         nullable=False, server_default=text('now()'))
-    is_answer = Column(Boolean,)
+    is_answer = Column(Boolean, nullable=True)
     owner = relationship('app.model.User')
     question = relationship('app.model.Question')
+
+
+class AnswerVote(Base):
+    __tablename__ = "answer_vote"
+    __table_args__ = {'extend_existing': True}
+    id = Column(Integer, primary_key=True)
+    owner_id = Column(Integer, ForeignKey(
+        "user.user_id", ondelete="CASCADE"), nullable=True)
+    answer_id = Column(Integer, ForeignKey(
+        "answer.answer_id", ondelete="CASCADE"), nullable=False)
+    vote_type = Column(String(100), nullable=False)
+    owner = relationship('app.model.User')
+    answer = relationship('app.model.Answer')
 
 
 class Like(Base):
