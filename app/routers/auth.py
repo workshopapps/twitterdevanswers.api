@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, status, Response, Request
 from app.config import settings
 from fastapi.security import OAuth2PasswordRequestForm
-from sqlalchemy.orm import Session  
+from sqlalchemy.orm import Session
 import yagmail
 
 from app import database, schema, model, utils, oauth
@@ -15,7 +15,12 @@ router = APIRouter(
 )
 
 
-
+# send reset email
+def send_reset_mail(user, token):
+    msg = f''' 
+           To reset your password visit the following link:
+            {router.url_path_for(forget_password)}/{token}    
+            If you did not make this request then simply ignore this email) '''
 
 
 @router.post('/signin')
@@ -35,7 +40,7 @@ def user_login(user_credentials: OAuth2PasswordRequestForm = Depends(), db: Sess
 
     return {'success': True, 'Message': 'user signed in successfully ',
             'data': {
-                'user_id' : user.user_id,
+                'user_id': user.user_id,
                 'userName': user.username,
                 'firstName': user.first_name,
                 'lastName': user.last_name,
@@ -53,10 +58,13 @@ def user_signnup(user_credentials: schema.UserSignInRequest, db: Session = Depen
         model.User.email == user_credentials.email).first()
     if user:
         return HTTPException(status_code=400, detail={"msg": "User already exists"})
-    new_user = model.User( username = user_credentials.username, 
-                                email = user_credentials.email, 
-                                password = user_credentials.password, 
-                                )
+    new_user = model.User(username=user_credentials.username,
+                          first_name=user_credentials.first_name,
+                          last_name=user_credentials.last_name,
+                          email=user_credentials.email,
+                          password=user_credentials.password,
+                          image_url=user_credentials.image_url
+                          )
     db.add(new_user)
     db.commit()
     db.refresh(new_user)
@@ -68,7 +76,7 @@ def user_signnup(user_credentials: schema.UserSignInRequest, db: Session = Depen
         'Message': 'user added successfully',
         'data':
         {
-            'user_id' : user.user_id,
+            'user_id': user.user_id,
             'userName': user.username,
             'email': user.email,
 
@@ -79,22 +87,24 @@ def user_signnup(user_credentials: schema.UserSignInRequest, db: Session = Depen
 @router.put('/change-password')
 def change_password(update_password: schema.ChangePasswordRequest, db: Session = Depends(database.get_db), current_user: int = Depends(oauth.get_current_user)):
     print(current_user)
-    user_query = db.query(model.User).filter(model.User.user_id == current_user.user_id)
-    
+    user_query = db.query(model.User).filter(
+        model.User.user_id == current_user.user_id)
+
     user = user_query.first()
     print(current_user)
     if user.user_id != current_user.user_id:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
                             detail=f"You are not authorised to perform the required action")
     updated_password = utils.hash(update_password.newPassword)
-    
-    user_query.update({'password': str(updated_password)}, synchronize_session=False)
+
+    user_query.update({'password': str(updated_password)},
+                      synchronize_session=False)
     db.commit()
     return {'sucess': True, 'message': 'Password Changed'}
 
 
 @router.post('/forget-password', name='getPass')
-def forget_password(email: schema.Email, request : Request,db: Session = Depends(database.get_db)):
+def forget_password(email: schema.Email, request: Request, db: Session = Depends(database.get_db)):
     user = db.query(model.User).filter(model.User.email == email.email).first()
     if user is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
@@ -120,12 +130,3 @@ def verify_password_token(token: str,  password: schema.ForgotPassword, db: Sess
     db.commit()
 
     return {'success': True, 'message': 'Password Changed'}
-
-def send_reset_mail(user, url):
-    
-    msg = f''' 
-           To reset your password visit the following link:
-            {url}  
-            If you did not make this request then simply ignore this email) '''
-    with yagmail.SMTP(app_email,app_passwd) as yag:
-        yag.send(to=user, subject='Passowrd Reset Request', contents=msg)

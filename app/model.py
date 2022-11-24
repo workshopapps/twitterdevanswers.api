@@ -11,13 +11,23 @@ class User(Base):
     __table_args__ = {'extend_existing': True}
     user_id = Column(Integer, primary_key=True, nullable=False)
     username = Column(String(15), nullable=False)
-    first_name = Column(String(30), nullable=False, default = "firstname")
-    last_name = Column(String(30), nullable=False, default = "lastname")
+    first_name = Column(String(30), nullable=False, default="firstname")
+    last_name = Column(String(30), nullable=False, default="lastname")
     email = Column(String(100), nullable=False, unique=True)
     password = Column(String, nullable=False)
     #account_balance = Column(Integer)
     #role = Column(String(100))
     image_url = Column(String(300), default="default.jpg")
+
+
+class Following(Base):
+    __tablename__ = "following"
+    user_from = Column(Integer, ForeignKey(
+        "user.user_id", ondelete="CASCADE"
+    ), nullable=False, primary_key=True)
+    target_user = Column(Integer, ForeignKey(
+        "user.user_id", ondelete="CASCADE"
+    ), nullable=False, primary_key=True)
 
 
 class Question(Base):
