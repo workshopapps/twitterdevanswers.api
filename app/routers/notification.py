@@ -73,6 +73,7 @@ async def notification_stream(request: Request, db: Session = Depends(get_db), t
     """
     Periodically streams the user's notifications to the client using SSE.
     The client communicates with this endpoint using an EventSource object.
+    E.g  const source = new EventSource("https://127.0.0.1:8000/notification?token=<user's jwt bearer token>");
     """
     async def event_generator(user_id: int):
         PREVIOUS_NO_UNREAD, FIRST_STREAM = 0, True
@@ -89,7 +90,7 @@ async def notification_stream(request: Request, db: Session = Depends(get_db), t
             }
             if FIRST_STREAM is True:
                 # Streams the data to the client
-                print(number_of_unread)
+                #print(number_of_unread)
                 yield {
                     "event": "new_notification",
                     "data": jsonable_encoder(data),
@@ -101,7 +102,7 @@ async def notification_stream(request: Request, db: Session = Depends(get_db), t
 
             elif number_of_unread != PREVIOUS_NO_UNREAD:
                 # Streams the data to the client
-                print(number_of_unread)
+                #print(number_of_unread)
                 yield {
                     "event": "new_notification",
                     "data": jsonable_encoder(data),
@@ -123,7 +124,7 @@ async def notification_stream(request: Request, db: Session = Depends(get_db), t
 
 @router.get("/all")
 async def get_all_notifications(db: Session = Depends(get_db), user: schema.User = Depends(oauth.get_current_user)):
-    "Get request to get all user's notification."
+    "Get request to list all the notification of the current logged in user."
     notifications, number_of_unread = await get_notifications(user.user_id, db)
     data = {
         "number_of_unread": number_of_unread,
@@ -135,7 +136,7 @@ async def get_all_notifications(db: Session = Depends(get_db), user: schema.User
 @router.patch("/read/{notification_id}", status_code=status.HTTP_200_OK, response_model=schema.Notification)
 async def mark_read(
     notification_id: int = Path(
-        default=..., description="The id of the notification to mark as read"
+        default=..., description="The id of the notification to mark as read."
     ),
     db: Session = Depends(get_db),
     user: schema.User = Depends(oauth.get_current_user)

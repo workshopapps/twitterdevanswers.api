@@ -10,16 +10,17 @@ class User(Base):
     __tablename__ = "user"
     user_id = Column(Integer, primary_key=True, nullable=False)
     username = Column(String(15), nullable=False)
-    first_name = Column(String(30), nullable=False)
-    last_name = Column(String(30), nullable=False)
+    first_name = Column(String(30), nullable=False, default = "firstname")
+    last_name = Column(String(30), nullable=False, default = "lastname")
     email = Column(String(100), nullable=False, unique=True)
     description = Column(String(400),nullable=True)
     password = Column(String, nullable=False)
-    image_url = Column(String(300),nullable=True)
+    image_url = Column(String(300),default="default.jpg")
     location = Column(String(100),nullable=True)
     created_at = Column(TIMESTAMP(timezone=True),
                         nullable=False, server_default=text('now()'))
-    account_balance = Column(Integer, server_default = Integer(1000))
+    account_balance = Column(Integer, default = 1000)
+
 
 class Question(Base):
     __tablename__ = "question"
@@ -44,9 +45,22 @@ class Answer(Base):
     content = Column(String(2000))
     created_at = Column(TIMESTAMP(timezone=True),
                         nullable=False, server_default=text('now()'))
-    is_answered = Column(Boolean,server_default='TRUE')
-    owner = relationship('User')
-    question = relationship('Question')
+    is_answered = Column(Boolean,nullable=True)
+    owner = relationship('app.model.User')
+    question = relationship('app.model.Question')
+
+
+class AnswerVote(Base):
+    __tablename__ = "answer_vote"
+    __table_args__ = {'extend_existing': True}
+    id = Column(Integer, primary_key=True)
+    owner_id = Column(Integer, ForeignKey(
+        "user.user_id", ondelete="CASCADE"), nullable=True)
+    answer_id = Column(Integer, ForeignKey(
+        "answer.answer_id", ondelete="CASCADE"), nullable=False)
+    vote_type = Column(String(100), nullable=False)
+    owner = relationship('app.model.User')
+    answer = relationship('app.model.Answer')
 
 
 class Like(Base):
