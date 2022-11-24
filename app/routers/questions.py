@@ -23,6 +23,22 @@ def add_question(request: schema.Question, db: Session = Depends(get_db), curren
     return {"success": True, "message": ask_question.content}
 
 
+@router.get("/update_questions/{question_id}",status_code=status.HTTP_200_OK)
+def retrieve_question(question_id: int, db: Session = Depends(get_db)):
+    retrieve = db.query(model.Question).filter(
+        model.Question.question_id == question_id).first()
+    if retrieve:
+        return retrieve
+    return {"success":True,"message":"detail not found"}
+
+@router.patch("/update_questions/",status_code=status.HTTP_200_OK)
+def edit_retrieved_question(request: schema.Question, db: Session = Depends(get_db)):
+    retrieved_question = retrieve_question()
+    retrieved_question.content = request.content
+    db.commit()
+    return {"success": True, "message": retrieved_question.content}
+
+    
 # @router.patch("/question/{question_id}", status_code=status.HTTP_200_OK)
 # def answer_question(question_id, request: schema.Question, db: Session = Depends(get_db)):
 #     update_answer = db.query(model.Question).filter(
@@ -64,7 +80,7 @@ def get_question(question_id: int, db: Session = Depends(get_db)):
             "answers": [],
         }
         }
-
+    return {"success":True,"message":"user have not asked any questions"}
 
 @router.patch("/{question_id}", status_code=status.HTTP_200_OK)
 def update_question(question_id, request: schema.Question, db: Session = Depends(get_db), current_user: int = Depends(oauth.get_current_user)):
@@ -78,9 +94,7 @@ def update_question(question_id, request: schema.Question, db: Session = Depends
         db.commit()
         return {"success": True, "message": update_question.content}
 
-
 @router.get("/", status_code=status.HTTP_200_OK)
 def get_all_questions(db: Session = Depends(get_db)):
     get_all_questions_db = db.query(model.Question).all()
-    return {"success": True, "data": get_all_questions_db
-            }
+    return {"success": True, "data": get_all_questions_db}
