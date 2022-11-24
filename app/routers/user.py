@@ -1,6 +1,6 @@
 import sys
 sys.path.append('..')
-from fastapi import FastAPI, Depends, HTTPException, APIRouter
+from fastapi import FastAPI, Depends, HTTPException, APIRouter, Request
 from sqlalchemy.orm import Session
 from typing import List
 from app.model import *
@@ -28,6 +28,7 @@ def fetch_user(user_id: int, db: Session = Depends(get_db)):
     if not user:
         raise HTTPException(
             status=404, detail=f" user with user_id : {user_id} not found")
+    question = Question.query.filter_by(owner_id = user).order_by(Question.created_at.desc()).all()
     return {"success": True, 'data': user}
 
 
@@ -43,7 +44,7 @@ def update_user(user: schema.UserUpdate, user_id: int, db: Session = Depends(get
 
 
 @router.delete('/{user_id}')
-def delete_user(user_id: int, db: Session = Depends(get_db)):
+def delete_user(user_id: int, db: Session = Depends(get_db), ):
     delete_user = crud.delete_user(db, user_id=user_id)
     if not delete_user:
         raise HTTPException(

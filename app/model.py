@@ -11,13 +11,13 @@ class User(Base):
     __table_args__ = {'extend_existing': True}
     user_id = Column(Integer, primary_key=True, nullable=False)
     username = Column(String(15), nullable=False)
-    first_name = Column(String(30), nullable=False)
-    last_name = Column(String(30), nullable=False)
+    first_name = Column(String(30), nullable=False, default="firstname")
+    last_name = Column(String(30), nullable=False, default="lastname")
     email = Column(String(100), nullable=False, unique=True)
     password = Column(String, nullable=False)
     #account_balance = Column(Integer)
     #role = Column(String(100))
-    image_url = Column(String(300))
+    image_url = Column(String(300), default="default.jpg")
 
 
 class Question(Base):
@@ -46,6 +46,7 @@ class Answer(Base):
     created_at = Column(TIMESTAMP(timezone=True),
                         nullable=False, server_default=text('now()'))
     is_answer = Column(Boolean, nullable=True)
+    vote = Column(Integer)
     owner = relationship('app.model.User')
     question = relationship('app.model.Question')
 
@@ -106,4 +107,4 @@ class contenTag(Base):
     tag = relationship('app.model.Tag')
 
 
-# Base.metadata.create_all(bind=engine)
+Base.metadata.create_all(bind=engine)

@@ -1,4 +1,4 @@
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, validator
 from pydantic.types import conint
 from datetime import datetime
 from typing import Optional
@@ -6,11 +6,15 @@ from typing import Optional
 
 class UserSignInRequest(BaseModel):
     username: str
-    first_name: str
-    last_name: str
-    password: str
     email: EmailStr
-    image_url: str
+    password: str
+    confirmPassword : str
+
+    @validator('confirmPassword')
+    def passwords_match(cls, v, values, **kwargs):
+        if 'password' in values and v != values['password']:
+            raise ValueError('passwords do not match')
+        return v
 
 
 class UserUpdate(BaseModel):
