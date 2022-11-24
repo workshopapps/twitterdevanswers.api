@@ -59,6 +59,7 @@ class User(BaseModel):
     description : str
     image_url: str
     location : str
+    account_balance :int
 
 class Question(BaseModel):
     content: str
