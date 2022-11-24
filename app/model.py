@@ -46,6 +46,7 @@ class Answer(Base):
     created_at = Column(TIMESTAMP(timezone=True),
                         nullable=False, server_default=text('now()'))
     is_answer = Column(Boolean, nullable=True)
+    vote = Column(Integer)
     owner = relationship('app.model.User')
     question = relationship('app.model.Question')
 
