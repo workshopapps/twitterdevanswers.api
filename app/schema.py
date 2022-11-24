@@ -6,18 +6,17 @@ from typing import Optional
 
 class UserSignInRequest(BaseModel):
     username: str
-    first_name: str
-    last_name: str
-    password: str
     email: EmailStr
-    image_url: str
+    password: str
 
 
 class UserUpdate(BaseModel):
     username :str
     first_name :str
     last_name :str
+    description:str
     image_url : str
+    location :str
         
 
 class UserSignInResponse(BaseModel):
@@ -57,11 +56,9 @@ class User(BaseModel):
     first_name: str
     last_name: str
     email: str
-    password_hash: str
-    account_balance: int
-    role: str
+    description : str
     image_url: str
-
+    location : str
 
 class Question(BaseModel):
     content: str
