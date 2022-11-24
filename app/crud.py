@@ -1,14 +1,12 @@
 from sqlalchemy.orm import Session
-from . import model
-from . import schema
+from . import model,schema
 from fastapi.exceptions import HTTPException
 
 
 #  get a user
 def get_user(db: Session, user_id: int):
-    user = db.query(model.User).filter(model.User.user_id == user_id).first()
+    user = db.query(model.User).filter(model.User.user_id == user_id).first()  
     return user
-
 
 #  get all users
 def get_users(db: Session, skip: int = 0, limit: int = 100):
@@ -22,7 +20,7 @@ def update_user(db: Session, user_id: int, user: schema.UserUpdate):
         model.User.user_id == user_id)
     updated_user = update_user.first()
 
-    if not updated_user:
+    if  updated_user is None:
         raise HTTPException(status_code=404, detail="User not found")
     update_data = user.dict(exclude_unset=True)
     update_user.filter(model.User.user_id == user_id).update(
