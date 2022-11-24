@@ -13,7 +13,7 @@ router = APIRouter(prefix='/following', tags=['Follow'])
 def follow_user(user_id: int, request: schema.Follow, db: Session = Depends(get_db),
                 current_user: int = Depends(get_current_user)):
     """Follow a user"""
-    target_user = db.query(User).filter(User.user_id == user_id)
+    target_user = db.query(User).filter(User.user_id == user_id).first()
     if target_user:
         if current_user.user_id != target_user.user_id:
             following = Following(target_user=target_user,
@@ -30,7 +30,7 @@ def follow_user(user_id: int, request: schema.Follow, db: Session = Depends(get_
 @router.delete('/unfollow/{user_id}', status_code=status.HTTP_200_OK)
 def delete_user(user_id: int, db: Session = Depends(get_db), current_user: int = Depends(get_current_user)):
     """Unfollow a user"""
-    target_user = db.query(User).filter(User.user_id == user_id)
+    target_user = db.query(User).filter(User.user_id == user_id).first()
     following = db.query(Following).filter(target_user.user_id == user_id
                                            ).filter(Following.user_from.user_id == current_user.user_id)
     if following:
