@@ -1,5 +1,6 @@
 from fastapi import FastAPI, status
 from fastapi.middleware.cors import CORSMiddleware
+base import engine, SessionLocal, Base
 from routers import user, notification, questions, auth, like, answer
 from database import engine, SessionLocal
 
@@ -54,6 +55,7 @@ app.include_router(notification.router)
 app.include_router(auth.router)
 app.include_router(like.router)
 app.include_router(answer.router)
+
 
 
 @app.get("/")
