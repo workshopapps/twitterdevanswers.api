@@ -14,6 +14,7 @@ class User(BaseModel):
     location : str
     account_balance :int
 
+
 class UserSignInRequest(BaseModel):
     username: str
     email: EmailStr
@@ -28,12 +29,12 @@ class UserSignInRequest(BaseModel):
 
 
 class UserUpdate(BaseModel):
-    username: str
-    first_name: str
-    last_name: str
-    description: str
-    image_url: str
-    location: str
+    username: Optional[str] = None
+    first_name: Optional[str] = None
+    last_name: Optional[str] = None
+    description: Optional[str] = None
+    image_url: Optional[str] = None
+    location: Optional[str] = None
 
 
 class UserSignInResponse(BaseModel):
