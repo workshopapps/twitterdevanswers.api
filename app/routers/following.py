@@ -31,8 +31,8 @@ def follow_user(user_id: int, request: schema.Follow, db: Session = Depends(get_
 def delete_user(user_id: int, db: Session = Depends(get_db), current_user: int = Depends(get_current_user)):
     """Unfollow a user"""
     target_user = db.query(User).filter(User.user_id == user_id).first()
-    following = db.query(Following).filter(target_user.user_id == user_id
-                                           ).filter(user_from.user_id == current_user.user_id)
+    following = db.query(Following).filter_by(
+        target_user=user_id, user_from=current_user.user_id).first()
     if following:
         db.delete(following)
         db.commit()
