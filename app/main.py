@@ -15,13 +15,15 @@ This endpoint will handle all authorization requests including sign up, sign in,
 
 ## Users 
 These endpoint perform CRUD operations involving the user 
+
 ## Questions 
 These endpoint perform CRUD operations involving the questions asked by the user 
+
 ## Answer
 These endpoint perform CRUD operations involving the answer to the questions asked by the user 
 
 ## Follow
-     These endpoint perform CRUD operations involving following a user
+These endpoint perform CRUD operations involving following a user
 
 Other Endpoints are implemented below 
  
