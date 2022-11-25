@@ -3,7 +3,7 @@ from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from sqlalchemy.sql.sqltypes import TIMESTAMP
 from sqlalchemy.sql.expression import text
-from database import Base, engine
+from app.database import Base, engine
 
 
 class User(Base):
@@ -13,13 +13,13 @@ class User(Base):
     first_name = Column(String(30), nullable=False, default="firstname")
     last_name = Column(String(30), nullable=False, default="lastname")
     email = Column(String(100), nullable=False, unique=True)
-    description = Column(String(400),nullable=True)
+    description = Column(String(400), nullable=True)
     password = Column(String, nullable=False)
-    image_url = Column(String(300),default="default.jpg")
-    location = Column(String(100),nullable=True)
+    image_url = Column(String(300), default="default.jpg")
+    location = Column(String(100), nullable=True)
     created_at = Column(TIMESTAMP(timezone=True),
                         nullable=False, server_default=text('now()'))
-    account_balance = Column(Integer, default = 1000)
+    account_balance = Column(Integer, default=1000)
 
 
 class Following(Base):
@@ -43,7 +43,8 @@ class Question(Base):
                         nullable=False, server_default=text('now()'))
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
     owner = relationship('app.model.User')
-    tags = relationship("app.model.Tag", secondary="question_tags", back_populates="questions")
+    tags = relationship(
+        "app.model.Tag", secondary="question_tags", back_populates="questions")
 
 
 class Answer(Base):
@@ -56,7 +57,7 @@ class Answer(Base):
     content = Column(String(2000))
     created_at = Column(TIMESTAMP(timezone=True),
                         nullable=False, server_default=text('now()'))
-    is_answered = Column(Boolean,nullable=True)
+    is_answered = Column(Boolean, nullable=True)
     vote = Column(Integer)
     owner = relationship('app.model.User')
     question = relationship('app.model.Question')
@@ -98,18 +99,19 @@ class Notification(Base):
 
 
 question_tags = Table(
-    "question_tags", 
+    "question_tags",
     Base.metadata,
-    Column("question_id", ForeignKey("question.question_id"), primary_key = True),
-    Column("tag_id", ForeignKey("tag.tag_id"), primary_key = True)
+    Column("question_id", ForeignKey("question.question_id"), primary_key=True),
+    Column("tag_id", ForeignKey("tag.tag_id"), primary_key=True)
 )
+
 
 class Tag(Base):
     __tablename__ = 'tag'
     tag_id = Column(Integer, primary_key=True, nullable=False)
     tag_name = Column(String(40), nullable=False)
-    questions = relationship("app.model.Question", secondary="question_tags", back_populates="tags")
+    questions = relationship("app.model.Question",
+                             secondary="question_tags", back_populates="tags")
 
 
 Base.metadata.create_all(bind=engine)
-
