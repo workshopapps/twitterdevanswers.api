@@ -32,7 +32,7 @@ def delete_user(user_id: int, db: Session = Depends(get_db), current_user: int =
     """Unfollow a user"""
     target_user = db.query(User).filter(User.user_id == user_id).first()
     following = db.query(Following).filter(target_user.user_id == user_id
-                                           ).filter(Following.user_from.user_id == current_user.user_id)
+                                           ).filter(user_from.user_id == current_user.user_id)
     if following:
         db.delete(following)
         db.commit()
