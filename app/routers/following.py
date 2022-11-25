@@ -16,7 +16,7 @@ def follow_user(user_id: int, request: schema.Follow, db: Session = Depends(get_
     target_user = db.query(User).filter(User.user_id == user_id).first()
     if target_user:
         if current_user.user_id != target_user.user_id:
-            following = Following(target_user=target_user,
+            following = Following(target_user=target_user.user_id,
                                   user_from=current_user.user_id)
             db.add(following)
             db.commit()
