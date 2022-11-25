@@ -15,7 +15,7 @@ router = APIRouter(
 )
 
 
-@router.get('/', response_model=List[schema.User])
+@router.get('/')
 def fetch_users(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
    
     """ List to get all users """
@@ -23,7 +23,7 @@ def fetch_users(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
     return crud.get_users(db, skip=skip, limit=limit)
 
 
-@router.get('/{user_id}',response_model=schema.User)
+@router.get('/{user_id}')
 def fetch_user(user_id: int, db: Session = Depends(get_db)):
     
     """ Fetch a user by it's user_id  """
