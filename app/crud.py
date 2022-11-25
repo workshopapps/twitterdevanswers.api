@@ -30,8 +30,9 @@ def update_user(db: Session, user_id: int, user: schema.UserUpdate):
         raise HTTPException(status_code=404, detail="User not found")
 
     update_data = user.dict(exclude_unset=True)
-    update_user.filter(model.User.user_id == user_id).update(
-        update_data, synchronize_session=False)
+    for key, value in update_data.items():
+        setattr(update_data, key, value)
+    db.add(update_data)       
     db.commit()
     db.refresh(update_user)
     return {"success": True, "message": "Profile Updated", "data": update_user}

@@ -27,7 +27,7 @@ def send_reset_mail(user, token):
 @router.post('/signin')
 def user_login(user_credentials: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(database.get_db)):
     user = db.query(model.User).filter(
-        model.User.email == user_credentials.email).first()
+        model.User.email == user_credentials.username).first()
 
     if not user:
         raise HTTPException(
