@@ -9,9 +9,6 @@ class UserSignInRequest(BaseModel):
     email: EmailStr
     password: str
     confirmPassword: str
-    first_name: str
-    last_name: str
-    image_url: str
 
     @validator('confirmPassword')
     def passwords_match(cls, v, values, **kwargs):

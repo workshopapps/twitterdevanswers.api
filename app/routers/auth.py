@@ -15,12 +15,13 @@ router = APIRouter(
 )
 
 # send reset email
+
+
 def send_reset_mail(user, token):
     msg = f''' 
            To reset your password visit the following link:
             {router.url_path_for(forget_password)}/{token}    
             If you did not make this request then simply ignore this email) '''
-
 
 
 @router.post('/signin')
@@ -56,11 +57,8 @@ def user_signnup(user_credentials: schema.UserSignInRequest, db: Session = Depen
     if user:
         return HTTPException(status_code=400, detail={"msg": "User already exists"})
     new_user = model.User(username=user_credentials.username,
-                          first_name=user_credentials.first_name,
-                          last_name=user_credentials.last_name,
                           email=user_credentials.email,
                           password=user_credentials.password,
-                          image_url=user_credentials.image_url
                           )
     db.add(new_user)
     db.commit()
