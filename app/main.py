@@ -14,19 +14,22 @@ Dev Ask Api does the following functions
 This endpoint will handle all authorization requests including sign up, sign in, change password etc.
 
 ## Users 
-    These endpoint perform CRUD operations involving the user 
+These endpoint perform CRUD operations involving the user 
+
 ## Questions 
-     These endpoint perform CRUD operations involving the questions asked by the user 
+These endpoint perform CRUD operations involving the questions asked by the user 
+
 ## Answer
-     These endpoint perform CRUD operations involving the answer to the questions asked by the user 
+These endpoint perform CRUD operations involving the answer to the questions asked by the user 
 
 ## Follow
-     These endpoint perform CRUD operations involving following a user
+These endpoint perform CRUD operations involving following a user
 
 Other Endpoints are implemented below 
  
 ## HTTP Methods
-    The following methods are used in this api :- 
+The following methods are used in this api :- 
+
 * **GET** 
 * **POST** 
 * **UPDATE** 
