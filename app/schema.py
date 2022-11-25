@@ -9,6 +9,9 @@ class UserSignInRequest(BaseModel):
     email: EmailStr
     password: str
     confirmPassword: str
+    first_name: str
+    last_name: str
+    image_url: str
 
     @validator('confirmPassword')
     def passwords_match(cls, v, values, **kwargs):
@@ -18,13 +21,12 @@ class UserSignInRequest(BaseModel):
 
 
 class UserUpdate(BaseModel):
-    username :str
-    first_name :str
-    last_name :str
-    description:str
-    image_url : str
-    location :str
-        
+    username: str
+    first_name: str
+    last_name: str
+    description: str
+    image_url: str
+    location: str
 
 
 class UserSignInResponse(BaseModel):
@@ -64,10 +66,11 @@ class User(BaseModel):
     first_name: str
     last_name: str
     email: str
-    description : str
+    description: str
     image_url: str
-    location : str
-    account_balance :int
+    location: str
+    account_balance: int
+
 
 class Question(BaseModel):
     content: str
@@ -116,23 +119,26 @@ class Email(BaseModel):
 class TokenData(BaseModel):
     id: Optional[str] = None
 
-#class Tag(BaseModel):
+# class Tag(BaseModel):
 #
 #    tag_id: int
 #    tag_name: str
 #
 #
-#class contenTag(BaseModel):
+# class contenTag(BaseModel):
 #    question_id: int
 #    tag_id: int
 #    question: Question
 #    tag: Tag
 
+
 class TagBase(BaseModel):
     tag_name: str
 
+
 class TagCreate(TagBase):
     pass
+
 
 class Tag(TagBase):
     tag_id: int
@@ -140,9 +146,11 @@ class Tag(TagBase):
     class Config:
         orm_mode = True
 
+
 class AddTag(BaseModel):
     tag_id: int
     question_id: int
+
 
 class AnswerBase(BaseModel):
     """ Answer BaseModel for Add Answer endpoint """
