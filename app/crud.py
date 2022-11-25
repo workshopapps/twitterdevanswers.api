@@ -3,35 +3,44 @@ from . import model,schema
 from fastapi.exceptions import HTTPException
 
 
-#  get a user
 def get_user(db: Session, user_id: int):
+    
+    """ Get a user from the database based on their id  """
+
     user = db.query(model.User).filter(model.User.user_id == user_id).first()  
     return user
 
-#  get all users
+
 def get_users(db: Session, skip: int = 0, limit: int = 100):
+    
+    """ Get all users in the database  """     
+    
     users = db.query(model.User).offset(skip).limit(limit).all()
     return {"success": True, 'data': users}
 
 
-# Update a user
 def update_user(db: Session, user_id: int, user: schema.UserUpdate):
-    update_user = db.query(model.User).filter(
-        model.User.user_id == user_id)
-    updated_user = update_user.first()
+   
+    """ Update a User profile """
 
-    if  updated_user is None:
+    update_user = db.query(model.User).filter(
+        model.User.user_id == user_id).first()
+
+    if  update_user is None:
         raise HTTPException(status_code=404, detail="User not found")
+
     update_data = user.dict(exclude_unset=True)
     update_user.filter(model.User.user_id == user_id).update(
         update_data, synchronize_session=False)
     db.commit()
-    db.refresh(updated_user)
-    return {"success": True, "message": "Profile Updated", "data": updated_user}
+    db.refresh(update_user)
+    return {"success": True, "message": "Profile Updated", "data": update_user}
 
 
-# Delete a user
 def delete_user(db: Session, user_id: int):
+    
+    """ Delete a user Profile  """
+
     delete_user = db.query(model.User).filter(
         model.User.user_id == user_id).first()
     if delete_user:
