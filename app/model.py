@@ -1,22 +1,35 @@
-from sqlalchemy import Column, Integer, String, Boolean, ForeignKey, DateTime
+from sqlalchemy import Column, Integer, String, Boolean, ForeignKey, DateTime, Table
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from sqlalchemy.sql.sqltypes import TIMESTAMP
 from sqlalchemy.sql.expression import text
-from app.database import Base, engine
+from database import Base, engine
 
 
 class User(Base):
     __tablename__ = "user"
     user_id = Column(Integer, primary_key=True, nullable=False)
     username = Column(String(15), nullable=False)
-    first_name = Column(String(30), nullable=False)
-    last_name = Column(String(30), nullable=False)
+    first_name = Column(String(30), nullable=False, default="firstname")
+    last_name = Column(String(30), nullable=False, default="lastname")
     email = Column(String(100), nullable=False, unique=True)
+    description = Column(String(400),nullable=True)
     password = Column(String, nullable=False)
-    account_balance = Column(Integer)
-    role = Column(String(100))
-    image_url = Column(String(300))
+    image_url = Column(String(300),default="default.jpg")
+    location = Column(String(100),nullable=True)
+    created_at = Column(TIMESTAMP(timezone=True),
+                        nullable=False, server_default=text('now()'))
+    account_balance = Column(Integer, default = 1000)
+
+
+class Following(Base):
+    __tablename__ = "following"
+    user_from = Column(Integer, ForeignKey(
+        "user.user_id", ondelete="CASCADE"
+    ), nullable=False, primary_key=True)
+    target_user = Column(Integer, ForeignKey(
+        "user.user_id", ondelete="CASCADE"
+    ), nullable=False, primary_key=True)
 
 
 class Question(Base):
@@ -29,7 +42,8 @@ class Question(Base):
     created_at = Column(TIMESTAMP(timezone=True),
                         nullable=False, server_default=text('now()'))
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
-    owner = relationship('User')
+    owner = relationship('app.model.User')
+    tags = relationship("app.model.Tag", secondary="question_tags", back_populates="questions")
 
 
 class Answer(Base):
@@ -39,8 +53,26 @@ class Answer(Base):
         "user.user_id", ondelete="CASCADE"), nullable=False)
     question_id = Column(Integer, ForeignKey(
         "question.question_id", ondelete="CASCADE"), nullable=False)
-    owner = relationship('User')
-    question = relationship('Question')
+    content = Column(String(2000))
+    created_at = Column(TIMESTAMP(timezone=True),
+                        nullable=False, server_default=text('now()'))
+    is_answered = Column(Boolean,nullable=True)
+    vote = Column(Integer)
+    owner = relationship('app.model.User')
+    question = relationship('app.model.Question')
+
+
+class AnswerVote(Base):
+    __tablename__ = "answer_vote"
+    __table_args__ = {'extend_existing': True}
+    id = Column(Integer, primary_key=True)
+    owner_id = Column(Integer, ForeignKey(
+        "user.user_id", ondelete="CASCADE"), nullable=True)
+    answer_id = Column(Integer, ForeignKey(
+        "answer.answer_id", ondelete="CASCADE"), nullable=False)
+    vote_type = Column(String(100), nullable=False)
+    owner = relationship('app.model.User')
+    answer = relationship('app.model.Answer')
 
 
 class Like(Base):
@@ -65,6 +97,13 @@ class Notification(Base):
     title = Column(String(200), nullable=False)
 
 
+question_tags = Table(
+    "question_tags", 
+    Base.metadata,
+    Column("question_id", ForeignKey("question.question_id"), primary_key = True),
+    Column("tag_id", ForeignKey("tag.tag_id"), primary_key = True)
+)
+
 class Tag(Base):
     __tablename__ = 'tag'
     tag_id = Column(Integer, primary_key=True, nullable=False)
@@ -82,3 +121,4 @@ class contenTag(Base):
 
 
 Base.metadata.create_all(bind=engine)
+

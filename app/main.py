@@ -1,7 +1,8 @@
 from fastapi import FastAPI, status
 from fastapi.middleware.cors import CORSMiddleware
-from app.routers import user, notification, questions, auth, like
-from app.database import engine, SessionLocal
+
+from routers import user, notification, questions, auth, like, answer, following
+
 
 #  Description of Dev ASk Api
 
@@ -18,6 +19,9 @@ This endpoint will handle all authorization requests including sign up, sign in,
      These endpoint perform CRUD operations involving the questions asked by the user 
 ## Answer
      These endpoint perform CRUD operations involving the answer to the questions asked by the user 
+
+## Follow
+     These endpoint perform CRUD operations involving following a user
 
 Other Endpoints are implemented below 
  
@@ -53,6 +57,8 @@ app.include_router(questions.router)
 app.include_router(notification.router)
 app.include_router(auth.router)
 app.include_router(like.router)
+app.include_router(answer.router)
+app.include_router(following.router)
 
 
 @app.get("/")
