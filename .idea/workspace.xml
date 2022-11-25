@@ -5,21 +5,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="fad414ad-7900-4cab-801e-9e7b9af8f3a4" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/Dockerfile" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/routers/tag.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Jenkinsfile" beforeDir="false" afterPath="$PROJECT_DIR$/Jenkinsfile" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/__init__.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/auth.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/config.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/config.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/main.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/model.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/model.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/routers/auth.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/routers/auth.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/routers/like.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/routers/like.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/routers/notification.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/routers/notification.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/routers/questions.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/routers/questions.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/routers/user.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/routers/user.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/schema.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/schema.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/utils.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/utils.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -51,7 +37,7 @@
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "SHARE_PROJECT_CONFIGURATION_FILES": "true",
     "WebServerToolWindowFactoryState": "false",
-    "last_opened_file_path": "/home/mato/Desktop/FastApi/twitterdevanswers.api",
+    "last_opened_file_path": "/home/mato/Desktop/Django/New Folder/arkServer",
     "node.js.detected.package.eslint": "true",
     "node.js.detected.package.tslint": "true",
     "node.js.selected.package.eslint": "(autodetect)",
@@ -77,7 +63,8 @@
       <workItem from="1668969324084" duration="1958000" />
       <workItem from="1669166606132" duration="69000" />
       <workItem from="1669174694707" duration="14946000" />
-      <workItem from="1669225258641" duration="17083000" />
+      <workItem from="1669225258641" duration="18606000" />
+      <workItem from="1669320263423" duration="25000" />
     </task>
     <servers />
   </component>
