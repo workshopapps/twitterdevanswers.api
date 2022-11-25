@@ -108,16 +108,7 @@ class Tag(Base):
     __tablename__ = 'tag'
     tag_id = Column(Integer, primary_key=True, nullable=False)
     tag_name = Column(String(40), nullable=False)
-
-
-class contenTag(Base):
-    __tablename__ = 'contenTag'
-    question_id = Column(Integer, ForeignKey(
-        "question.question_id", ondelete="CASCADE"),  primary_key=True, nullable=False)
-    tag_id = Column(Integer, ForeignKey(
-        "tag.tag_id", ondelete="CASCADE"), nullable=False)
-    question = relationship('Question')
-    tag = relationship('Tag')
+    questions = relationship("app.model.Question", secondary="question_tags", back_populates="tags")
 
 
 Base.metadata.create_all(bind=engine)
