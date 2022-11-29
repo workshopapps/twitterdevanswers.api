@@ -43,7 +43,6 @@ app = FastAPI(
     description=description,
 )
 
-
 origins = ['*']
 
 app.add_middleware(
@@ -65,6 +64,8 @@ app.include_router(following.router)
 app.include_router(tag.router)
 
 
-@app.get("/")
+app.get("/")
+
+
 async def root():
     return {"message": "Hello world"}
