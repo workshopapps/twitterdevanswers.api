@@ -9,7 +9,19 @@ class User(BaseModel):
     username: str
     first_name: str
     last_name: str
-    email: str
+    email: EmailStr
+    description: str
+    image_url: str
+    location: str
+    account_balance: int
+
+
+class UserOut(BaseModel):
+    user_id:  int
+    username: str
+    first_name: str
+    last_name: str
+    email: EmailStr
     description: str
     image_url: str
     location: str
