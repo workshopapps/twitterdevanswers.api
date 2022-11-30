@@ -6,7 +6,7 @@ from typing import List
 from app.model import *
 from app.database import get_db
 from app import crud
-from app import schema , oauth
+from app import schema
 
 
 router = APIRouter(
@@ -14,35 +14,36 @@ router = APIRouter(
     tags=['Users']
 )
 
-# response model not working (response_model=schema.User)
+
 @router.get('/')
 def fetch_users(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
    
-    """ Get all users  """
-    users = crud.get_users(db, skip=skip, limit=limit)
-    return users
+    """ List to get all users """
+
+    return crud.get_users(db, skip=skip, limit=limit)
 
 
-@router.get('/{username}',response_model=schema.User,response_model_exclude_unset=True)
-def fetch_user(username:str, db: Session = Depends(get_db)):
+@router.get('/{user_id}')
+def fetch_user(user_id: int, db: Session = Depends(get_db)):
     
-    """ Fetch a user by username  """
-    user = crud.get_user(db, username=username)
-    if user is None:
+    """ Fetch a user by it's user_id  """
+  
+    user = crud.get_user(db, user_id=user_id)
+    if not user:
         raise HTTPException(
-            status_code=404, detail=f" user  {username} not found")
-    return user
+            status=404, detail=f" user with user_id : {user_id} not found")
+    return {"success": True, 'data': user}
 
-# update returning null
-@router.patch('/edit/{username}', response_model=schema.UserUpdate)
-def update_user(user: schema.UserUpdate, username: str, db: Session = Depends(get_db)):
+
+@router.patch('/edit/{user_id}', response_model=schema.UserUpdate)
+def update_user(user: schema.UserUpdate, user_id: int, db: Session = Depends(get_db)):
     
-    """ Update a User profile by username  """
+    """ Update a User profile by user_id  """
     
-    user = db.query(User).filter(User.username == username).first()
+    user = db.query(User).filter(User.user_id == user_id).first()
     if user is None:
         raise HTTPException(status_code=404, detail="User not found")
-    return crud.update_user(db, user=user, username=username)
+    return crud.update_user(db, user=user, user_id=user_id)
 
 
 @router.delete('/delete/{user_id}')
@@ -51,7 +52,7 @@ def delete_user(user_id: int, db: Session = Depends(get_db)):
     """ Delete a user by it's user_id  """
   
     delete_user = crud.delete_user(db, user_id=user_id)
-    if  delete_user is None:
+    if not delete_user:
         raise HTTPException(
-            status_code=404, detail=f"user with id {user_id} does not exist")
+            status=404, detail=f"user with user_id : {user_id} does not exist")
     return delete_user
