@@ -14,12 +14,21 @@ router = APIRouter(
     tags=['Authentication']
 )
 
+
 # send reset email
 def send_reset_mail(user, token):
     msg = f''' 
            To reset your password visit the following link:
             {router.url_path_for(forget_password)}/{token}    
             If you did not make this request then simply ignore this email) '''
+
+    with yagmail.SMTP(app_email, app_passwd) as yag:
+        yag.send(to=user.email, subject ='Passowrd Reset Request', contents=msg)
+
+    
+
+
+
 
 
 
@@ -114,15 +123,18 @@ def forget_password(email: schema.Email, request: Request, db: Session = Depends
     return {'success': True, 'message': 'token sent to provided email'}
 
 
-@router.post('/forget-password/{token}')
-def verify_password_token(token: str,  password: schema.ForgotPassword, db: Session = Depends(database.get_db),):
 
-    user_id = oauth.verify_access_token(token)
-    user = db.query(model.User).filter(model.User.user_id == user_id).first()
+@router.put('/forget-password/{token}')
+def verify_password_token(token: str,  password: schema.ForgotPassword, db: Session = Depends(database.get_db)):
+    user_id  = oauth.verify_access_token(token)
+    print(user_id)
+    if user_id is None:
+        raise HTTPException(status_code=status.HTTP_406_NOT_ACCEPTABLE, detail=f"The token is invalid or has expired")
+    user_query = db.query(model.User).filter(model.User.user_id == user_id)
+    user = user_query.first()
     if user is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail=f"Check token again")
-    user.password = utils.hash(password.newPassword)
-    db.commit()
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"This user does not exist")
+    new_password = utils.hash(password.newPassword)
+    user_query.update({'password': new_password }, synchronize_session=False)
 
-    return {'success': True, 'message': 'Password Changed'}
+    
