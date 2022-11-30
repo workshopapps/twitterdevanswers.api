@@ -26,7 +26,7 @@ def fetch_users(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
 @router.get('/{username}',response_model=schema.User,response_model_exclude_unset=True)
 def fetch_user(username:str, db: Session = Depends(get_db)):
     
-    """ Fetch a user by it's user_id  """
+    """ Fetch a user by username  """
     user = crud.get_user(db, username=username)
     if user is None:
         raise HTTPException(
@@ -37,7 +37,7 @@ def fetch_user(username:str, db: Session = Depends(get_db)):
 @router.patch('/edit/{username}', response_model=schema.UserUpdate)
 def update_user(user: schema.UserUpdate, username: str, db: Session = Depends(get_db)):
     
-    """ Update a User profile by user_id  """
+    """ Update a User profile by username  """
     
     user = db.query(User).filter(User.username == username).first()
     if user is None:
