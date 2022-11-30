@@ -1,18 +1,19 @@
 from pydantic import BaseModel, EmailStr, validator
 from pydantic.types import conint
 from datetime import datetime
-from typing import Optional, List
+from typing import Optional, List, Union
+
 
 class User(BaseModel):
-    id:  int
-    user_name: str
+    user_id:  int
+    username: str
     first_name: str
     last_name: str
     email: str
-    description : str
+    description: str
     image_url: str
-    location : str
-    account_balance :int
+    location: str
+    account_balance: int
 
 
 class UserSignInRequest(BaseModel):
@@ -75,6 +76,11 @@ class Question(BaseModel):
     updated_at: datetime
 
 
+class QuestionUpdate(BaseModel):
+    content: str
+    updated_at: datetime
+
+
 class Answer(BaseModel):
 
     id: int
@@ -112,8 +118,16 @@ class Email(BaseModel):
     email: EmailStr
 
 
+class Token(BaseModel):
+    access_token: str
+    token_type: str
+
+
 class TokenData(BaseModel):
-    id: Optional[str] = None
+    username: Union[str, None] = None
+
+# class TokenData(BaseModel):
+#     id: Optional[str] = None
 
 # class Tag(BaseModel):
 #
