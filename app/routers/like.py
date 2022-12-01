@@ -36,22 +36,41 @@ def create_like(like_base: schema.Like, background_task: BackgroundTasks, db: Se
 
     # check_if_like_exist
     if check_if_like_exist is not None:
-        # remove like
-        question_db = db.query(model.Question).filter(model.Question.question_id == like_base.question_id).first()
-        question_db.like = question_db.like - 1
-        db.commit()
-        db.refresh(question_db)
+
+        if check_if_like_exist.like_type == "up" and check_if_like_exist.like_type == "up":
+            pass
+
+        elif check_if_like_exist.like_type != "up" and like_base.like_type == "up":
+            question_db = db.query(model.Question).filter(model.Question.question_id == like_base.question_id).first()
+            question_db.total_like = question_db.total_like + 1
+            question_db.total_unlike = question_db.total_unlike - 1
+            db.commit()
+            db.refresh(question_db)
+
+        elif check_if_like_exist.like_type == "up" and like_base.like_type != "up":
+            question_db = db.query(model.Question).filter(model.Question.question_id == like_base.question_id).first()
+            question_db.total_unlike = question_db.total_unlike + 1
+            question_db.total_like = question_db.total_like - 1
+            db.commit()
+            db.refresh(question_db)
+        else:
+            pass
+
         return {"detail": "Success"}
     else:
 
         db_like = model.Like(
             user_id=current_user.user_id,
+            like_type=like_base.like_type,
             question_id=like_base.question_id
         )
 
         # add like
         question_db = db.query(model.Question).filter(model.Question.question_id == like_base.question_id).first()
-        question_db.like = question_db.like + 1
+        if like_base.like_type == "up":
+            question_db.total_like = question_db.total_like + 1
+        else:
+            question_db.total_unlike = question_db.total_unlike + 1
 
         db.add(db_like)
         db.commit()
@@ -69,7 +88,6 @@ def create_like(like_base: schema.Like, background_task: BackgroundTasks, db: Se
         background_task.add_task(create_notification, notification=notification, db=db)
 
         return db_like
-
 
 # @router.post("/", status_code=status.HTTP_201_CREATED)
 # def like(like: schema.Like, db: Session = Depends(get_db), current_user: int = Depends(oauth.get_current_user)):

@@ -208,6 +208,7 @@ class LikeBase(BaseModel):
     """ Like BaseModel for Add Like endpoint """
 
     question_id: int
+    like_type: str
 
 
 class Like(LikeBase):
