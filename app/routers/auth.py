@@ -86,6 +86,13 @@ def user_signnup(user_credentials: schema.UserSignInRequest, db: Session = Depen
             db.add(new_user)
             db.commit()
             db.refresh(new_user)
+
+            # Creating User wallet
+            wallet_obj = Wallet(user_id=new_user.user_id)
+            db.add(wallet_obj)
+            db.commit()
+            db.refresh(wallet_obj)
+
             user = db.query(model.User).filter(
                 model.User.email == user_credentials.email).first()
             access_token = oauth.create_access_token(data={'user_id': user.user_id})
@@ -97,6 +104,7 @@ def user_signnup(user_credentials: schema.UserSignInRequest, db: Session = Depen
                     'user_id': user.user_id,
                     'userName': user.username,
                     'email': user.email,
+                    'wallet': wallet_obj
                 },
                 'Token': access_token}
     else:
