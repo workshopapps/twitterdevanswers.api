@@ -88,14 +88,19 @@ class ForgotPassword(BaseModel):
 
 
 class Question(BaseModel):
+    title: str
     content: str
+    expected_result: str
+    payment_amount: int
     answered: bool
     created_at: datetime
     updated_at: datetime
 
 
 class QuestionUpdate(BaseModel):
+    title: str
     content: str
+    expected_result: str
     updated_at: datetime
 
 
