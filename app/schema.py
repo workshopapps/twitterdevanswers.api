@@ -220,3 +220,7 @@ class Follow(BaseModel):
     user_from: int
     target_user: int
 
+class Blog(BaseModel):
+    title:str
+    body:str
+    blog_user_id:int
