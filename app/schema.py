@@ -1,7 +1,31 @@
 from pydantic import BaseModel, EmailStr, validator
 from pydantic.types import conint
 from datetime import datetime
-from typing import Optional, List
+from typing import Optional, List, Union
+
+
+class User(BaseModel):
+    user_id:  int
+    username: str
+    first_name: str
+    last_name: str
+    email: EmailStr
+    description: str
+    image_url: str
+    location: str
+    account_balance: int
+
+
+class UserOut(BaseModel):
+    user_id:  int
+    username: str
+    first_name: str
+    last_name: str
+    email: EmailStr
+    description: str
+    image_url: str
+    location: str
+    account_balance: int
 
 
 class UserSignInRequest(BaseModel):
@@ -18,13 +42,12 @@ class UserSignInRequest(BaseModel):
 
 
 class UserUpdate(BaseModel):
-    username :str
-    first_name :str
-    last_name :str
-    description:str
-    image_url : str
-    location :str
-        
+    username: Optional[str] = None
+    first_name: Optional[str] = None
+    last_name: Optional[str] = None
+    description: Optional[str] = None
+    image_url: Optional[str] = None
+    location: Optional[str] = None
 
 
 class UserSignInResponse(BaseModel):
@@ -58,21 +81,15 @@ class ForgotPassword(BaseModel):
     pass
 
 
-class User(BaseModel):
-    id:  int
-    user_name: str
-    first_name: str
-    last_name: str
-    email: str
-    description : str
-    image_url: str
-    location : str
-    account_balance :int
-
 class Question(BaseModel):
     content: str
     answered: bool
     created_at: datetime
+    updated_at: datetime
+
+
+class QuestionUpdate(BaseModel):
+    content: str
     updated_at: datetime
 
 
@@ -113,26 +130,37 @@ class Email(BaseModel):
     email: EmailStr
 
 
-class TokenData(BaseModel):
-    id: Optional[str] = None
+class Token(BaseModel):
+    access_token: str
+    token_type: str
 
-#class Tag(BaseModel):
+
+class TokenData(BaseModel):
+    username: Union[str, None] = None
+
+# class TokenData(BaseModel):
+#     id: Optional[str] = None
+
+# class Tag(BaseModel):
 #
 #    tag_id: int
 #    tag_name: str
 #
 #
-#class contenTag(BaseModel):
+# class contenTag(BaseModel):
 #    question_id: int
 #    tag_id: int
 #    question: Question
 #    tag: Tag
 
+
 class TagBase(BaseModel):
     tag_name: str
 
+
 class TagCreate(TagBase):
     pass
+
 
 class Tag(TagBase):
     tag_id: int
@@ -140,9 +168,11 @@ class Tag(TagBase):
     class Config:
         orm_mode = True
 
+
 class AddTag(BaseModel):
     tag_id: int
     question_id: int
+
 
 class AnswerBase(BaseModel):
     """ Answer BaseModel for Add Answer endpoint """

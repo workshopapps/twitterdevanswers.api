@@ -3,6 +3,8 @@ from app.config import settings
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 import yagmail
+from app.oauth import get_current_user, authenticate_user, create_access_token
+from datetime import timedelta
 
 from app import database, schema, model, utils, oauth
 
@@ -15,6 +17,8 @@ router = APIRouter(
 )
 
 # send reset email
+
+
 def send_reset_mail(user, token):
     msg = f''' 
            To reset your password visit the following link:
@@ -22,30 +26,22 @@ def send_reset_mail(user, token):
             If you did not make this request then simply ignore this email) '''
 
 
-
-@router.post('/signin')
-def user_login(user_credentials: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(database.get_db)):
-    user = db.query(model.User).filter(
-        model.User.email == user_credentials.username).first()
-
+@router.post('/signin', response_model=schema.Token)
+async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(database.get_db)):
+    user = authenticate_user(db, form_data.username, form_data.password)
     if not user:
         raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN, detail=f"Invalid Credentials")
-    if not utils.verify(user_credentials.password, user.password):
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN, detail=f"Invalid Credentials")
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Incorrect username or password",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
 
-    access_token = oauth.create_access_token(data={'user_id': user.user_id}
-                                             )
+    access_token_expires = timedelta(
+        minutes=settings.access_token_expire_minutes)
+    access_token = create_access_token(
+        data={"sub": user.email}, expires_delta=access_token_expires)
 
-    return {'success': True, 'Message': 'user signed in successfully ',
-            'data': {
-                'user_id': user.user_id,
-                'userName': user.username,
-                'email': user.email,
-            },
-            'token': access_token
-            }
+    return {"access_token": access_token, "token_type": "bearer"}
 
 
 @router.post('/signup', status_code=status.HTTP_201_CREATED)
@@ -56,11 +52,8 @@ def user_signnup(user_credentials: schema.UserSignInRequest, db: Session = Depen
     if user:
         return HTTPException(status_code=400, detail={"msg": "User already exists"})
     new_user = model.User(username=user_credentials.username,
-                          first_name=user_credentials.first_name,
-                          last_name=user_credentials.last_name,
                           email=user_credentials.email,
                           password=user_credentials.password,
-                          image_url=user_credentials.image_url
                           )
     db.add(new_user)
     db.commit()

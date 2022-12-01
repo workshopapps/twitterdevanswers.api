@@ -1,7 +1,7 @@
 from fastapi import FastAPI, status
 from fastapi.middleware.cors import CORSMiddleware
 
-from routers import user, notification, questions, auth, like, answer, following
+from routers import user, notification, questions, auth, like, answer, following, tag
 
 
 #  Description of Dev ASk Api
@@ -14,19 +14,22 @@ Dev Ask Api does the following functions
 This endpoint will handle all authorization requests including sign up, sign in, change password etc.
 
 ## Users 
-    These endpoint perform CRUD operations involving the user 
+These endpoint perform CRUD operations involving the user 
+
 ## Questions 
-     These endpoint perform CRUD operations involving the questions asked by the user 
+These endpoint perform CRUD operations involving the questions asked by the user 
+
 ## Answer
-     These endpoint perform CRUD operations involving the answer to the questions asked by the user 
+These endpoint perform CRUD operations involving the answer to the questions asked by the user 
 
 ## Follow
-     These endpoint perform CRUD operations involving following a user
+These endpoint perform CRUD operations involving following a user
 
 Other Endpoints are implemented below 
  
 ## HTTP Methods
-    The following methods are used in this api :- 
+The following methods are used in this api :- 
+
 * **GET** 
 * **POST** 
 * **UPDATE** 
@@ -39,7 +42,6 @@ app = FastAPI(
     title="DEV ASK",
     description=description,
 )
-
 
 origins = ['*']
 
@@ -59,8 +61,11 @@ app.include_router(auth.router)
 app.include_router(like.router)
 app.include_router(answer.router)
 app.include_router(following.router)
+app.include_router(tag.router)
 
 
-@app.get("/")
+app.get("/")
+
+
 async def root():
     return {"message": "Hello world"}
