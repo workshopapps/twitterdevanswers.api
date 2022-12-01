@@ -72,7 +72,7 @@ class Question(Base):
 	updated_at = Column(DateTime(timezone=True), onupdate=func.now())
 	owner = relationship('app.model.User')
 	tags = relationship(
-		"app.model.Tag", secondary="question_tags", back_populates="questions")
+		"app.model.Tag", secondary="question_tags")
 
 
 class Answer(Base):
@@ -124,8 +124,8 @@ class Notification(Base):
 		"user.user_id", ondelete="CASCADE"), nullable=False)
 	content_id = Column(Integer, ForeignKey(
 		"answer.answer_id", ondelete="CASCADE"), nullable=False)
-	owner = relationship('User')
-	content = relationship('Answer')
+	owner = relationship('app.model.User')
+	content = relationship('app.model.Answer')
 	type = Column(String(200), nullable=False)
 	unread = Column(Boolean, default=True)
 	title = Column(String(200), nullable=False)
@@ -146,7 +146,7 @@ class Tag(Base):
 	tag_id = Column(Integer, primary_key=True, nullable=False)
 	tag_name = Column(String(40), nullable=False)
 	questions = relationship("app.model.Question",
-							 secondary="question_tags", back_populates="tags")
+							 secondary="question_tags")
 
 
 class Blog(Base):
@@ -156,7 +156,7 @@ class Blog(Base):
 	blog_id = Column(Integer, primary_key=True, nullable=False)
 	title = Column(String, nullable=False)
 	body = Column(String, nullable=False)
-	user = relationship('model.User')
+	user = relationship('app.model.User')
 	date_posted = Column(TIMESTAMP(timezone=True),
 						 nullable=False, server_default=text('now()'))
 	blog_user_id = Column(Integer, ForeignKey(
