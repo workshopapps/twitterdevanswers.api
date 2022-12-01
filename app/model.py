@@ -4,6 +4,22 @@ from sqlalchemy.sql import func
 from sqlalchemy.sql.sqltypes import TIMESTAMP
 from sqlalchemy.sql.expression import text
 from app.database import Base, engine
+from uuid import UUID
+
+
+class Wallet(Base):
+	__tablename__ = 'walletaccount'
+	__table_args__ = {'extend_existing': True}
+
+	id = Column(UUID(as_uuid=True),
+		primary_key=True,
+		server_default=sqlalchemy.text("gen_random_uuid()"),)
+	# id = Column(UUID(as_uuid=True), primary_key=True, default=str(uuid_pkg.uuid4())),
+	balance = Column(Integer, default=1000, nullable=False)
+	deposits_made = Column(Integer, default=0, nullable=False)
+	spendings = Column(Integer, default=0, nullable=False)
+	user_id = Column(Integer, ForeignKey("user.user_id"))
+	created_at = Column(DateTime, nullable=False)
 
 
 class User(Base):
