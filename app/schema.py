@@ -10,12 +10,15 @@ class User(BaseModel):
     first_name: str
     last_name: str
     email: EmailStr
-    email_verification_code : str
+    email_verification_code: str
     description: str
     image_url: str
     location: str
     account_balance: int
-    is_admin = Optional[bool] = None
+    is_admin = Optional[bool]
+
+    class Config:
+        arbitrary_types_allowed = True
 
 
 class UserOut(BaseModel):
@@ -84,7 +87,6 @@ class ForgotPassword(BaseModel):
         return v
 
 
-
 class Question(BaseModel):
     content: str
     answered: bool
@@ -139,7 +141,7 @@ class Token(BaseModel):
     token_type: str
 
 
-#class TokenData(BaseModel):
+# class TokenData(BaseModel):
 #    username: Union[str, None] = None
 
 class TokenData(BaseModel):
