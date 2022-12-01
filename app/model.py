@@ -41,8 +41,12 @@ class Question(Base):
     question_id = Column(Integer, primary_key=True, nullable=False)
     owner_id = Column(Integer, ForeignKey(
         "user.user_id", ondelete="CASCADE"), nullable=False)
+    title = Column(String(400), nullable=False)
     content = Column(String(2000), nullable=False)
-    amount_paid = Column(Integer,nullable=False)
+
+    expected_result = Column(String(2000), nullable=False)
+    token_amount = Column(String(100), nullable=False)
+
     answered = Column(Boolean, server_default='FALSE', nullable=False)
     total_like = Column(Integer, default=0)
     total_unlike = Column(Integer, default=0)

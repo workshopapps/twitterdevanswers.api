@@ -10,7 +10,6 @@ class User(BaseModel):
     first_name: str
     last_name: str
     email: EmailStr
-    email_verification_code: str
     description: str
     image_url: str
     location: str
@@ -38,6 +37,7 @@ class UserSignInRequest(BaseModel):
     email: EmailStr
     password: str
     confirmPassword: str
+    email_verification_code: Optional[str]
 
     @validator('confirmPassword')
     def passwords_match(cls, v, values, **kwargs):
@@ -88,14 +88,19 @@ class ForgotPassword(BaseModel):
 
 
 class Question(BaseModel):
+    title: str
     content: str
+    expected_result: str
+    payment_amount: int
     answered: bool
     created_at: datetime
     updated_at: datetime
 
 
 class QuestionUpdate(BaseModel):
+    title: str
     content: str
+    expected_result: str
     updated_at: datetime
 
 
@@ -226,7 +231,8 @@ class Follow(BaseModel):
     user_from: int
     target_user: int
 
+
 class Blog(BaseModel):
-    title:str
-    body:str
-    blog_user_id:int
+    title: str
+    body: str
+    blog_user_id: int
