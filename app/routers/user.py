@@ -1,12 +1,12 @@
-from app import schema
-from app import crud
-from app.database import get_db
-from app.model import *
+import schema
+import crud
+from database import get_db
+from model import *
 from typing import List
 from sqlalchemy.orm import Session
 from fastapi import FastAPI, Depends, HTTPException, APIRouter, Request
-import sys
-sys.path.append('..')
+
+
 
 
 router = APIRouter(
