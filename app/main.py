@@ -11,7 +11,7 @@ description = """
 Dev Ask Api does the following functions
 
 ## Auth
-This endpoint will handle all authorization requests including sign up, sign in, change password etc.
+This endpoint will handle all authorization and authentication requests including sign up, sign in, change password, Forgot Password,  etc.
 
 ## Users 
 These endpoint perform CRUD operations involving the user 
@@ -69,3 +69,4 @@ app.get("/")
 
 async def root():
     return {"message": "Hello world"}
+

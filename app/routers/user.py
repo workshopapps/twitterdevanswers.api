@@ -1,3 +1,5 @@
+import sys
+sys.path.append('..')
 from app import schema
 from app import crud
 from app.database import get_db
@@ -7,8 +9,6 @@ from sqlalchemy.orm import Session
 from fastapi import FastAPI, Depends, HTTPException, APIRouter, Request
 from app.oauth import get_current_user
 from app import model
-import sys
-sys.path.append('..')
 
 
 router = APIRouter(
