@@ -5,7 +5,23 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="fad414ad-7900-4cab-801e-9e7b9af8f3a4" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/app/routers/following.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/twitterdevanswers.api.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/twitterdevanswers.api.iml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/.env" beforeDir="false" afterPath="$PROJECT_DIR$/app/.env" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/config.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/config.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/crud.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/crud.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/database.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/database.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/main.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/model.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/model.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/routers/answer.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/routers/answer.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/routers/auth.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/routers/auth.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/routers/notification.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/routers/notification.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/routers/questions.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/routers/questions.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/routers/tag.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/routers/tag.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/routers/user.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/routers/user.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/schema.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/schema.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -65,6 +81,8 @@
       <workItem from="1669174694707" duration="14946000" />
       <workItem from="1669225258641" duration="18606000" />
       <workItem from="1669320263423" duration="25000" />
+      <workItem from="1669335380426" duration="1044000" />
+      <workItem from="1669363406289" duration="27000" />
     </task>
     <servers />
   </component>
