@@ -102,11 +102,6 @@ class Answer(BaseModel):
     question: Question
 
 
-class Like(BaseModel):
-    question_id: int
-    dir: conint(le=1)
-
-
 class NotificationBase(BaseModel):
     owner_id: int
     content_id: int
@@ -206,6 +201,17 @@ class AnswerVoteBase(BaseModel):
 
 class AnswerVote(AnswerVoteBase):
     """ Answer Vote BaseModel for Add Answer Vote endpoint """
+    pass
+
+
+class LikeBase(BaseModel):
+    """ Like BaseModel for Add Like endpoint """
+
+    question_id: int
+
+
+class Like(LikeBase):
+    """ Like BaseModel for Add Like endpoint """
     pass
 
 

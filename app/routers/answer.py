@@ -43,16 +43,31 @@ def create_answer(answer: schema.CreateAnswer, background_task: BackgroundTasks,
     db_question = get_question(db=db, question_id=answer.question_id)
     if db_question is None:
         raise HTTPException(status_code=404, detail="Invalid Question ID")
+
+    check_if_answer_exist = db.query(model.Answer).filter(
+        model.Answer.question_id == answer.question_id, model.Answer.owner_id == current_user.user_id
+    ).first()
+
+    if check_if_answer_exist is not None:
+        raise HTTPException(status_code=400, detail="Already exist")
+
     db_answer = model.Answer(
         owner_id=current_user.user_id,
         content=answer.content,
         question_id=answer.question_id
     )
+
+    # update user account by 1000
+    db_user = db.query(model.User).filter(model.User.user_id == current_user.user_id).first()
+    db_user.account_balance = db_user.account_balance + 1000
+
     db.add(db_answer)
     db.commit()
     db.refresh(db_answer)
+    db.refresh(db_user)
 
-    #This automatically creates a notification by calling create_notification as a background function which runs after returning a response
+    # This automatically creates a notification by calling create_notification as a background function which
+    # runs after returning a response
     notification = schema.NotificationCreate(
         owner_id=db_question.owner_id, 
         content_id=db_answer.answer_id, 
@@ -100,41 +115,40 @@ def vote_answer(answer: schema.AnswerVote, db: Session = Depends(get_db),
     # checks if answer_id exists
     db_answer = get_answer(db=db, answer_id=answer.answer_id)
     if db_answer is None:
-        raise HTTPException(status_code=404, detail="Not Found")
+        raise HTTPException(status_code=404, detail="Answer Not Found")
 
     # check if user voted before
     check_user_vote = db.query(model.AnswerVote).filter(model.AnswerVote.answer_id == answer.answer_id).first()
 
-    if check_user_vote.owner_id == current_user.user_id:
-        # update vote
-        get_answer_detail = get_answer(db=db, answer_id=answer.answer_id)
+    if check_user_vote is not None:
+        if check_user_vote.owner_id == current_user.user_id:
+            # update vote
+            get_answer_detail = get_answer(db=db, answer_id=answer.answer_id)
 
-        # prevent user from voting up again
-        if check_user_vote.vote_type == "add" and answer.vote_type == "add":
-            raise HTTPException(status_code=400, detail="Already voted!")
+            # prevent user from voting up again
+            if check_user_vote.vote_type == "add" and answer.vote_type == "add":
+                raise HTTPException(status_code=400, detail="Already voted!")
 
-        # add vote if previous vote is not add
-        elif check_user_vote.vote_type != "add" and answer.vote_type == "add":
-            db_vote_answer = db.query(model.Answer).get(model.Answer.answer_id == answer.answer_id).update(
-                vote=get_answer_detail.vote + 1
-            )
-            check_user_vote.vote_type = answer.vote_type
-            db.commit()
-            db.refresh(db_vote_answer)
-            db.refresh(check_user_vote)
+            # add vote if previous vote is not add
+            elif check_user_vote.vote_type != "add" and answer.vote_type == "add":
+                db_vote_answer = db.query(model.Answer).filter(model.Answer.answer_id == answer.answer_id).first()
+                db_vote_answer.vote = get_answer_detail.vote + 1
+                check_user_vote.vote_type = answer.vote_type
+                db.commit()
+                db.refresh(db_vote_answer)
+                db.refresh(check_user_vote)
 
-        # remove vote if previous vote is add
-        elif check_user_vote.vote_type == "add" and answer.vote_type != "add":
-            db_vote_answer = db.query(model.Answer).get(model.Answer.answer_id == answer.answer_id).update(
-                vote=get_answer_detail.vote - 1
-            )
-            check_user_vote.vote_type = answer.vote_type
-            db.commit()
-            db.refresh(db_vote_answer)
-            db.refresh(check_user_vote)
-        else:
-            pass
-        return {"detail": "Success"}
+            # remove vote if previous vote is add
+            elif check_user_vote.vote_type == "add" and answer.vote_type != "add":
+                db_vote_answer = db.query(model.Answer).filter(model.Answer.answer_id == answer.answer_id).first()
+                db_vote_answer.vote = get_answer_detail.vote - 1
+                check_user_vote.vote_type = answer.vote_type
+                db.commit()
+                db.refresh(db_vote_answer)
+                db.refresh(check_user_vote)
+            else:
+                pass
+            return {"detail": "Success"}
     else:
         # add vote
         db_answer_vote = model.AnswerVote(
@@ -145,12 +159,15 @@ def vote_answer(answer: schema.AnswerVote, db: Session = Depends(get_db),
 
         # update vote point
         get_answer_detail = get_answer(db=db, answer_id=answer.answer_id)
-        db_vote_answer = db.query(model.Answer).get(model.Answer.answer_id == answer.answer_id).update(
-            vote=get_answer_detail.vote + 1 if answer.vote_type == "add" else get_answer_detail.vote - 1
-        )
+        db_vote_answer = db.query(model.Answer).filter(model.Answer.answer_id == answer.answer_id).first()
+        try:
+            db_vote_answer.vote = get_answer_detail.vote + 1 if answer.vote_type == "add" \
+                else get_answer_detail.vote - 1
+        except Exception as e:
+            db_vote_answer.vote = 1 if answer.vote_type == "add" \
+                else - 1
 
         db.add(db_answer_vote)
-        db.add(db_vote_answer)
         db.commit()
         db.refresh(db_answer_vote)
         db.refresh(db_vote_answer)
