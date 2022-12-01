@@ -1,6 +1,6 @@
 from fastapi import FastAPI, status
 from fastapi.middleware.cors import CORSMiddleware
-from routers import user, notification, questions, auth, like, answer, following, tag, blog
+from app.routers import user, notification, questions, auth, like, answer, following, tag, blog
 
 
 #  Description of Dev ASk Api

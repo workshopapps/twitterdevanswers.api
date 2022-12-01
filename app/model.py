@@ -45,7 +45,7 @@ class Question(Base):
     content = Column(String(2000), nullable=False)
 
     expected_result = Column(String(2000), nullable=False)
-    token_amount = Column(String(100), nullable=False)
+    payment_amount = Column(Integer, nullable=False)
 
     answered = Column(Boolean, server_default='FALSE', nullable=False)
     total_like = Column(Integer, default=0)
