@@ -21,7 +21,7 @@ add_pagination(router)
 
 @router.get("/",status_code=status.HTTP_200_OK)
 def get_post(db: Session = Depends(get_db)):
-    get_blog = db.query(model.Blog).all()
+    get_post = db.query(model.Blog).all()
     return {"success": True, "data": get_post}    
 
 #post blog by user
