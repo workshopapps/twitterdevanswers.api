@@ -157,3 +157,12 @@ class AnswerVoteBase(BaseModel):
 class AnswerVote(AnswerVoteBase):
     """ Answer Vote BaseModel for Add Answer Vote endpoint """
     pass
+
+class Blog(BaseModel):
+    title:str
+    body:str
+    blog_user_id:int
+
+
+    class Config:
+        orm_mode = True
