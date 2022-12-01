@@ -10,10 +10,12 @@ class User(BaseModel):
     first_name: str
     last_name: str
     email: EmailStr
+    email_verification_code : str
     description: str
     image_url: str
     location: str
     account_balance: int
+    is_admin = Optional[bool] = None
 
 
 class UserOut(BaseModel):

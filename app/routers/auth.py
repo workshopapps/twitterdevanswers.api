@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, status, Response, Request
 from app.config import settings
+import pyotp
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 import yagmail
@@ -23,14 +24,13 @@ router = APIRouter(
 def send_reset_mail(user, token):
     msg = f''' 
            To reset your password visit the following link:
-            {router.url_path_for(forget_password)}/{token}    
+            {token}   
             If you did not make this request then simply ignore this email) '''
 
     with yagmail.SMTP(app_email, app_passwd) as yag:
         yag.send(to=user.email, subject ='Passowrd Reset Request', contents=msg)
 
     
-
 
 
 
@@ -49,10 +49,23 @@ async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(
     access_token = create_access_token(
         data={"sub": user.email}, expires_delta=access_token_expires)
 
-    return {"access_token": access_token, "token_type": "bearer"}
+    return {"access_token": access_token,
+    "data" : {
+        "user_id": user.user_id,
+        "usename": user.username, 
+        "email": user.email, 
+        "name" : user.first_name + user.last_name
+    },
+     "token_type": "bearer"}
 
 
-    
+secret = pyotp.random_base32()
+
+def auth_otp(secret, code):
+    totp = pyotp.TOTP(secret, interval=60)
+    totp.verify(code)
+
+
 
 @router.post('/signup', status_code=status.HTTP_201_CREATED)
 def user_signnup(user_credentials: schema.UserSignInRequest, db: Session = Depends(database.get_db)):
@@ -61,26 +74,39 @@ def user_signnup(user_credentials: schema.UserSignInRequest, db: Session = Depen
         model.User.email == user_credentials.email).first()
     if user:
         return HTTPException(status_code=400, detail={"msg": "User already exists"})
-    new_user = model.User(username=user_credentials.username,
-                          email=user_credentials.email,
-                          password=user_credentials.password,
-                          )
-    db.add(new_user)
-    db.commit()
-    db.refresh(new_user)
-    user = db.query(model.User).filter(
-        model.User.email == user_credentials.email).first()
-    access_token = oauth.create_access_token(data={'user_id': user.user_id})
-    return {
-        'Success': True,
-        'Message': 'user added successfully',
-        'data':
-        {
-            'user_id': user.user_id,
-            'userName': user.username,
-            'email': user.email,
-        },
-        'Token': access_token}
+    
+    
+
+    if auth_otp(secret, user_credentials.email_verification_code):
+
+            new_user = model.User(username=user_credentials.username,
+                            email=user_credentials.email,
+                            password=user_credentials.password,
+                            )
+            db.add(new_user)
+            db.commit()
+            db.refresh(new_user)
+            user = db.query(model.User).filter(
+                model.User.email == user_credentials.email).first()
+            access_token = oauth.create_access_token(data={'user_id': user.user_id})
+            return {
+                'Success': True,
+                'Message': 'user added successfully',
+                'data':
+                {
+                    'user_id': user.user_id,
+                    'userName': user.username,
+                    'email': user.email,
+                },
+                'Token': access_token}
+    else:
+        raise HTTPException(status_code=status.HTTP_412_PRECONDITION_FAILED, detail="OTP is either a wrong one or has expired ")
+
+@router.post('/send_email_code', status_code=status.HTTP_200_OK)
+def user_signnup(request: schema.Email):
+    send_reset_mail(request.email, secret)
+
+
 
 
 @router.put('/change-password', )
@@ -102,7 +128,7 @@ def change_password(update_password: schema.ChangePasswordRequest, db: Session =
     return {'sucess': True, 'message': 'Password Changed'}
 
 
-@router.post('/forget-password', name='getPass')
+@router.post('/forget-password')
 def forget_password(email: schema.Email, request: Request, db: Session = Depends(database.get_db)):
     user = db.query(model.User).filter(model.User.email == email.email).first()
     if user is None:
@@ -110,7 +136,7 @@ def forget_password(email: schema.Email, request: Request, db: Session = Depends
                             detail=f"User with email: {email.email} does not exit")
 
     token = oauth.create_access_token({'user_id': user.user_id})
-    url = request.url._url+'/' + token
+    url = "devask.com/change/" + token
 
     send_reset_mail(user.email, url)
 
@@ -131,4 +157,3 @@ def verify_password_token(token: str,  password: schema.ForgotPassword, db: Sess
     new_password = utils.hash(password.newPassword)
     user_query.update({'password': new_password }, synchronize_session=False)
 
-    
