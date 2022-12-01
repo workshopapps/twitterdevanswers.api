@@ -3,7 +3,7 @@ from app.config import settings
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 import yagmail
-from app.oauth import get_current_user, authenticate_user, create_access_token
+from app.oauth import get_current_user, verify_access_token, create_access_token, authenticate_user
 from datetime import timedelta
 
 from app import database, schema, model, utils, oauth
@@ -34,7 +34,6 @@ def send_reset_mail(user, token):
 
 
 
-
 @router.post('/signin', response_model=schema.Token)
 async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(database.get_db)):
     user = authenticate_user(db, form_data.username, form_data.password)
@@ -52,6 +51,8 @@ async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(
 
     return {"access_token": access_token, "token_type": "bearer"}
 
+
+    
 
 @router.post('/signup', status_code=status.HTTP_201_CREATED)
 def user_signnup(user_credentials: schema.UserSignInRequest, db: Session = Depends(database.get_db)):
@@ -82,8 +83,8 @@ def user_signnup(user_credentials: schema.UserSignInRequest, db: Session = Depen
         'Token': access_token}
 
 
-@router.put('/change-password')
-def change_password(update_password: schema.ChangePasswordRequest, db: Session = Depends(database.get_db), current_user: int = Depends(oauth.get_current_user)):
+@router.put('/change-password', )
+def change_password(update_password: schema.ChangePasswordRequest, db: Session = Depends(database.get_db), current_user: int = Depends(get_current_user)):
     print(current_user)
     user_query = db.query(model.User).filter(
         model.User.user_id == current_user.user_id)
@@ -119,8 +120,8 @@ def forget_password(email: schema.Email, request: Request, db: Session = Depends
 
 @router.put('/forget-password/{token}')
 def verify_password_token(token: str,  password: schema.ForgotPassword, db: Session = Depends(database.get_db)):
-    user_id  = oauth.verify_access_token(token)
-    print(user_id)
+    user_id  = verify_access_token(token)
+    
     if user_id is None:
         raise HTTPException(status_code=status.HTTP_406_NOT_ACCEPTABLE, detail=f"The token is invalid or has expired")
     user_query = db.query(model.User).filter(model.User.user_id == user_id)
