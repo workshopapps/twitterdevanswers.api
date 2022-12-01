@@ -58,7 +58,7 @@ async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(
 
 def auth_otp(secret, code):
     totp = pyotp.TOTP(secret, interval=600)
-    totp.verify(code)
+    return totp.verify(code)
 
 
 def generate_secret():
