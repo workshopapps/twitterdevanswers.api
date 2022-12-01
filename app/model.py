@@ -42,6 +42,8 @@ class Question(Base):
         "user.user_id", ondelete="CASCADE"), nullable=False)
     content = Column(String(2000), nullable=False)
     answered = Column(Boolean, server_default='FALSE', nullable=False)
+    total_like = Column(Integer, default=0)
+    total_unlike = Column(Integer, default=0)
     created_at = Column(TIMESTAMP(timezone=True),
                         nullable=False, server_default=text('now()'))
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
@@ -62,7 +64,7 @@ class Answer(Base):
     created_at = Column(TIMESTAMP(timezone=True),
                         nullable=False, server_default=text('now()'))
     is_answered = Column(Boolean, nullable=True)
-    vote = Column(Integer)
+    vote = Column(Integer, default=0)
     owner = relationship('app.model.User')
     question = relationship('app.model.Question')
 
@@ -83,6 +85,8 @@ class AnswerVote(Base):
 class Like(Base):
     __tablename__ = "likes"
     __table_args__ = {'extend_existing': True}
+    like_id = Column(Integer, primary_key=True)
+    like_type = Column(String(100), nullable=False)
     user_id = Column(Integer, ForeignKey(
         'user.user_id', ondelete="CASCADE"), primary_key=True)
     question_id = Column(Integer, ForeignKey(
