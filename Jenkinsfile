@@ -7,29 +7,20 @@ pipeline {
         stage('Build') { 
             steps { 
                 sh 'pip install -r requirements.txt'
-                sh 'uvicorn app.main:app --host 0.0.0.0 --reload' 
             }
         }
-        stage('Test'){
-            steps {
-                sh '$pytest'
-            }
-        }
-
+        
         stage('Deploy to Production') {
             input{
                 message "Click OK! to deploy to Production?"
                 ok "OK"
             }
             steps {
-                sh 'ssh -o StrictHostKeyChecking=no deployment-user@52.203.249.167 "
-                cd devask;\
-                cd backend;\
-                git pull origin dev; \
-                cd ..;\
-                docker compose down --remove-orphans;\
-                docker compose up
-                "'
+                     sh "sudo cp -rf backend /home/judgejudy/twitterdevanswers.api"
+                     sh "sudo cp -fr ${WORKSPACE}/frontend/build/* /home/judgejudy/twitterdevanswers.api"
+                     sh "sudo su - judgejudy && whoami"
+	    		     sh "sudo pm2 stop main"
+                     sh "sudo pm2 start /home/judgejudy/backend/app/server.py --interpreter python3"
             }
         }
     }

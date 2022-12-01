@@ -10,10 +10,15 @@ class User(BaseModel):
     first_name: str
     last_name: str
     email: EmailStr
+    email_verification_code: str
     description: str
     image_url: str
     location: str
     account_balance: int
+    is_admin = Optional[bool]
+
+    class Config:
+        arbitrary_types_allowed = True
 
 
 class UserOut(BaseModel):
@@ -74,11 +79,12 @@ class ChangePasswordRequest(BaseModel):
 class ForgotPassword(BaseModel):
     newPassword: str
     confirmPassword: str
-    confirmPassword: str
 
-
-class ForgotPassword(BaseModel):
-    pass
+    @validator('confirmPassword')
+    def passwords_match(cls, v, values, **kwargs):
+        if 'newPassword' in values and v != values['newPassword']:
+            raise ValueError('passwords do not match')
+        return v
 
 
 class Question(BaseModel):
@@ -130,11 +136,11 @@ class Token(BaseModel):
     token_type: str
 
 
-class TokenData(BaseModel):
-    username: Union[str, None] = None
-
 # class TokenData(BaseModel):
-#     id: Optional[str] = None
+#    username: Union[str, None] = None
+
+class TokenData(BaseModel):
+    id: Optional[str] = None
 
 # class Tag(BaseModel):
 #

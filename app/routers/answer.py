@@ -49,7 +49,7 @@ def create_answer(answer: schema.CreateAnswer, background_task: BackgroundTasks,
     ).first()
 
     if check_if_answer_exist is not None:
-        raise HTTPException(status_code=400, detail="Already exist")
+        raise HTTPException(status_code=400, detail="Already added answer")
 
     db_answer = model.Answer(
         owner_id=current_user.user_id,
@@ -85,8 +85,10 @@ def update_answer(answer_id: int, answer: schema.UpdateAnswer, db: Session = Dep
     """ Update answer endpoint for a specific question """
 
     db_answer = db.query(model.Answer).filter(model.Answer.answer_id == answer_id).first()
-    if db_answer is None or db_answer.owner_id != current_user.user_id:
-        raise HTTPException(status_code=404, detail="Not Found")
+    if db_answer is None:
+        raise HTTPException(status_code=404, detail="Invalid answer id")
+    elif db_answer.owner_id != current_user.user_id:
+        raise HTTPException(status_code=400, detail="Only owner can update this answer")
     db_answer.content = answer.content
     db.commit()
     db.refresh(db_answer)
@@ -99,8 +101,10 @@ def delete_answer(answer_id: int, db: Session = Depends(get_db),
     """ Delete answer endpoint for a specific question """
 
     db_answer = get_answer(db=db, answer_id=answer_id)
-    if db_answer is None or db_answer.owner_id != current_user.user_id:
-        raise HTTPException(status_code=404, detail="Not Found")
+    if db_answer is None:
+        raise HTTPException(status_code=404, detail="Invalid answer id")
+    elif db_answer.owner_id != current_user.user_id:
+        raise HTTPException(status_code=400, detail="Only owner can delete this answer")
     del_answer = db.query(model.Answer).filter(model.Answer.answer_id == answer_id).first()
     db.delete(del_answer)
     db.commit()

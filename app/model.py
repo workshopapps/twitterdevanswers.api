@@ -10,7 +10,7 @@ class User(Base):
     __tablename__ = "user"
     __table_args__ = {'extend_existing': True}
     user_id = Column(Integer, primary_key=True, nullable=False)
-    username = Column(String(15), nullable=False)
+    username = Column(String(15), nullable=False, unique=True)
     first_name = Column(String(30), nullable=False, default="firstname")
     last_name = Column(String(30), nullable=False, default="lastname")
     email = Column(String(100), nullable=False, unique=True)
@@ -18,9 +18,11 @@ class User(Base):
     password = Column(String, nullable=False)
     image_url = Column(String(300), default="default.jpg")
     location = Column(String(100), nullable=True)
+    is_admin = Column(Boolean, default=False)
     created_at = Column(TIMESTAMP(timezone=True),
                         nullable=False, server_default=text('now()'))
     account_balance = Column(Integer, default=1000)
+    is_admin = Column(Boolean, nullable=True, default=False)
 
 
 class Following(Base):
@@ -31,7 +33,6 @@ class Following(Base):
     target_user = Column(Integer, ForeignKey(
         "user.user_id", ondelete="CASCADE"
     ), nullable=False, primary_key=True)
-
 
 
 class Question(Base):
@@ -125,18 +126,19 @@ class Tag(Base):
     questions = relationship("app.model.Question",
                              secondary="question_tags", back_populates="tags")
 
+
 class Blog(Base):
-    
+
     __tablename__ = 'blog'
     __table_args__ = {'extend_existing': True}
-    blog_id = Column(Integer,primary_key=True,nullable=False)
-    title = Column(String,nullable=False)
-    body = Column(String,nullable=False)
+    blog_id = Column(Integer, primary_key=True, nullable=False)
+    title = Column(String, nullable=False)
+    body = Column(String, nullable=False)
     user = relationship('model.User')
-    date_posted = Column(TIMESTAMP(timezone=True),nullable=False, server_default=text('now()'))
-    blog_user_id = Column(Integer,ForeignKey("user.user_id",ondelete="CASCADE"),nullable=False)    
-
-
+    date_posted = Column(TIMESTAMP(timezone=True),
+                         nullable=False, server_default=text('now()'))
+    blog_user_id = Column(Integer, ForeignKey(
+        "user.user_id", ondelete="CASCADE"), nullable=False)
 
 
 Base.metadata.create_all(bind=engine)
