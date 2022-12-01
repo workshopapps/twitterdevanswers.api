@@ -60,7 +60,6 @@ pyasn1==0.4.8
 pyasn1-modules==0.2.8
 pycparser==2.21
 pydantic==1.10.2
-pydbantic==0.0.25
 PyJWT==2.0.0
 pyotp==2.7.0
 pyparsing==3.0.9
