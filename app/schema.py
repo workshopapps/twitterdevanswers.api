@@ -1,7 +1,32 @@
 from pydantic import BaseModel, EmailStr, validator
 from pydantic.types import conint
 from datetime import datetime
-from typing import Optional, List , Union
+from typing import Optional, List, Union
+
+
+class User(BaseModel):
+    user_id:  int
+    username: str
+    first_name: str
+    last_name: str
+    email: EmailStr
+    description: str
+    image_url: str
+    location: str
+    account_balance: int
+
+
+class UserOut(BaseModel):
+    user_id:  int
+    username: str
+    first_name: str
+    last_name: str
+    email: EmailStr
+    description: str
+    image_url: str
+    location: str
+    account_balance: int
+
 
 class UserSignInRequest(BaseModel):
     username: str
@@ -16,47 +41,29 @@ class UserSignInRequest(BaseModel):
         return v
 
 
+class UserUpdate(BaseModel):
+    username: Optional[str] = None
+    first_name: Optional[str] = None
+    last_name: Optional[str] = None
+    description: Optional[str] = None
+    image_url: Optional[str] = None
+    location: Optional[str] = None
+
+
 class UserSignInResponse(BaseModel):
     pass
 
 
-
-class User(BaseModel):
-    user_id:int
-    username: Union[str,None] = None
-    first_name:  Union[str,None] = None
-    last_name:  Union[str,None] = None
-    email: EmailStr
-    description :  Union[str,None] = None
-    phone_number :  Union[str,None] = None
-    role :  Union[str,None] = None
-    position :  Union[str,None] = None
-    stacks :  Union[str,None] = None
-    links :Union[str,None] = None
-    image_url:  Union[str,None] = None
-    location :  Union[str,None] = None
-    account_balance :  Union[str,None] = None
+class UserBase(UserSignInRequest):
+    user_id: int
 
     class Config:
         orm_mode = True
 
 
+class ReadUser(UserBase):
+    pass
 
-class UserUpdate(BaseModel):
-    username: Optional[str]
-    first_name: Optional[str]
-    last_name: Optional[str]
-    description: Optional[str]
-    role: Optional[str]
-    position: Optional[str]
-    image_url: Optional[str]
-    phone_number: Optional[str]
-    location: Optional[str]
-    stack: Optional[str]
-    link: Optional[str]
-
-    class Config:
-        orm_mode = True
 
 class ChangePasswordRequest(BaseModel):
     oldPassword: str
@@ -67,17 +74,24 @@ class ChangePasswordRequest(BaseModel):
 class ForgotPassword(BaseModel):
     newPassword: str
     confirmPassword: str
-    confirmPassword: str
 
+    @validator('confirmPassword')
+    def passwords_match(cls, v, values, **kwargs):
+        if 'newPassword' in values and v != values['newPassword']:
+            raise ValueError('passwords do not match')
+        return v
 
-class ForgotPassword(BaseModel):
-    pass
 
 
 class Question(BaseModel):
     content: str
     answered: bool
     created_at: datetime
+    updated_at: datetime
+
+
+class QuestionUpdate(BaseModel):
+    content: str
     updated_at: datetime
 
 
@@ -117,6 +131,14 @@ class Notification(NotificationBase):
 class Email(BaseModel):
     email: EmailStr
 
+
+class Token(BaseModel):
+    access_token: str
+    token_type: str
+
+
+#class TokenData(BaseModel):
+#    username: Union[str, None] = None
 
 class TokenData(BaseModel):
     id: Optional[str] = None

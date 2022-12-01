@@ -10,22 +10,18 @@ class User(Base):
     __tablename__ = "user"
     __table_args__ = {'extend_existing': True}
     user_id = Column(Integer, primary_key=True, nullable=False)
-    username = Column(String(15), nullable=False,unique=True)
-    first_name = Column(String(30), nullable=False, default=" ")
-    last_name = Column(String(30), nullable=False, default=" ")
+    username = Column(String(15), nullable=False, unique=True)
+    first_name = Column(String(30), nullable=False, default="firstname")
+    last_name = Column(String(30), nullable=False, default="lastname")
     email = Column(String(100), nullable=False, unique=True)
+    description = Column(String(400), nullable=True)
     password = Column(String, nullable=False)
-    description = Column(String(400),default=" ")
-    image_url = Column(String(300),nullable=False, default=" ")
-    role = Column(String(300),default="User")
-    position = Column(String(300),default=" ",nullable=True)
-    stacks = Column(String(300), default=" ")
-    links = Column(String(300), default=" ")
-    location = Column(String(100),default=" ",nullable=True)
-    phone_number = Column(Integer,nullable=True)
-    account_balance = Column(Integer, default=1000)
+    image_url = Column(String(300), default="default.jpg")
+    location = Column(String(100), nullable=True)
+    is_admin = Column(Boolean, default=False)
     created_at = Column(TIMESTAMP(timezone=True),
                         nullable=False, server_default=text('now()'))
+    account_balance = Column(Integer, default=1000)
 
 
 class Following(Base):

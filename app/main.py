@@ -11,7 +11,7 @@ description = """
 Dev Ask Api does the following functions
 
 ## Auth
-This endpoint will handle all authorization requests including sign up, sign in, change password etc.
+This endpoint will handle all authorization and authentication requests including sign up, sign in, change password, Forgot Password,  etc.
 
 ## Users 
 These endpoint perform CRUD operations involving the user 
@@ -43,7 +43,6 @@ app = FastAPI(
     description=description,
 )
 
-
 origins = ['*']
 
 app.add_middleware(
@@ -65,6 +64,9 @@ app.include_router(following.router)
 app.include_router(tag.router)
 
 
-@app.get("/")
+app.get("/")
+
+
 async def root():
     return {"message": "Hello world"}
+

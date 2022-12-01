@@ -3,6 +3,8 @@ from app.config import settings
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 import yagmail
+from app.oauth import get_current_user, verify_access_token, create_access_token, authenticate_user
+from datetime import timedelta
 
 from app import database, schema, model, utils, oauth
 
@@ -14,6 +16,7 @@ router = APIRouter(
     tags=['Authentication']
 )
 
+
 # send reset email
 
 
@@ -23,31 +26,33 @@ def send_reset_mail(user, token):
             {router.url_path_for(forget_password)}/{token}    
             If you did not make this request then simply ignore this email) '''
 
+    with yagmail.SMTP(app_email, app_passwd) as yag:
+        yag.send(to=user.email, subject ='Passowrd Reset Request', contents=msg)
 
-@router.post('/signin')
-def user_login(user_credentials: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(database.get_db)):
-    user = db.query(model.User).filter(
-        model.User.email == user_credentials.username).first()
+    
 
+
+
+
+@router.post('/signin', response_model=schema.Token)
+async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(database.get_db)):
+    user = authenticate_user(db, form_data.username, form_data.password)
     if not user:
         raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN, detail=f"Invalid Credentials")
-    if not utils.verify(user_credentials.password, user.password):
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN, detail=f"Invalid Credentials")
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Incorrect username or password",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
 
-    access_token = oauth.create_access_token(data={'user_id': user.user_id}
-                                             )
+    access_token_expires = timedelta(
+        minutes=settings.access_token_expire_minutes)
+    access_token = create_access_token(
+        data={"sub": user.email}, expires_delta=access_token_expires)
 
-    return {'success': True, 'Message': 'user signed in successfully ',
-            'data': {
-                'user_id': user.user_id,
-                'userName': user.username,
-                'email': user.email,
-            },
-            'token': access_token
-            }
+    return {"access_token": access_token, "token_type": "bearer"}
 
+
+    
 
 @router.post('/signup', status_code=status.HTTP_201_CREATED)
 def user_signnup(user_credentials: schema.UserSignInRequest, db: Session = Depends(database.get_db)):
@@ -78,8 +83,8 @@ def user_signnup(user_credentials: schema.UserSignInRequest, db: Session = Depen
         'Token': access_token}
 
 
-@router.put('/change-password')
-def change_password(update_password: schema.ChangePasswordRequest, db: Session = Depends(database.get_db), current_user: int = Depends(oauth.get_current_user)):
+@router.put('/change-password', )
+def change_password(update_password: schema.ChangePasswordRequest, db: Session = Depends(database.get_db), current_user: int = Depends(get_current_user)):
     print(current_user)
     user_query = db.query(model.User).filter(
         model.User.user_id == current_user.user_id)
@@ -112,15 +117,18 @@ def forget_password(email: schema.Email, request: Request, db: Session = Depends
     return {'success': True, 'message': 'token sent to provided email'}
 
 
-@router.post('/forget-password/{token}')
-def verify_password_token(token: str,  password: schema.ForgotPassword, db: Session = Depends(database.get_db),):
 
-    user_id = oauth.verify_access_token(token)
-    user = db.query(model.User).filter(model.User.user_id == user_id).first()
+@router.put('/forget-password/{token}')
+def verify_password_token(token: str,  password: schema.ForgotPassword, db: Session = Depends(database.get_db)):
+    user_id  = verify_access_token(token)
+    
+    if user_id is None:
+        raise HTTPException(status_code=status.HTTP_406_NOT_ACCEPTABLE, detail=f"The token is invalid or has expired")
+    user_query = db.query(model.User).filter(model.User.user_id == user_id)
+    user = user_query.first()
     if user is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail=f"Check token again")
-    user.password = utils.hash(password.newPassword)
-    db.commit()
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"This user does not exist")
+    new_password = utils.hash(password.newPassword)
+    user_query.update({'password': new_password }, synchronize_session=False)
 
-    return {'success': True, 'message': 'Password Changed'}
+    
