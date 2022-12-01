@@ -51,11 +51,13 @@ class ChangePasswordRequest(BaseModel):
 class ForgotPassword(BaseModel):
     newPassword: str
     confirmPassword: str
-    confirmPassword: str
 
+    @validator('confirmPassword')
+    def passwords_match(cls, v, values, **kwargs):
+        if 'newPassword' in values and v != values['newPassword']:
+            raise ValueError('passwords do not match')
+        return v
 
-class ForgotPassword(BaseModel):
-    pass
 
 
 class User(BaseModel):
