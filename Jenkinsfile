@@ -17,10 +17,9 @@ pipeline {
             }
             steps {
                      sh "sudo cp -rf backend /home/judgejudy/twitterdevanswers.api"
-                     sh "sudo cp -fr ${WORKSPACE}/frontend/build/* /home/judgejudy/twitterdevanswers.api"
-                     sh "sudo su - judgejudy && whoami"
-	    		     sh "sudo pm2 stop main"
-                     sh "sudo pm2 start /home/judgejudy/backend/app/server.py --interpreter python3"
+                 //  sh "sudo su - judgejudy && whoami"
+	    	 //  sh "sudo pm2 stop main"
+                     sh "sudo pm2 start /home/judgejudy/twitterdevanswers.api/main.py --interpreter python3"
             }
         }
     }
