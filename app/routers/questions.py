@@ -16,7 +16,7 @@ router = APIRouter(
 def add_question(request: schema.Question, db: Session = Depends(get_db), current_user: int = Depends(oauth.get_current_user)):
     #request.owner_id = current_user.user_id
     ask_question = model.Question(
-        content=request.content, owner_id=current_user.user_id,payment_method=request.payment_method)
+        content=request.content, owner_id=current_user.user_id, payment_method=request.payment_method)
     db.add(ask_question)
     db.commit()
     db.refresh(ask_question)
@@ -105,13 +105,15 @@ def get_all_questions(db: Session = Depends(get_db), current_user: int = Depends
     return {"success": True, "data": get_all_questions_db}
 
 
-#get all questions by a user
-@router.get("/{user_id}/user/",status_code=status.HTTP_200_OK)
-def get_all_questions_by_a_user(user_id:int, db: Session = Depends(get_db)):
-    get_all_user_question = db.query(model.Question).filter(model.Question.owner_id == user_id).all()
+# get all questions by a user
+@router.get("/{user_id}/user/", status_code=status.HTTP_200_OK)
+def get_all_questions_by_a_user(user_id: int, db: Session = Depends(get_db)):
+    get_all_user_question = db.query(model.Question).filter(
+        model.Question.owner_id == user_id).all()
     if not get_all_user_question:
         raise HTTPException(status_code=404, detail="User not found")
-    return {"success":True,"data":get_all_user_question}
+    return {"success": True, "data": get_all_user_question}
+
 
 """
 #gets a particular question from a user using the question id
