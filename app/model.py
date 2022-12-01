@@ -41,7 +41,7 @@ class Question(Base):
     owner_id = Column(Integer, ForeignKey(
         "user.user_id", ondelete="CASCADE"), nullable=False)
     content = Column(String(2000), nullable=False)
-    payment_method = Column(String(100),nullable=False)
+    amount_paid = Column(Integer,nullable=False)
     answered = Column(Boolean, server_default='FALSE', nullable=False)
     total_like = Column(Integer, default=0)
     total_unlike = Column(Integer, default=0)
