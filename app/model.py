@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Boolean, ForeignKey, DateTime
+from sqlalchemy import Column, Integer, String, Boolean, ForeignKey, DateTime, Table
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from sqlalchemy.sql.sqltypes import TIMESTAMP
@@ -11,13 +11,27 @@ class User(Base):
     __table_args__ = {'extend_existing': True}
     user_id = Column(Integer, primary_key=True, nullable=False)
     username = Column(String(15), nullable=False)
-    first_name = Column(String(30), nullable=False)
-    last_name = Column(String(30), nullable=False)
+    first_name = Column(String(30), nullable=False, default="firstname")
+    last_name = Column(String(30), nullable=False, default="lastname")
     email = Column(String(100), nullable=False, unique=True)
+    description = Column(String(400), nullable=True)
     password = Column(String, nullable=False)
-    #account_balance = Column(Integer)
-    #role = Column(String(100))
-    image_url = Column(String(300))
+    image_url = Column(String(300), default="default.jpg")
+    location = Column(String(100), nullable=True)
+    created_at = Column(TIMESTAMP(timezone=True),
+                        nullable=False, server_default=text('now()'))
+    account_balance = Column(Integer, default=1000)
+
+
+class Following(Base):
+    __tablename__ = "following"
+    user_from = Column(Integer, ForeignKey(
+        "user.user_id", ondelete="CASCADE"
+    ), nullable=False, primary_key=True)
+    target_user = Column(Integer, ForeignKey(
+        "user.user_id", ondelete="CASCADE"
+    ), nullable=False, primary_key=True)
+
 
 
 class Question(Base):
@@ -29,10 +43,14 @@ class Question(Base):
     content = Column(String(2000), nullable=False)
     #payment_method = Column(String(100),nullable=False)
     answered = Column(Boolean, server_default='FALSE', nullable=False)
+    total_like = Column(Integer, default=0)
+    total_unlike = Column(Integer, default=0)
     created_at = Column(TIMESTAMP(timezone=True),
                         nullable=False, server_default=text('now()'))
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
     owner = relationship('app.model.User')
+    tags = relationship(
+        "app.model.Tag", secondary="question_tags", back_populates="questions")
 
 
 class Answer(Base):
@@ -46,7 +64,8 @@ class Answer(Base):
     content = Column(String(2000))
     created_at = Column(TIMESTAMP(timezone=True),
                         nullable=False, server_default=text('now()'))
-    is_answer = Column(Boolean, nullable=True)
+    is_answered = Column(Boolean, nullable=True)
+    vote = Column(Integer, default=0)
     owner = relationship('app.model.User')
     question = relationship('app.model.Question')
 
@@ -65,8 +84,10 @@ class AnswerVote(Base):
 
 
 class Like(Base):
-    __table_args__ = {'extend_existing': True}
     __tablename__ = "likes"
+    __table_args__ = {'extend_existing': True}
+    like_id = Column(Integer, primary_key=True)
+    like_type = Column(String(100), nullable=False)
     user_id = Column(Integer, ForeignKey(
         'user.user_id', ondelete="CASCADE"), primary_key=True)
     question_id = Column(Integer, ForeignKey(
@@ -81,11 +102,19 @@ class Notification(Base):
         "user.user_id", ondelete="CASCADE"), nullable=False)
     content_id = Column(Integer, ForeignKey(
         "answer.answer_id", ondelete="CASCADE"), nullable=False)
-    owner = relationship('app.model.User')
-    content = relationship('app.model.Answer')
+    owner = relationship('User')
+    content = relationship('Answer')
     type = Column(String(200), nullable=False)
     unread = Column(Boolean, default=True)
     title = Column(String(200), nullable=False)
+
+
+question_tags = Table(
+    "question_tags",
+    Base.metadata,
+    Column("question_id", ForeignKey("question.question_id"), primary_key=True),
+    Column("tag_id", ForeignKey("tag.tag_id"), primary_key=True)
+)
 
 
 class Tag(Base):
@@ -93,31 +122,8 @@ class Tag(Base):
     __table_args__ = {'extend_existing': True}
     tag_id = Column(Integer, primary_key=True, nullable=False)
     tag_name = Column(String(40), nullable=False)
-
-
-class contenTag(Base):
-
-    __tablename__ = 'contenTag'
-    __table_args__ = {'extend_existing': True}
-    question_id = Column(Integer, ForeignKey(
-        "question.question_id", ondelete="CASCADE"),  primary_key=True, nullable=False)
-    tag_id = Column(Integer, ForeignKey(
-        "tag.tag_id", ondelete="CASCADE"), nullable=False)
-    question = relationship('app.model.Question')
-    tag = relationship('app.model.Tag')
-
-
-class Blog(Base):
-    
-    __tablename__ = 'blog'
-    __table_args__ = {'extend_existing': True}
-    blog_id = Column(Integer,primary_key=True,nullable=False)
-    title = Column(String,nullable=False)
-    body = Column(String,nullable=False)
-    user = relationship('model.User')
-    date_posted = Column(TIMESTAMP(timezone=True),nullable=False, server_default=text('now()'))
-    blog_user_id = Column(Integer,ForeignKey("user.user_id",ondelete="CASCADE"),nullable=False)    
-
+    questions = relationship("app.model.Question",
+                             secondary="question_tags", back_populates="tags")
 
 
 

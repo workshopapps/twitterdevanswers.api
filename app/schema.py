@@ -1,24 +1,54 @@
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, validator
 from pydantic.types import conint
 from datetime import datetime
-from typing import Optional
+from typing import Optional, List, Union
+
+
+class User(BaseModel):
+    user_id:  int
+    username: str
+    first_name: str
+    last_name: str
+    email: EmailStr
+    description: str
+    image_url: str
+    location: str
+    account_balance: int
+
+
+class UserOut(BaseModel):
+    user_id:  int
+    username: str
+    first_name: str
+    last_name: str
+    email: EmailStr
+    description: str
+    image_url: str
+    location: str
+    account_balance: int
 
 
 class UserSignInRequest(BaseModel):
     username: str
-    first_name: str
-    last_name: str
-    password: str
     email: EmailStr
-    image_url: str
+    password: str
+    confirmPassword: str
+
+    @validator('confirmPassword')
+    def passwords_match(cls, v, values, **kwargs):
+        if 'password' in values and v != values['password']:
+            raise ValueError('passwords do not match')
+        return v
 
 
 class UserUpdate(BaseModel):
-    username :str
-    first_name :str
-    last_name :str
-    image_url : str
-        
+    username: Optional[str] = None
+    first_name: Optional[str] = None
+    last_name: Optional[str] = None
+    description: Optional[str] = None
+    image_url: Optional[str] = None
+    location: Optional[str] = None
+
 
 class UserSignInResponse(BaseModel):
     pass
@@ -51,22 +81,15 @@ class ForgotPassword(BaseModel):
     pass
 
 
-class User(BaseModel):
-    id:  int
-    user_name: str
-    first_name: str
-    last_name: str
-    email: str
-    password_hash: str
-    account_balance: int
-    role: str
-    image_url: str
-
-
 class Question(BaseModel):
     content: str
     answered: bool
     created_at: datetime
+    updated_at: datetime
+
+
+class QuestionUpdate(BaseModel):
+    content: str
     updated_at: datetime
 
 
@@ -77,11 +100,6 @@ class Answer(BaseModel):
     question_id: int
     owner: User
     question: Question
-
-
-class Like(BaseModel):
-    question_id: int
-    dir: conint(le=1)
 
 
 class NotificationBase(BaseModel):
@@ -107,21 +125,48 @@ class Email(BaseModel):
     email: EmailStr
 
 
+class Token(BaseModel):
+    access_token: str
+    token_type: str
+
+
 class TokenData(BaseModel):
-    id: Optional[str] = None
+    username: Union[str, None] = None
+
+# class TokenData(BaseModel):
+#     id: Optional[str] = None
+
+# class Tag(BaseModel):
+#
+#    tag_id: int
+#    tag_name: str
+#
+#
+# class contenTag(BaseModel):
+#    question_id: int
+#    tag_id: int
+#    question: Question
+#    tag: Tag
 
 
-class Tag(BaseModel):
-
-    tag_id: int
+class TagBase(BaseModel):
     tag_name: str
 
 
-class contenTag(BaseModel):
-    question_id: int
+class TagCreate(TagBase):
+    pass
+
+
+class Tag(TagBase):
     tag_id: int
-    question: Question
-    tag: Tag
+
+    class Config:
+        orm_mode = True
+
+
+class AddTag(BaseModel):
+    tag_id: int
+    question_id: int
 
 
 class AnswerBase(BaseModel):
@@ -158,11 +203,20 @@ class AnswerVote(AnswerVoteBase):
     """ Answer Vote BaseModel for Add Answer Vote endpoint """
     pass
 
-class Blog(BaseModel):
-    title:str
-    body:str
-    blog_user_id:int
+
+class LikeBase(BaseModel):
+    """ Like BaseModel for Add Like endpoint """
+
+    question_id: int
+    like_type: str
 
 
-    class Config:
-        orm_mode = True
+class Like(LikeBase):
+    """ Like BaseModel for Add Like endpoint """
+    pass
+
+
+class Follow(BaseModel):
+    user_from: int
+    target_user: int
+
