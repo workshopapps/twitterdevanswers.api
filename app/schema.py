@@ -71,8 +71,8 @@ class ForgotPassword(BaseModel):
 class Question(BaseModel):
     content: str
     answered: bool
-    created_at: datetime
-    updated_at: datetime
+    # created_at: datetime
+    # updated_at: datetime
 
 
 class Answer(BaseModel):
@@ -133,19 +133,33 @@ class TagBase(BaseModel):
 
 
 class TagCreate(TagBase):
-    pass
+    id: int 
+    owner_id: int
+    question_id: int
+    tag_name: str
+    question: Question 
+    owner: User
+    
+    
+     
+    
 
 
 class Tag(TagBase):
-    tag_id: int
-
-    class Config:
-        orm_mode = True
-
-
-class AddTag(BaseModel):
-    tag_id: int
+    #tag_id: int
+    tag_name: str 
     question_id: int
+
+    # class Config:
+    #     orm_mode = True
+class AddQuestionTag(BaseModel):
+    tag_id: int 
+    question_id: int
+    
+
+# class AddTag(BaseModel):
+#     tag_id: int
+#     # question_id: int
 
 
 class AnswerBase(BaseModel):

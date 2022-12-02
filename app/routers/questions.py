@@ -14,13 +14,13 @@ router = APIRouter(
 
 @router.post("/", status_code=status.HTTP_201_CREATED)
 def add_question(request: schema.Question, db: Session = Depends(get_db), current_user: int = Depends(oauth.get_current_user)):
-    request.owner_id = current_user.user_id
+    owner_id = current_user.user_id
     ask_question = model.Question(
-        content=request.content, owner_id=request.owner_id)
+        content=request.content, owner_id=owner_id)
     db.add(ask_question)
     db.commit()
     db.refresh(ask_question)
-    return {"success": True, "message": ask_question.content}
+    return {"success": True, "message": ask_question.content, "question_id":ask_question.question_id}
 
 
 @router.get("/update_questions/{question_id}",status_code=status.HTTP_200_OK)

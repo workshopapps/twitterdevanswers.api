@@ -46,9 +46,10 @@ class Question(Base):
                         nullable=False, server_default=text('now()'))
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
     owner = relationship('app.model.User')
+    # tags = relationship(
+    #     "app.model.Tag", secondary="question_tags", backref="questions")
     tags = relationship(
-        "app.model.Tag", secondary="question_tags", back_populates="questions")
-
+        "app.model.Tag")
 
 class Answer(Base):
     __tablename__ = "answer"
@@ -117,8 +118,14 @@ class Tag(Base):
     __table_args__ = {'extend_existing': True}
     tag_id = Column(Integer, primary_key=True, nullable=False)
     tag_name = Column(String(40), nullable=False)
-    questions = relationship("app.model.Question",
-                             secondary="question_tags", back_populates="tags")
+    owner_id = Column(Integer, ForeignKey(
+        "user.user_id", ondelete="CASCADE"), nullable=False)
+    question_id = Column(Integer, ForeignKey(
+        "question.question_id", ondelete="CASCADE"), nullable=False)
+    created_at = Column(TIMESTAMP(timezone=True),
+                        nullable=False, server_default=text('now()'))
+    owner = relationship('app.model.User')
+    question = relationship('app.model.Question')
 
 
 
