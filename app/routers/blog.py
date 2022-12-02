@@ -26,8 +26,8 @@ def get_post(db: Session = Depends(get_db)):
 
 #make posts by a user
 @router.post("/",status_code=status.HTTP_201_CREATED)
-def post_blog(request:schema.Blog,db:Session=Depends(get_db)):
-    new_post =  model.Blog(title=request.title,body=request.body,blog_user_id=request.blog_user_id,author=request.author,image_url=request.image_url,post_category=request.post_category)
+def post_blog(user_id,request:schema.Blog,db:Session=Depends(get_db)):
+    new_post =  model.Blog(title=request.title,body=request.body,blog_user_id=user_id,author=request.author,image_url=request.image_url,post_category=request.post_category)
     db.add(new_post)
     db.commit()
     db.refresh(new_post)
@@ -41,27 +41,30 @@ def get_post_by_blog_id(blog_id,db:Session=Depends(get_db)):
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail=f"{blog_id} does not exist")
     return get_post
 
-#get post by user_id
-@router.get("/{blog_id}/user",status_code=status.HTTP_200_OK)
+#get all posts by user_id
+@router.get("/{user_id}/user",status_code=status.HTTP_200_OK)
 def get_post_by_user_id(user_id,db:Session=Depends(get_db)):
-    get_post = db.query(model.Blog).filter(model.Blog.blog_user_id == user_id).first()
+    get_post = db.query(model.Blog).filter(model.Blog.blog_user_id == user_id).all()
     if not get_post:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail=f"{user_id} does not exist")
     return get_post
 
 #delete post by user_id
-@router.delete("/{blog_id}/user",status_code=status.HTTP_200_OK)
+@router.delete("/{user_id}/user",status_code=status.HTTP_200_OK)
 def delete_post_by_user_id(user_id,db:Session=Depends(get_db)):
     post_delete = db.query(model.Blog).filter(model.Blog.blog_user_id == user_id).delete(synchronize_session=False)
     return {"sucess":True,"data":f"{user_id} deleted"}
 
 #update post by user id
-@router.patch("/blog{user_id}/user",status_code=status.HTTP_202_ACCEPTED)
+@router.patch("/{user_id}/user",status_code=status.HTTP_202_ACCEPTED)
 def update_post_by_user_id(user_id,request:schema.Blog,db:Session=Depends(get_db)):
     post_update = db.query(model.Blog).filter(model.Blog.blog_user_id == user_id).first()
     if not post_update:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail=f"{user_id} does not exist")
     post_update.title = request.title
     post_update.body = request.body
+    post_update.author = request.author
+    post_update.image_url = request.image_url
+    post_update.post_category = request.post_category
     db.commit()
     return {"success":True,"data":"update sucessful"}
