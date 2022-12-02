@@ -77,7 +77,7 @@ def remove_from_wallet(request: schema.TransactionRequest, db: Session = Depends
 		return {"code": "error", "message": "Wallet Balance Insufficience"}
 
 
-# testing endpoints
+
 # {
 #   "Success": true,
 #   "Message": "user added successfully",
