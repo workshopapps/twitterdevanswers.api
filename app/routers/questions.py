@@ -14,13 +14,13 @@ router = APIRouter(
 
 @router.post("/", status_code=status.HTTP_201_CREATED)
 def add_question(request: schema.Question, db: Session = Depends(get_db), current_user: int = Depends(oauth.get_current_user)):
-    ask_question = model.Question(title=request.title, expected_result=request.expected_result,
-                                  content=request.content, owner_id=current_user.user_id, payment_amount=request.payment_amount)
-
+    request.owner_id = current_user.user_id
+    ask_question = model.Question(
+        content=request.content, owner_id=request.owner_id)
     db.add(ask_question)
     db.commit()
     db.refresh(ask_question)
-    return {"success": True, "message": ask_question}
+    return {"success": True, "message": ask_question.content}
 
 
 @router.get("/update_questions/{question_id}", status_code=status.HTTP_200_OK)
@@ -30,28 +30,6 @@ def retrieve_question(question_id: int, db: Session = Depends(get_db), current_u
     if retrieve:
         return retrieve
     return {"success": True, "message": "detail not found"}
-
-
-# @router.patch("/update_questions/{question_id}", status_code=status.HTTP_200_OK)
-# def edit_retrieved_question(question_id: int, request: schema.QuestionUpdate, db: Session = Depends(get_db), current_user: int = Depends(oauth.get_current_user)):
-#     retrieved_question = db.query(model.Question).filter(
-#         model.Question.question_id == question_id).first()
-#     retrieved_question.content = request.content
-#     db.commit()
-#     return {"success": True, "message": retrieved_question.content}
-
-
-# @router.patch("/question/{question_id}", status_code=status.HTTP_200_OK)
-# def answer_question(question_id, request: schema.Question, db: Session = Depends(get_db)):
-#     update_answer = db.query(model.Question).filter(
-#         model.Question.question_id == question_id).first
-#     if update_answer:
-#         update_answer.answered = request.answered
-#         update_answer.user_id = request.user_id
-#         update_answer.answer_id = request.answer_id
-#         db.commit()
-#         db.close()
-#         return {"success": True, "message": update_answer.content}
 
 
 @router.delete("/{question_id}", status_code=status.HTTP_204_NO_CONTENT)

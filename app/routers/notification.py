@@ -90,7 +90,6 @@ async def notification_stream(request: Request, db: Session = Depends(get_db), t
             }
             if FIRST_STREAM is True:
                 # Streams the data to the client
-                #print(number_of_unread)
                 yield {
                     "event": "new_notification",
                     "data": jsonable_encoder(data),
@@ -102,7 +101,6 @@ async def notification_stream(request: Request, db: Session = Depends(get_db), t
 
             elif number_of_unread != PREVIOUS_NO_UNREAD:
                 # Streams the data to the client
-                #print(number_of_unread)
                 yield {
                     "event": "new_notification",
                     "data": jsonable_encoder(data),
