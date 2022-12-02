@@ -1,9 +1,7 @@
 from fastapi import APIRouter, status, Response, Depends, Path
 from fastapi.encoders import jsonable_encoder
 from fastapi.exceptions import HTTPException
-import schema
-import model
-import oauth
+from app import schema, model, oauth
 from sqlalchemy.orm import Session, joinedload
 from app.database import get_db
 from typing import List

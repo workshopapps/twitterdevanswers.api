@@ -1,14 +1,14 @@
+from app import model
+from app.oauth import get_current_user
+from fastapi import FastAPI, Depends, HTTPException, APIRouter, Request
+from sqlalchemy.orm import Session
+from typing import List
+from app.model import *
+from app.database import get_db
+from app import crud
+from app import schema
 import sys
 sys.path.append('..')
-from app import schema
-from app import crud
-from database import get_db
-from model import *
-from typing import List
-from sqlalchemy.orm import Session
-from fastapi import FastAPI, Depends, HTTPException, APIRouter, Request
-from oauth import get_current_user
-import model
 
 
 router = APIRouter(
@@ -58,9 +58,8 @@ def update_user(user: schema.UserUpdate, username: str, db: Session = Depends(ge
         db.add(update_user)
         db.commit()
         db.refresh(update_user)
-        return {"success": True,"message": "Profile Updated","data": update_data}
+        return {"success": True, "message": "Profile Updated", "data": update_data}
 
-        
 
 @router.delete('/delete/{username}')
 def delete_user(username: str, db: Session = Depends(get_db), current_user: int = Depends(get_current_user)):

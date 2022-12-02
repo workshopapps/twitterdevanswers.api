@@ -6,12 +6,10 @@ import logging
 from sqlalchemy import desc
 from sqlalchemy.orm import Session
 
-from database import get_db
-import model
-import schema
+from app.database import get_db
+from app import model, schema, oauth
 
 from typing import List
-import oauth
 
 router = APIRouter(
     prefix="/notification",
@@ -108,7 +106,7 @@ async def notification_stream(request: Request, db: Session = Depends(get_db), t
                     "retry": MESSAGE_STREAM_RETRY_TIMEOUT
                 }
                 PREVIOUS_NO_UNREAD = number_of_unread
-            
+
             await asyncio.sleep(MESSAGE_STREAM_DELAY)
 
     try:
@@ -119,6 +117,7 @@ async def notification_stream(request: Request, db: Session = Depends(get_db), t
     except:
         raise credentials_exception
     return EventSourceResponse(event_generator(token.id))
+
 
 @router.get("/all")
 async def get_all_notifications(db: Session = Depends(get_db), user: schema.User = Depends(oauth.get_current_user)):
@@ -143,8 +142,8 @@ async def mark_read(
     result = set_unread_to_false(id=notification_id, db=db)
     if result is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
-            detail="Notification Id is invalid."
-        )
+                            detail="Notification Id is invalid."
+                            )
     return result
 
 

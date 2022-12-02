@@ -1,12 +1,11 @@
-import schema
-import crud
-from database import get_db
-from model import *
+from app import schema, crud
+from app.database import get_db
+from app.model import *
 from typing import List
 from sqlalchemy.orm import Session
 from fastapi import FastAPI, Depends, HTTPException, APIRouter, status, Request, Path
-from oauth import get_current_user
-import oauth
+from app.oauth import get_current_user
+from app import oauth
 
 router = APIRouter(
     prefix='/admin',
@@ -20,6 +19,7 @@ def fetch_users(skip: int = 0, limit: int = 100, db: Session = Depends(get_db), 
 
     return crud.get_users(db, skip=skip, limit=limit)
 
+
 @router.get('/{user_id}')
 def fetch_user(user_id: int, db: Session = Depends(get_db), current_user: int = Depends(get_current_user)):
     """ Fetch a user by it's user_id  """
@@ -29,6 +29,7 @@ def fetch_user(user_id: int, db: Session = Depends(get_db), current_user: int = 
         raise HTTPException(
             status=404, detail=f" user with user_id : {user_id} not found")
     return {"success": True, 'data': user}
+
 
 @router.delete('/delete/{user_id}')
 def delete_user(user_id: int, db: Session = Depends(get_db)):
@@ -42,8 +43,7 @@ def delete_user(user_id: int, db: Session = Depends(get_db)):
 
 
 @router.put("/{user_id}")
-def update_user(user:schema.UserUpdate,user_id: int, db: Session = Depends(get_db),current_user: int = Depends(get_current_user)):
-
+def update_user(user: schema.UserUpdate, user_id: int, db: Session = Depends(get_db), current_user: int = Depends(get_current_user)):
     """ Update a User profile by user_id  """
 
     user_db = db.query(User).filter(User.user_id == user_id).first()
@@ -68,6 +68,7 @@ def update_user(user:schema.UserUpdate,user_id: int, db: Session = Depends(get_d
         db.refresh(update_user)
         return {"success": True, "message": "Profile Updated", "data": update_user}
 
+
 @router.delete("/{question_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_question(question_id: int, db: Session = Depends(get_db), current_user: int = Depends(oauth.get_current_user)):
     """delete questions using the question_id"""
@@ -81,6 +82,7 @@ def delete_question(question_id: int, db: Session = Depends(get_db), current_use
         else:
             return {"success": False, "message": "Not authorized"}
 
+
 @router.delete("/{answer_id}")
 def delete_answer(answer_id: int, db: Session = Depends(get_db),
                   current_user: int = Depends(oauth.get_current_user)):
@@ -90,11 +92,14 @@ def delete_answer(answer_id: int, db: Session = Depends(get_db),
     if db_answer is None:
         raise HTTPException(status_code=404, detail="Invalid answer id")
     elif db_answer.owner_id != current_user.user_id:
-        raise HTTPException(status_code=400, detail="Only owner can delete this answer")
-    del_answer = db.query(model.Answer).filter(model.Answer.answer_id == answer_id).first()
+        raise HTTPException(
+            status_code=400, detail="Only owner can delete this answer")
+    del_answer = db.query(model.Answer).filter(
+        model.Answer.answer_id == answer_id).first()
     db.delete(del_answer)
     db.commit()
     return {"detail": "success"}
+
 
 @router.post("/", status_code=status.HTTP_201_CREATED, response_model=schema.Tag)
 async def create_tag(tag: schema.TagCreate, db: Session = Depends(get_db), user: schema.User = Depends(oauth.get_current_user)):

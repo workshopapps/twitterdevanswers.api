@@ -1,13 +1,13 @@
 from fastapi import APIRouter, Depends, HTTPException, status, Response, Request
-from config import settings
+from app.config import settings
 import pyotp
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 import yagmail
-from oauth import get_current_user, verify_access_token, create_access_token, authenticate_user
+from app.oauth import get_current_user, verify_access_token, create_access_token, authenticate_user
 from datetime import timedelta
-from model import Wallet
-import database, schema, model, utils, oauth
+from app.model import Wallet
+from app import database, schema, model, utils, oauth
 
 app_passwd = settings.app_passwd
 app_email = settings.app_email
@@ -84,47 +84,46 @@ def user_signnup(request: schema.Email):
 
 @router.post('/signup', status_code=status.HTTP_201_CREATED)
 def user_signnup(user_credentials: schema.UserSignInRequest, db: Session = Depends(database.get_db)):
-	user_credentials.password = utils.hash(user_credentials.password)
-	user = db.query(model.User).filter(
-		model.User.email == user_credentials.email).first()
-	if user:
-		return HTTPException(status_code=400, detail={"msg": "User already exists"})
+    user_credentials.password = utils.hash(user_credentials.password)
+    user = db.query(model.User).filter(
+        model.User.email == user_credentials.email).first()
+    if user:
+        return HTTPException(status_code=400, detail={"msg": "User already exists"})
 
-	# if auth_otp(secret, user_credentials.email_verification_code):
+    # if auth_otp(secret, user_credentials.email_verification_code):
 
-	new_user = model.User(username=user_credentials.username,
-						  email=user_credentials.email,
-						  password=user_credentials.password,
-						  )
-	db.add(new_user)
-	db.commit()
-	db.refresh(new_user)
+    new_user = model.User(username=user_credentials.username,
+                          email=user_credentials.email,
+                          password=user_credentials.password,
+                          )
+    db.add(new_user)
+    db.commit()
+    db.refresh(new_user)
 
-	# creating User Wallet
-	wallet_obj = Wallet(user_id=new_user.user_id)
-	db.add(wallet_obj)
-	db.commit()
-	db.refresh(wallet_obj)
+    # creating User Wallet
+    wallet_obj = Wallet(user_id=new_user.user_id)
+    db.add(wallet_obj)
+    db.commit()
+    db.refresh(wallet_obj)
 
-	user = db.query(model.User).filter(
-		model.User.email == user_credentials.email).first()
-	access_token = oauth.create_access_token(
-		data={'user_id': user.user_id})
-	return {
-		'Success': True,
-		'Message': 'user added successfully',
-		'data':
-		{
-			'user_id': user.user_id,
-			'userName': user.username,
-			'email': user.email,
-			'wallet': wallet_obj
-		},
-		'Token': access_token}
-	# else:
-	#     raise HTTPException(status_code=status.HTTP_412_PRECONDITION_FAILED,
-	#                         detail="OTP is either a wrong one or has expired ")
-
+    user = db.query(model.User).filter(
+        model.User.email == user_credentials.email).first()
+    access_token = oauth.create_access_token(
+        data={'user_id': user.user_id})
+    return {
+        'Success': True,
+        'Message': 'user added successfully',
+        'data':
+            {
+                'user_id': user.user_id,
+                'userName': user.username,
+                'email': user.email,
+                'wallet': wallet_obj
+            },
+        'Token': access_token}
+    # else:
+    #     raise HTTPException(status_code=status.HTTP_412_PRECONDITION_FAILED,
+    #                         detail="OTP is either a wrong one or has expired ")
 
 
 @router.put('/change-password', )

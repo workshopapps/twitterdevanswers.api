@@ -1,11 +1,10 @@
 from fastapi import APIRouter, Depends, BackgroundTasks
 from fastapi.exceptions import HTTPException
-import schema, model, oauth
+from app import schema, model, oauth
 from sqlalchemy.orm import Session
-from database import get_db
-from database import get_db
-from routers.answer import get_question
-from routers.notification import create_notification
+from app.database import get_db
+from app.routers.answer import get_question
+from app.routers.notification import create_notification
 
 
 router = APIRouter(
@@ -44,7 +43,8 @@ def create_like(like_base: schema.Like, background_task: BackgroundTasks, db: Se
 
         elif check_if_like_exist.like_type != "up" and like_base.like_type == "up":
             # update question
-            question_db = db.query(model.Question).filter(model.Question.question_id == like_base.question_id).first()
+            question_db = db.query(model.Question).filter(
+                model.Question.question_id == like_base.question_id).first()
             question_db.total_like = question_db.total_like + 1
             question_db.total_unlike = question_db.total_unlike - 1
             # update like
@@ -56,7 +56,8 @@ def create_like(like_base: schema.Like, background_task: BackgroundTasks, db: Se
 
         elif check_if_like_exist.like_type == "up" and like_base.like_type != "up":
             # update question
-            question_db = db.query(model.Question).filter(model.Question.question_id == like_base.question_id).first()
+            question_db = db.query(model.Question).filter(
+                model.Question.question_id == like_base.question_id).first()
             question_db.total_unlike = question_db.total_unlike + 1
             question_db.total_like = question_db.total_like - 1
             # update like
@@ -79,7 +80,8 @@ def create_like(like_base: schema.Like, background_task: BackgroundTasks, db: Se
         )
 
         # add like
-        question_db = db.query(model.Question).filter(model.Question.question_id == like_base.question_id).first()
+        question_db = db.query(model.Question).filter(
+            model.Question.question_id == like_base.question_id).first()
         if like_base.like_type == "up":
             question_db.total_like = question_db.total_like + 1
         else:
@@ -98,7 +100,8 @@ def create_like(like_base: schema.Like, background_task: BackgroundTasks, db: Se
             type="Like",
             title=f"@{current_user.username} like your question.",
         )
-        background_task.add_task(create_notification, notification=notification, db=db)
+        background_task.add_task(
+            create_notification, notification=notification, db=db)
 
         return db_like
 

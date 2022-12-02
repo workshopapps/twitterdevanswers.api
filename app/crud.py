@@ -1,5 +1,5 @@
 from sqlalchemy.orm import Session
-import model, schema
+from app import model, schema
 from fastapi.exceptions import HTTPException
 
 
@@ -18,7 +18,7 @@ def get_user(db: Session, username: str):
         "work_experience": user.work_experience,
         "position": user.position,
         "stack": user.stack,
-        "links": {""}, 
+        "links": {""},
         "role": user.role,
         "image_url": user.image_url,
         "location": user.location,
@@ -44,7 +44,7 @@ def get_users(db: Session, skip: int = 0, limit: int = 100):
             "work_experience": user.work_experience,
             "position": user.position,
             "stack": user.stack,
-            "links": [user.links], 
+            "links": [user.links],
             "role": user.role,
             "image_url": user.image_url,
             "location": user.location,

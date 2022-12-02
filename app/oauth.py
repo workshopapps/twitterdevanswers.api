@@ -1,12 +1,12 @@
-from utils import verify_password
+from app.utils import verify_password
 from jose import JWTError
 from jose import jwt
 from datetime import datetime, timedelta
-import schema, database, model
+from app import schema, database, model
 from fastapi import Depends, status, HTTPException
 from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.orm import Session
-from config import settings
+from app.config import settings
 from pydantic import BaseModel
 from typing import Union
 oauth2scheme = OAuth2PasswordBearer(tokenUrl='auth/signin')
@@ -33,7 +33,7 @@ def create_access_token(data: dict, expires_delta: Union[timedelta, None] = None
         expire = datetime.utcnow() + timedelta(minutes=15)
     to_encode.update({"exp": expire})
     encoded_jwt = jwt.encode(
-        to_encode, settings.secret_key, algorithm=settings.algorithm    )
+        to_encode, settings.secret_key, algorithm=settings.algorithm)
     return encoded_jwt
 
 
@@ -97,10 +97,10 @@ def get_current_user(db: Session = Depends(database.get_db), token: str = Depend
         raise credentials_exception
     return user
 
+
 def get_admin():
     user_admin = get_current_user()
     if user_admin.is_admin:
         return user_admin
     else:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN)
-
