@@ -4,7 +4,7 @@ pipeline {
             skipStagesAfterUnstable()
         }
     stages {
-        stage('Deploy to Production') {
+        stage('Build and deploy to Production') {
             steps {
 		    sh "sudo cp -rf ${WORKSPACE}/app/* /home/judgejudy/twitterdevanswers.api/app"
 		    sh "sudo su - judgejudy && whoami"
