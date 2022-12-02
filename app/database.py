@@ -14,8 +14,8 @@ from app.config import settings
 SQLALCHEMY_DATABASE_URI = "postgresql://qyevadrnislxhk:92e12d8bbe1a82d4c60f5b089bb1bd8fa2806880716828119220925f882446db@ec2-54-160-109-68.compute-1.amazonaws.com:5432/db61l29l5p66eb"
 # SQLALCHEMY_DATABASE_URI = "mysql://devask:HNG#9devask@localhost/devask"
 
-#engine = create_engine(SQLALCHEMY_DATABASE_URI)
-engine = create_engine(SQLALCHEMY_DATABASE_URI, encoding='latin1', echo=True)
+engine = create_engine(SQLALCHEMY_DATABASE_URI)
+# engine = create_engine(SQLALCHEMY_DATABASE_URI, encoding='latin1', echo=True)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 Base = declarative_base()
@@ -28,7 +28,7 @@ def get_db():
     finally:
         db.close()
 # Base.metadata.create_all(bind=engine)
-        db.close()
+        # db.close()
 
 
 # Base.metadata.create_all(bind=engine)
