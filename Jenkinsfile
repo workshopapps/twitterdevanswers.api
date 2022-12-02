@@ -15,7 +15,7 @@ pipeline {
 		    sh "sudo cp -rf ${WORKSPACE}/app/* /home/judgejudy/twitterdevanswers.api/app"
 		    //  sh "sudo su - judgejudy && whoami"
 	    	 //  sh "sudo pm2 stop main"
-                     sh "sudo pm2 start /home/judgejudy/twitterdevanswers.api/app/main.py --interpreter python3"
+                     sh "sudo pm2 start /home/judgejudy/twitterdevanswers.api/app/main.py --interpreter python3 -p 5567"
             }
         }
     }
