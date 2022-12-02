@@ -54,8 +54,8 @@ class UserSignInRequest(BaseModel):
 
 	@validator('confirmPassword')
 	def passwords_match(cls, v, values, **kwargs):
-	    if 'password' in values and v != values['password']:
-	        raise ValueError('passwords do not match')
+		if 'password' in values and v != values['password']:
+			raise ValueError('passwords do not match')
 		return v
 
 
