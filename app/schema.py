@@ -10,12 +10,20 @@ class WalletItem(BaseModel):
 	first_name: str
 	last_name: str
 
-
-
 class TransactionRequest(BaseModel):
 	wallet_address: str
 	amount: int
 	user_id: str
+
+
+	class Config:
+		schema_extra = {
+			"example": {
+				"wallet_address":"e6bd3cthg-8f06-4b3d-b2db-2be907rgade972",
+				"amount": "50",
+				"user_id": "20"
+			}
+		}
 
 class User(BaseModel):
 	user_id:  int
@@ -246,6 +254,9 @@ class Follow(BaseModel):
 
 
 class Blog(BaseModel):
-	title: str
-	body: str
-	blog_user_id: int
+    title: str
+    body: str
+    blog_user_id: int
+    author:str
+    image_url:str
+    post_category:str

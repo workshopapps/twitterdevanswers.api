@@ -91,6 +91,7 @@ def user_signnup(user_credentials: schema.UserSignInRequest, db: Session = Depen
 	db.commit()
 	db.refresh(new_user)
 
+	# creating User Wallet
 	wallet_obj = Wallet(user_id=new_user.user_id)
 	db.add(wallet_obj)
 	db.commit()
