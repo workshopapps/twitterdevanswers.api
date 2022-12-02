@@ -11,18 +11,24 @@ class User(Base):
     __table_args__ = {'extend_existing': True}
     user_id = Column(Integer, primary_key=True, nullable=False)
     username = Column(String(15), nullable=False, unique=True)
-    first_name = Column(String(30), nullable=False, default="firstname")
-    last_name = Column(String(30), nullable=False, default="lastname")
+    first_name = Column(String(30), nullable=False, default=" ")
+    last_name = Column(String(30), nullable=False, default=" ")
     email = Column(String(100), nullable=False, unique=True)
-    description = Column(String(400), nullable=True)
+    description = Column(String(400), nullable=True,default=" ")
     password = Column(String, nullable=False)
-    image_url = Column(String(300), default="default.jpg")
-    location = Column(String(100), nullable=True)
+    image_url = Column(String(300), default=" ")
+    location = Column(String(100), nullable=True,default=" ")
+    phone_number = Column(String(30), nullable=True , default=" ")
+    work_experience = Column(String(400), nullable=True, default=" ")
+    position = Column(String(400), nullable=True, default=" ")
+    stack = Column(String(400), nullable=True, default=" ")
+    links = Column(String(400), nullable=True, default=" ")
+    role = Column(String(300), nullable=True)
     is_admin = Column(Boolean, default=False)
+    account_balance = Column(Integer, default=1000)
     created_at = Column(TIMESTAMP(timezone=True),
                         nullable=False, server_default=text('now()'))
-    account_balance = Column(Integer, default=1000)
-    is_admin = Column(Boolean, nullable=True, default=False)
+
 
 
 class Following(Base):
