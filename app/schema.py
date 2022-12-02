@@ -250,8 +250,8 @@ class Like(LikeBase):
 
 
 class Follow(BaseModel):
+    """Schema for Follow endpoint"""
     target_user: int
-    user_from: int
 
 
 class Blog(BaseModel):
