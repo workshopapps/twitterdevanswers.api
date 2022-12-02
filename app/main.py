@@ -2,12 +2,9 @@ from fastapi import FastAPI, status
 from fastapi.middleware.cors import CORSMiddleware
 # from app.routers import googleauth
 
-from app.routers import user, notification, questions, auth, like, answer, following, tag, blog, wallet
+from routers import user, notification, questions, auth, like, answer, following, tag, blog, wallet, admin
 
-<<<<<<< HEAD
-from routers import user, notification, questions, auth, like, answer, following, tag, admin
-=======
->>>>>>> main
+
 
 
 #  Description of Dev ASk Api
@@ -65,15 +62,11 @@ app.include_router(auth.router)
 app.include_router(like.router)
 app.include_router(answer.router)
 app.include_router(following.router)
-<<<<<<< HEAD
-app.include_router(tag.router) 
-app.include_router(admin.router)
-=======
 app.include_router(tag.router)
 app.include_router(blog.router)
+app.include_router(admin.router)
 # app.include_router(googleauth.router)
 app.include_router(wallet.router)
->>>>>>> main
 
 
 

@@ -4,10 +4,7 @@ from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from sqlalchemy.sql.sqltypes import TIMESTAMP
 from sqlalchemy.sql.expression import text
-<<<<<<< HEAD
 from database import Base, engine
-=======
-from app.database import Base, engine
 from uuid import UUID
 from sqlalchemy.dialects.postgresql import UUID
 import uuid  as uuid_pkg
@@ -28,7 +25,6 @@ class Wallet(Base):
 	created_at = Column(DateTime, default=datetime.datetime.utcnow, nullable=False)
 
 
->>>>>>> main
 
 class User(Base):
 	__tablename__ = "user"
@@ -80,39 +76,6 @@ class Question(Base):
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
     owner = relationship('model.User')
     tags = relationship(
-<<<<<<< HEAD
-        "model.Tag", secondary="question_tags", back_populates="questions")
-
-
-class Answer(Base):
-    __tablename__ = "answer"
-    __table_args__ = {'extend_existing': True}
-    answer_id = Column(Integer, primary_key=True, nullable=False)
-    owner_id = Column(Integer, ForeignKey(
-        "user.user_id", ondelete="CASCADE"), nullable=False)
-    question_id = Column(Integer, ForeignKey(
-        "question.question_id", ondelete="CASCADE"), nullable=False)
-    content = Column(String(2000))
-    created_at = Column(TIMESTAMP(timezone=True),
-                        nullable=False, server_default=text('now()'))
-    is_answered = Column(Boolean, nullable=True)
-    vote = Column(Integer)
-    owner = relationship('model.User')
-    question = relationship('model.Question')
-
-
-class AnswerVote(Base):
-    __tablename__ = "answer_vote"
-    __table_args__ = {'extend_existing': True}
-    id = Column(Integer, primary_key=True)
-    owner_id = Column(Integer, ForeignKey(
-        "user.user_id", ondelete="CASCADE"), nullable=True)
-    answer_id = Column(Integer, ForeignKey(
-        "answer.answer_id", ondelete="CASCADE"), nullable=False)
-    vote_type = Column(String(100), nullable=False)
-    owner = relationship('model.User')
-    answer = relationship('model.Answer')
-=======
         "app.model.Tag", secondary="question_tags") #, back_populates="questions"
 
 
@@ -144,7 +107,6 @@ class AnswerVote(Base):
 	vote_type = Column(String(100), nullable=False)
 	owner = relationship('app.model.User')
 	answer = relationship('app.model.Answer')
->>>>>>> main
 
 
 class Like(Base):
@@ -194,12 +156,6 @@ class Blog(Base):
 
     __tablename__ = 'blog'
     __table_args__ = {'extend_existing': True}
-<<<<<<< HEAD
-    tag_id = Column(Integer, primary_key=True, nullable=False)
-    tag_name = Column(String(40), nullable=False)
-    questions = relationship("model.Question",
-                             secondary="question_tags", back_populates="tags")
-=======
     blog_id = Column(Integer, primary_key=True, nullable=False)
     title = Column(String(300), nullable=False)
     body = Column(String(7000), nullable=False)
@@ -211,7 +167,6 @@ class Blog(Base):
                          nullable=False, server_default=text('now()'))
     blog_user_id = Column(Integer, ForeignKey(
         "user.user_id", ondelete="CASCADE"), nullable=False)
->>>>>>> main
 
 
 Base.metadata.create_all(bind=engine)

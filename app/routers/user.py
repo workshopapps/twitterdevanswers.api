@@ -1,26 +1,14 @@
-<<<<<<< HEAD
-import schema
-import crud
+import sys
+sys.path.append('..')
+from app import schema
+from app import crud
 from database import get_db
 from model import *
 from typing import List
 from sqlalchemy.orm import Session
 from fastapi import FastAPI, Depends, HTTPException, APIRouter, Request
-
-
-=======
-import sys
-sys.path.append('..')
-from app import schema
-from app import crud
-from app.database import get_db
-from app.model import *
-from typing import List
-from sqlalchemy.orm import Session
-from fastapi import FastAPI, Depends, HTTPException, APIRouter, Request
-from app.oauth import get_current_user
-from app import model
->>>>>>> main
+from oauth import get_current_user
+import model
 
 
 router = APIRouter(
