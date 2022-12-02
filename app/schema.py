@@ -40,12 +40,17 @@ class User(BaseModel):
     stack:str
     links : List[str]
     role:str
+    following: str
+    followers: str
     location: str
     account_balance: int
     is_admin = Optional[bool]
 
-	class Config:
-		arbitrary_types_allowed = True
+
+    class Config:
+		    arbitrary_types_allowed = True
+
+		
 
 
 
@@ -79,7 +84,14 @@ class UserUpdate(BaseModel):
 	username: Optional[str] = None
 	first_name: Optional[str] = None
 	last_name: Optional[str] = None
+	email:Optional[str] = None
 	description: Optional[str] = None
+	phone_number : Optional[str] = None
+	work_experience: Optional[str] = None
+	position: Optional[str] = None
+	stack: Optional[str] = None
+	links: List[str] = None
+	role: Optional[str]= None
 	image_url: Optional[str] = None
 	location: Optional[str] = None
 
