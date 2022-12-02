@@ -12,6 +12,12 @@ class User(BaseModel):
     email: EmailStr
     description: str
     image_url: str
+    phone_number : str
+    work_experience:str
+    position:str
+    stack:str
+    links : List[str]
+    role:str
     location: str
     account_balance: int
     is_admin = Optional[bool]
@@ -51,6 +57,11 @@ class UserUpdate(BaseModel):
     first_name: Optional[str] = None
     last_name: Optional[str] = None
     description: Optional[str] = None
+    phone_number: Optional[str] = None
+    position: Optional[str] = None
+    work_experience : Optional[str] = None
+    stack: Optional[str] = None
+    links: List[str] = None
     image_url: Optional[str] = None
     location: Optional[str] = None
 
