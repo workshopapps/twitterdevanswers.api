@@ -35,7 +35,7 @@ def fetch_user(user_id: int, db: Session = Depends(get_db), current_user: int = 
     return {"success": True, 'data': user}
 
 
-@router.patch('/edit/{user_id}', response_model=schema.UserUpdate)
+@router.patch('/edit/{user_id}')
 def update_user(user: schema.UserUpdate, user_id: int, db: Session = Depends(get_db), current_user: int = Depends(get_current_user)):
     """ Update a User profile by user_id  """
 
@@ -45,25 +45,23 @@ def update_user(user: schema.UserUpdate, user_id: int, db: Session = Depends(get
     if user_db.user_id == current_user.user_id:
         update_user = db.query(model.User).filter(
             model.User.user_id == user_id).first()
-
         if update_user is None:
             raise HTTPException(status_code=404, detail="User not found")
 
-        # update_data = user.dict(exclude_unset=True)
         if isinstance(user, dict):
             update_data = user
         else:
             update_data = user.dict(exclude_unset=True)
         for field in update_data:
             setattr(update_user, field, update_data[field])
-        # print(update_data)
-        # for key, value in update_data.items():
-        #     setattr(update_data, key, value)
+
         db.add(update_user)
         db.commit()
         db.refresh(update_user)
-        return {"success": True, "message": "Profile Updated", "data": update_user}
+        print(update_user.description)
+        return {"success": True,"message": "Profile Updated","data": update_data}
 
+        
 
 @router.delete('/delete/{user_id}')
 def delete_user(user_id: int, db: Session = Depends(get_db), current_user: int = Depends(get_current_user)):

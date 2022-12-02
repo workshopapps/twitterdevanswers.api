@@ -40,27 +40,6 @@ def get_users(db: Session, skip: int = 0, limit: int = 100):
     return {"success": True, 'data': users_list}
 
 
-def update_user(db: Session, user_id: int, user: schema.UserUpdate):
-    """ Update a User profile """
-
-    update_user = db.query(model.User).filter(
-        model.User.user_id == user_id).first()
-
-    if update_user is None:
-        raise HTTPException(status_code=404, detail="User not found")
-
-    if isinstance(user, dict):
-        update_data = user
-    else:
-        update_data = user
-    for key, value in update_data.items():
-        setattr(update_data, key, value)
-    db.add(update_data)
-    db.commit()
-    db.refresh(update_user)
-    return {"success": True, "message": "Profile Updated", "data": update_user}
-
-
 def delete_user(db: Session, user_id: int):
     """ Delete a user Profile  """
 
