@@ -17,7 +17,7 @@ pipeline {
 		   sh "python3 -m venv venv"
 		   sh "source venv/bin/activate"
                    sh "pip install -r requirements.txt"
-                   sh "unicorn app.main:app --host 0.0.0.0 --reload --port 3310 &""
+                   sh "uvicorn app.main:app --host 0.0.0.0 --reload --port 3310 &""
             }
         }
     }
