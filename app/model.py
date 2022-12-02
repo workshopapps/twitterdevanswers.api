@@ -33,7 +33,6 @@ class Following(Base):
     ), nullable=False, primary_key=True)
 
 
-
 class Question(Base):
     __tablename__ = "question"
     __table_args__ = {'extend_existing': True}
