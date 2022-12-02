@@ -19,8 +19,6 @@ router = APIRouter(
 
 
 # send reset email
-
-
 def send_reset_mail(email, token):
     msg = f'''
 		   To reset your password visit the following link:
@@ -29,6 +27,16 @@ def send_reset_mail(email, token):
 
     with yagmail.SMTP(app_email, app_passwd) as yag:
         yag.send(to=email, subject='Passowrd Reset Request', contents=msg)
+
+
+def send_signup_mail(email, token):
+    msg = f''' 
+           To Sign up on DevAsk, visit the following link:
+            {token}   
+            If you did not make this request then simply ignore this email) '''
+
+    with yagmail.SMTP(app_email, app_passwd) as yag:
+        yag.send(to=email, subject='Email Signup Request', contents=msg)
 
 
 @router.post('/signin', response_model=schema.Token)
@@ -70,7 +78,8 @@ def generate_secret():
 def user_signnup(request: schema.Email):
     global secret
     secret = generate_secret()
-    send_reset_mail(request.email, secret)
+    send_signup_mail(request.email, secret)
+    return {"msg": "email sent"}
 
 
 @router.post('/signup', status_code=status.HTTP_201_CREATED)
