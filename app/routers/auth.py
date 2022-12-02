@@ -22,9 +22,9 @@ router = APIRouter(
 
 
 def send_reset_mail(email, token):
-    msg = f''' 
+    msg = f'''
 		   To reset your password visit the following link:
-			{token}   
+			{token}
 			If you did not make this request then simply ignore this email) '''
 
     with yagmail.SMTP(app_email, app_passwd) as yag:
@@ -75,6 +75,7 @@ def user_signnup(request: schema.Email):
 
 @router.post('/signup', status_code=status.HTTP_201_CREATED)
 def user_signnup(user_credentials: schema.UserSignInRequest, db: Session = Depends(database.get_db)):
+    #     model.User.__table__.drop(database.engine)
     user_credentials.password = utils.hash(user_credentials.password)
     user = db.query(model.User).filter(
         model.User.email == user_credentials.email).first()
