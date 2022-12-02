@@ -97,7 +97,6 @@ def user_signnup(user_credentials: schema.UserSignInRequest, db: Session = Depen
 	db.commit()
 	db.refresh(wallet_obj)
 
-
 	user = db.query(model.User).filter(
 		model.User.email == user_credentials.email).first()
 	access_token = oauth.create_access_token(
