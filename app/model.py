@@ -6,7 +6,10 @@ from sqlalchemy.sql.sqltypes import TIMESTAMP
 from sqlalchemy.sql.expression import text
 from app.database import Base, engine
 from uuid import UUID
-
+from sqlalchemy.dialects.postgresql import UUID
+import uuid  as uuid_pkg
+import sqlalchemy
+import datetime
 
 class Wallet(Base):
 	__tablename__ = 'walletaccount'
@@ -20,23 +23,9 @@ class Wallet(Base):
 	deposits_made = Column(Integer, default=0, nullable=False)
 	spendings = Column(Integer, default=0, nullable=False)
 	user_id = Column(Integer, ForeignKey("user.user_id"))
-	created_at = Column(DateTime, nullable=False)
+	created_at = Column(DateTime, default=datetime.datetime.utcnow, nullable=False)
 
 
-
-class Wallet(Base):
-	__tablename__ = 'walletaccount'
-	__table_args__ = {'extend_existing': True}
-
-	
-	id = Column(UUID(as_uuid=True),
-		primary_key=True,
-		server_default=sqlalchemy.text("gen_random_uuid()"),)
-	balance = Column(Integer, default=1000, nullable=False)
-	deposits_made = Column(Integer, default=0, nullable=False)
-	spendings = Column(Integer, default=0, nullable=False)
-	user_id = Column(Integer, ForeignKey("user.user_id"))
-	created_at = Column(DateTime, nullable=False)
 
 class User(Base):
 	__tablename__ = "user"
@@ -88,7 +77,7 @@ class Question(Base):
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
     owner = relationship('app.model.User')
     tags = relationship(
-        "app.model.Tag", secondary="question_tags", back_populates="questions")
+        "app.model.Tag", secondary="question_tags") #, back_populates="questions"
 
 
 class Answer(Base):
@@ -161,8 +150,7 @@ class Tag(Base):
 	__table_args__ = {'extend_existing': True}
 	tag_id = Column(Integer, primary_key=True, nullable=False)
 	tag_name = Column(String(40), nullable=False)
-	questions = relationship("app.model.Question",
-							 secondary="question_tags")
+	questions = relationship("app.model.Question", secondary="question_tags")
 
 
 class Blog(Base):
