@@ -43,8 +43,9 @@ class User(BaseModel):
     account_balance: int
     is_admin = Optional[bool]
 
-	class Config:
-	    arbitrary_types_allowed = True
+    class Config:
+        arbitrary_types_allowed = True
+
 
 
 class UserOut(BaseModel):
@@ -168,23 +169,9 @@ class Token(BaseModel):
 	token_type: str
 
 
-# class TokenData(BaseModel):
-#    username: Union[str, None] = None
 
 class TokenData(BaseModel):
 	id: Optional[str] = None
-
-# class Tag(BaseModel):
-#
-#    tag_id: int
-#    tag_name: str
-#
-#
-# class contenTag(BaseModel):
-#    question_id: int
-#    tag_id: int
-#    question: Question
-#    tag: Tag
 
 
 class TagBase(BaseModel):
