@@ -11,13 +11,9 @@ pipeline {
         }
         
         stage('Deploy to Production') {
-            input{
-                message "Click OK! to deploy to Production?"
-                ok "OK"
-            }
             steps {
-                     sh "sudo cp -rf backend /home/judgejudy/twitterdevanswers.api"
-                 //  sh "sudo su - judgejudy && whoami"
+		    sh "sudo cp -rf ${WORKPACE}/twitterdevanswers.api/* /home/judgejudy/twitterdevanswers.api/backend"
+		    //  sh "sudo su - judgejudy && whoami"
 	    	 //  sh "sudo pm2 stop main"
                      sh "sudo pm2 start /home/judgejudy/twitterdevanswers.api/main.py --interpreter python3"
             }
