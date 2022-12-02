@@ -58,7 +58,6 @@ def update_user(user: schema.UserUpdate, user_id: int, db: Session = Depends(get
         db.add(update_user)
         db.commit()
         db.refresh(update_user)
-        print(update_user.description)
         return {"success": True,"message": "Profile Updated","data": update_data}
 
         
