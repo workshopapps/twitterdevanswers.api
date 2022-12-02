@@ -76,7 +76,7 @@ class Question(Base):
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
     owner = relationship('app.model.User')
     tags = relationship(
-        "app.model.Tag", secondary="question_tags") 
+        "app.model.Tag", secondary="question_tags") #, back_populates="questions"
 
 
 class Answer(Base):

@@ -8,7 +8,9 @@ from sqlalchemy.orm import relationship, Session
 from sqlalchemy import Column, String, Integer
 from sqlalchemy import Column, Integer, String, ForeignKey, DateTime
 from database import get_db
-from schema import TransactionRequest
+
+from schema import TransactionRequest, WalletItem
+
 from model import Wallet
 import schema
 
@@ -22,6 +24,8 @@ Base = declarative_base()
 
 
 
+
+@router.post('/create', status_code=status.HTTP_201_CREATED)
 def create_wallet( user_id: int,  db: Session = Depends(get_db)):
 	walletobj= db.query(Wallet).filter(Wallet.user_id==user_id).first()
 	if not walletobj:
@@ -32,6 +36,7 @@ def create_wallet( user_id: int,  db: Session = Depends(get_db)):
 		return itemobj
 	else:
 		return walletobj
+
 
 @router.put('/earn')
 def add_to_wallet(request: schema.TransactionRequest, db: Session = Depends(get_db)):
