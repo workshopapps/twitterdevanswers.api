@@ -7,14 +7,37 @@ def get_user(db: Session, user_id: int):
     """ Get a user from the database based on their id  """
 
     user = db.query(model.User).filter(model.User.user_id == user_id).first()
-    return user
+    return {
+        "user_id": user.user_id,
+        "username": user.username,
+        "first_name": user.first_name,
+        "last_name": user.last_name,
+        "email": user.email,
+        "description": user.description,
+        "image_url": user.image_url,
+        "location": user.location,
+        "account_balance": user.account_balance
+    }
 
 
 def get_users(db: Session, skip: int = 0, limit: int = 100):
     """ Get all users in the database  """
 
     users = db.query(model.User).offset(skip).limit(limit).all()
-    return {"success": True, 'data': users}
+    users_list = []
+    for user in users:
+        users_list.append({
+            "user_id": user.user_id,
+            "username": user.username,
+            "first_name": user.first_name,
+            "last_name": user.last_name,
+            "email": user.email,
+            "description": user.description,
+            "image_url": user.image_url,
+            "location": user.location,
+            "account_balance": user.account_balance
+        })
+    return {"success": True, 'data': users_list}
 
 
 def update_user(db: Session, user_id: int, user: schema.UserUpdate):
@@ -26,7 +49,10 @@ def update_user(db: Session, user_id: int, user: schema.UserUpdate):
     if update_user is None:
         raise HTTPException(status_code=404, detail="User not found")
 
-    update_data = user.dict(exclude_unset=True)
+    if isinstance(user, dict):
+        update_data = user
+    else:
+        update_data = user
     for key, value in update_data.items():
         setattr(update_data, key, value)
     db.add(update_data)

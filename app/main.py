@@ -1,17 +1,18 @@
 from fastapi import FastAPI, status
 from fastapi.middleware.cors import CORSMiddleware
+# from app.routers import googleauth
 
-from routers import user, notification, questions, auth, like, answer, following, tag
+from app.routers import user, notification, questions, auth, like, answer, following, tag, blog, wallet
+
 
 
 #  Description of Dev ASk Api
-
 description = """
 
 Dev Ask Api does the following functions
 
 ## Auth
-This endpoint will handle all authorization requests including sign up, sign in, change password etc.
+This endpoint will handle all authorization and authentication requests including sign up, sign in, change password, Forgot Password,  etc.
 
 ## Users 
 These endpoint perform CRUD operations involving the user 
@@ -51,7 +52,6 @@ app.add_middleware(
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"]
-
 )
 
 app.include_router(user.router)
@@ -62,10 +62,12 @@ app.include_router(like.router)
 app.include_router(answer.router)
 app.include_router(following.router)
 app.include_router(tag.router)
+app.include_router(blog.router)
+# app.include_router(googleauth.router)
+app.include_router(wallet.router)
 
 
-app.get("/")
 
-
+@app.get("/")
 async def root():
     return {"message": "Hello world"}

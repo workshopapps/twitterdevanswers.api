@@ -73,7 +73,7 @@ def authenticate_user(db: Session, email: str, password: str):
 
 
 def get_user(db: Session, email: str):
-    return db.query(model.User).filter(model.User.email == email).first()
+    return db.query(model.User).filter(model.User.email == email).first() or db.query(model.User).filter(model.User.username == email).first()
 
 
 def get_current_user(db: Session = Depends(database.get_db), token: str = Depends(oauth2scheme)):
@@ -96,3 +96,11 @@ def get_current_user(db: Session = Depends(database.get_db), token: str = Depend
     if user is None:
         raise credentials_exception
     return user
+
+def get_admin():
+    user_admin = get_current_user()
+    if user_admin.is_admin:
+        return user_admin
+    else:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN)
+

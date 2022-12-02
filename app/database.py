@@ -4,7 +4,7 @@ from sqlalchemy.orm import sessionmaker
 from app.config import settings
 
 # devlopment
-#SQLALCHEMY_DATABASE_URI = f'postgresql://{settings.database_username}:{settings.database_password}@{settings.database_hostname}:{settings.database_port}/{settings.database_name}'
+# SQLALCHEMY_DATABASE_URI = f'postgresql://{settings.database_username}:{settings.database_password}@{settings.database_hostname}:{settings.database_port}/{settings.database_name}'
 # SQLALCHEMY_DATABASE_URI = f'postgresql://postgres:123456@localhost:5432/devask'
 
 # production
@@ -23,4 +23,6 @@ def get_db():
         yield db
     finally:
         db.close()
+
+
 # Base.metadata.create_all(bind=engine)
