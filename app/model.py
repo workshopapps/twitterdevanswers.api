@@ -5,7 +5,7 @@ from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from sqlalchemy.sql.sqltypes import TIMESTAMP
 from sqlalchemy.sql.expression import text
-from app.database import Base, engine
+from database import Base, engine
 from uuid import UUID
 from sqlalchemy.dialects.postgresql import UUID
 import uuid as uuid_pkg
@@ -89,6 +89,7 @@ class Question(Base):
     owner = relationship('app.model.User')
     # tags = relationship(
     #     "app.model.Tag", secondary="question_tags", backref="questions")
+
     tags = relationship(
         "app.model.Tag", secondary="question_tags", back_populates="questions")
 
