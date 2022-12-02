@@ -1,18 +1,57 @@
 from pydantic import BaseModel, EmailStr, validator
 from pydantic.types import conint
 from datetime import datetime
-from typing import Optional, List
+from typing import Optional, List, Union
+from uuid import uuid4, UUID
 
-class User(BaseModel):
-    id:  int
+
+class WalletItem(BaseModel):
     user_name: str
     first_name: str
     last_name: str
-    email: str
-    description : str
+
+
+class TransactionRequest(BaseModel):
+    wallet_address: str
+    amount: int
+    user_id: str
+
+    class Config:
+        schema_extra = {
+            "example": {
+                "wallet_address": "e6bd3cthg-8f06-4b3d-b2db-2be907rgade972",
+                "amount": "50",
+                "user_id": "20"
+            }
+        }
+
+
+class User(BaseModel):
+    user_id:  int
+    username: str
+    first_name: str
+    last_name: str
+    email: EmailStr
+    description: str
     image_url: str
-    location : str
-    account_balance :int
+    location: str
+    account_balance: int
+    is_admin = Optional[bool]
+
+    class Config:
+        arbitrary_types_allowed = True
+
+
+class UserOut(BaseModel):
+    user_id:  int
+    username: str
+    first_name: str
+    last_name: str
+    email: EmailStr
+    description: Optional[str]
+    image_url: str
+    location: str
+    account_balance: int
 
 
 class UserSignInRequest(BaseModel):
@@ -20,6 +59,7 @@ class UserSignInRequest(BaseModel):
     email: EmailStr
     password: str
     confirmPassword: str
+    email_verification_code: Optional[str]
 
     @validator('confirmPassword')
     def passwords_match(cls, v, values, **kwargs):
@@ -61,18 +101,29 @@ class ChangePasswordRequest(BaseModel):
 class ForgotPassword(BaseModel):
     newPassword: str
     confirmPassword: str
-    confirmPassword: str
 
-
-class ForgotPassword(BaseModel):
-    pass
+    @validator('confirmPassword')
+    def passwords_match(cls, v, values, **kwargs):
+        if 'newPassword' in values and v != values['newPassword']:
+            raise ValueError('passwords do not match')
+        return v
 
 
 class Question(BaseModel):
+    title: str
     content: str
+    expected_result: str
+    payment_amount: int
     answered: bool
     # created_at: datetime
     # updated_at: datetime
+
+
+class QuestionUpdate(BaseModel):
+    title: str
+    content: str
+    expected_result: str
+    updated_at: datetime
 
 
 class Answer(BaseModel):
@@ -82,11 +133,6 @@ class Answer(BaseModel):
     question_id: int
     owner: User
     question: Question
-
-
-class Like(BaseModel):
-    question_id: int
-    dir: conint(le=1)
 
 
 class NotificationBase(BaseModel):
@@ -111,6 +157,14 @@ class Notification(NotificationBase):
 class Email(BaseModel):
     email: EmailStr
 
+
+class Token(BaseModel):
+    access_token: str
+    token_type: str
+
+
+# class TokenData(BaseModel):
+#    username: Union[str, None] = None
 
 class TokenData(BaseModel):
     id: Optional[str] = None
@@ -197,6 +251,27 @@ class AnswerVote(AnswerVoteBase):
     pass
 
 
+class LikeBase(BaseModel):
+    """ Like BaseModel for Add Like endpoint """
+
+    question_id: int
+    like_type: str
+
+
+class Like(LikeBase):
+    """ Like BaseModel for Add Like endpoint """
+    pass
+
+
 class Follow(BaseModel):
-    user_from: int
+    """Schema for Follow endpoint"""
     target_user: int
+
+
+class Blog(BaseModel):
+    title: str
+    body: str
+    blog_user_id: int
+    author: str
+    image_url: str
+    post_category: str
