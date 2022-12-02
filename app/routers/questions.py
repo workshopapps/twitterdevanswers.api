@@ -32,28 +32,6 @@ def retrieve_question(question_id: int, db: Session = Depends(get_db), current_u
     return {"success": True, "message": "detail not found"}
 
 
-# @router.patch("/update_questions/{question_id}", status_code=status.HTTP_200_OK)
-# def edit_retrieved_question(question_id: int, request: schema.QuestionUpdate, db: Session = Depends(get_db), current_user: int = Depends(oauth.get_current_user)):
-#     retrieved_question = db.query(model.Question).filter(
-#         model.Question.question_id == question_id).first()
-#     retrieved_question.content = request.content
-#     db.commit()
-#     return {"success": True, "message": retrieved_question.content}
-
-
-# @router.patch("/question/{question_id}", status_code=status.HTTP_200_OK)
-# def answer_question(question_id, request: schema.Question, db: Session = Depends(get_db)):
-#     update_answer = db.query(model.Question).filter(
-#         model.Question.question_id == question_id).first
-#     if update_answer:
-#         update_answer.answered = request.answered
-#         update_answer.user_id = request.user_id
-#         update_answer.answer_id = request.answer_id
-#         db.commit()
-#         db.close()
-#         return {"success": True, "message": update_answer.content}
-
-
 @router.delete("/{question_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_question(question_id: int, db: Session = Depends(get_db), current_user: int = Depends(oauth.get_current_user)):
     delete_question = db.query(model.Question).filter(
