@@ -1,6 +1,6 @@
 from fastapi import FastAPI, status
 from fastapi.middleware.cors import CORSMiddleware
-from routers import user, notification, questions, auth, like, answer, following, tag, blog
+from app.routers import user, notification, questions, auth, like, answer, following, tag, blog, wallet
 
 
 #  Description of Dev ASk Api
@@ -62,6 +62,7 @@ app.include_router(answer.router)
 app.include_router(following.router)
 app.include_router(tag.router)
 app.include_router(blog.router)
+app.include_router(wallet.router)
 
 
 @app.get("/")
