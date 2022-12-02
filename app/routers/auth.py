@@ -21,17 +21,14 @@ router = APIRouter(
 # send reset email
 
 
-def send_reset_mail(user, token):
+def send_reset_mail(email, token):
     msg = f''' 
            To reset your password visit the following link:
             {token}   
             If you did not make this request then simply ignore this email) '''
 
     with yagmail.SMTP(app_email, app_passwd) as yag:
-        yag.send(to=user.email, subject ='Passowrd Reset Request', contents=msg)
-
-    
-
+        yag.send(to=email, subject='Passowrd Reset Request', contents=msg)
 
 
 @router.post('/signin', response_model=schema.Token)
@@ -50,21 +47,30 @@ async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(
         data={"sub": user.email}, expires_delta=access_token_expires)
 
     return {"access_token": access_token,
-    "data" : {
-        "user_id": user.user_id,
-        "usename": user.username, 
-        "email": user.email, 
-        "name" : user.first_name + user.last_name
-    },
-     "token_type": "bearer"}
+            "data": {
+                "user_id": user.user_id,
+                "usename": user.username,
+                "email": user.email,
+                "name": user.first_name + user.last_name
+            },
+            "token_type": "bearer"}
 
-
-secret = pyotp.random_base32()
 
 def auth_otp(secret, code):
-    totp = pyotp.TOTP(secret, interval=60)
-    totp.verify(code)
+    totp = pyotp.TOTP(secret, interval=600)
+    return totp.verify(code)
 
+
+def generate_secret():
+    secret = pyotp.random_base32()
+    return secret
+
+
+@router.post('/send_email_code', status_code=status.HTTP_200_OK)
+def user_signnup(request: schema.Email):
+    global secret
+    secret = generate_secret()
+    send_reset_mail(request.email, secret)
 
 
 @router.post('/signup', status_code=status.HTTP_201_CREATED)
@@ -74,47 +80,33 @@ def user_signnup(user_credentials: schema.UserSignInRequest, db: Session = Depen
         model.User.email == user_credentials.email).first()
     if user:
         return HTTPException(status_code=400, detail={"msg": "User already exists"})
-    
-    
 
-    if auth_otp(secret, user_credentials.email_verification_code):
+    # if auth_otp(secret, user_credentials.email_verification_code):
 
-            new_user = model.User(username=user_credentials.username,
-                            email=user_credentials.email,
-                            password=user_credentials.password,
-                            )
-            db.add(new_user)
-            db.commit()
-            db.refresh(new_user)
-
-            # Creating User wallet
-            wallet_obj = Wallet(user_id=new_user.user_id)
-            db.add(wallet_obj)
-            db.commit()
-            db.refresh(wallet_obj)
-
-            user = db.query(model.User).filter(
-                model.User.email == user_credentials.email).first()
-            access_token = oauth.create_access_token(data={'user_id': user.user_id})
-            return {
-                'Success': True,
-                'Message': 'user added successfully',
-                'data':
-                {
-                    'user_id': user.user_id,
-                    'userName': user.username,
-                    'email': user.email,
-                    'wallet': wallet_obj
-                },
-                'Token': access_token}
-    else:
-        raise HTTPException(status_code=status.HTTP_412_PRECONDITION_FAILED, detail="OTP is either a wrong one or has expired ")
-
-@router.post('/send_email_code', status_code=status.HTTP_200_OK)
-def user_signnup(request: schema.Email):
-    send_reset_mail(request.email, secret)
-
-
+    new_user = model.User(username=user_credentials.username,
+                          email=user_credentials.email,
+                          password=user_credentials.password,
+                          )
+    db.add(new_user)
+    db.commit()
+    db.refresh(new_user)
+    user = db.query(model.User).filter(
+        model.User.email == user_credentials.email).first()
+    access_token = oauth.create_access_token(
+        data={'user_id': user.user_id})
+    return {
+        'Success': True,
+        'Message': 'user added successfully',
+        'data':
+        {
+            'user_id': user.user_id,
+            'userName': user.username,
+            'email': user.email,
+        },
+        'Token': access_token}
+    # else:
+    #     raise HTTPException(status_code=status.HTTP_412_PRECONDITION_FAILED,
+    #                         detail="OTP is either a wrong one or has expired ")
 
 
 @router.put('/change-password', )
@@ -151,17 +143,17 @@ def forget_password(email: schema.Email, request: Request, db: Session = Depends
     return {'success': True, 'message': 'token sent to provided email'}
 
 
-
 @router.put('/forget-password/{token}')
 def verify_password_token(token: str,  password: schema.ForgotPassword, db: Session = Depends(database.get_db)):
-    user_id  = verify_access_token(token)
-    
+    user_id = verify_access_token(token)
+
     if user_id is None:
-        raise HTTPException(status_code=status.HTTP_406_NOT_ACCEPTABLE, detail=f"The token is invalid or has expired")
+        raise HTTPException(status_code=status.HTTP_406_NOT_ACCEPTABLE,
+                            detail=f"The token is invalid or has expired")
     user_query = db.query(model.User).filter(model.User.user_id == user_id)
     user = user_query.first()
     if user is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"This user does not exist")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                            detail=f"This user does not exist")
     new_password = utils.hash(password.newPassword)
-    user_query.update({'password': new_password }, synchronize_session=False)
-
+    user_query.update({'password': new_password}, synchronize_session=False)
