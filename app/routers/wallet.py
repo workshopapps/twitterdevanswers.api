@@ -25,17 +25,6 @@ Base = declarative_base()
 
 
 
-@router.post('/create', status_code=status.HTTP_201_CREATED)
-def create_wallet( user_id: int,  db: Session = Depends(get_db)):
-	walletobj= db.query(Wallet).filter(Wallet.user_id==user_id).first()
-	if not walletobj:
-		itemobj = Wallet(user_id=user_id)
-		db.add(itemobj)
-		db.commit()
-		db.refresh(itemobj)
-		return itemobj
-	else:
-		return walletobj
 
 
 @router.put('/wallet/earn')
