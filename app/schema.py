@@ -34,6 +34,14 @@ class User(BaseModel):
     email: EmailStr
     description: str
     image_url: str
+    phone_number : str
+    work_experience:str
+    position:str
+    stack:str
+    links : List[str]
+    role:str
+    following: str
+    followers: str
     location: str
     account_balance: int
     is_admin = Optional[bool]
@@ -41,6 +49,7 @@ class User(BaseModel):
     class Config:
         arbitrary_types_allowed = True
 
+		
 
 class UserOut(BaseModel):
     user_id:  int
@@ -69,12 +78,19 @@ class UserSignInRequest(BaseModel):
 
 
 class UserUpdate(BaseModel):
-    username: Optional[str] = None
-    first_name: Optional[str] = None
-    last_name: Optional[str] = None
-    description: Optional[str] = None
-    image_url: Optional[str] = None
-    location: Optional[str] = None
+	username: Optional[str] = None
+	first_name: Optional[str] = None
+	last_name: Optional[str] = None
+	email:Optional[str] = None
+	description: Optional[str] = None
+	phone_number : Optional[str] = None
+	work_experience: Optional[str] = None
+	position: Optional[str] = None
+	stack: Optional[str] = None
+	links: List[str] = None
+	role: Optional[str]= None
+	image_url: Optional[str] = None
+	location: Optional[str] = None
 
 
 class UserSignInResponse(BaseModel):
@@ -115,8 +131,8 @@ class Question(BaseModel):
     expected_result: str
     payment_amount: int
     answered: bool
-    created_at: datetime
-    updated_at: datetime
+    # created_at: datetime
+    # updated_at: datetime
 
 
 class QuestionUpdate(BaseModel):
@@ -163,23 +179,9 @@ class Token(BaseModel):
     token_type: str
 
 
-# class TokenData(BaseModel):
-#    username: Union[str, None] = None
 
 class TokenData(BaseModel):
     id: Optional[str] = None
-
-# class Tag(BaseModel):
-#
-#    tag_id: int
-#    tag_name: str
-#
-#
-# class contenTag(BaseModel):
-#    question_id: int
-#    tag_id: int
-#    question: Question
-#    tag: Tag
 
 
 class TagBase(BaseModel):
@@ -187,19 +189,33 @@ class TagBase(BaseModel):
 
 
 class TagCreate(TagBase):
-    pass
+    id: int 
+    owner_id: int
+    question_id: int
+    tag_name: str
+    question: Question 
+    owner: User
+    
+    
+     
+    
 
 
 class Tag(TagBase):
-    tag_id: int
-
-    class Config:
-        orm_mode = True
-
-
-class AddTag(BaseModel):
-    tag_id: int
+    #tag_id: int
+    tag_name: str 
     question_id: int
+
+    # class Config:
+    #     orm_mode = True
+class AddQuestionTag(BaseModel):
+    tag_id: int 
+    question_id: int
+    
+
+# class AddTag(BaseModel):
+#     tag_id: int
+#     # question_id: int
 
 
 class AnswerBase(BaseModel):
