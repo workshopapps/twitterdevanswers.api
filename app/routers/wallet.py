@@ -84,5 +84,4 @@ def remove_from_wallet(request: schema.TransactionRequest, db: Session = Depends
 #       "created_at": "2022-12-02T01:11:47.129076"
 #     }
 #   },
-#   "Token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjo3LCJleHAiOjE2Njk5NDQ0MDh9.9_IL2vXmGzLhF_SAwyacS03OOLctNJVZ6vOKvckdgk0"
 # }
