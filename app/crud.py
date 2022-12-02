@@ -14,8 +14,15 @@ def get_user(db: Session, user_id: int):
         "last_name": user.last_name,
         "email": user.email,
         "description": user.description,
+        "phone_number": user.phone_number,
+        "work_experience": user.work_experience,
+        "position": user.position,
+        "stack": user.stack,
+        "links": {" "}, 
+        "role": user.role,
         "image_url": user.image_url,
         "location": user.location,
+        "is_admin": user.is_admin,
         "account_balance": user.account_balance
     }
 
@@ -33,8 +40,15 @@ def get_users(db: Session, skip: int = 0, limit: int = 100):
             "last_name": user.last_name,
             "email": user.email,
             "description": user.description,
+            "phone_number": user.phone_number,
+            "work_experience": user.work_experience,
+            "position": user.position,
+            "stack": user.stack,
+            "links": [user.links], 
+            "role": user.role,
             "image_url": user.image_url,
             "location": user.location,
+            "is_admin": user.is_admin,
             "account_balance": user.account_balance
         })
     return {"success": True, 'data': users_list}
