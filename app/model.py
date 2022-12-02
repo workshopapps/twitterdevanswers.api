@@ -5,7 +5,7 @@ from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from sqlalchemy.sql.sqltypes import TIMESTAMP
 from sqlalchemy.sql.expression import text
-from app.database import Base, engine
+from database import Base, engine
 from uuid import UUID
 from sqlalchemy.dialects.postgresql import UUID
 import uuid as uuid_pkg
@@ -32,19 +32,27 @@ class User(Base):
     __tablename__ = "user"
     __table_args__ = {'extend_existing': True}
     user_id = Column(Integer, primary_key=True, nullable=False)
-    username = Column(String(50), nullable=False, unique=True)
-    first_name = Column(String(50), nullable=False, default="firstname")
-    last_name = Column(String(50), nullable=False, default="lastname")
+    username = Column(String(100), nullable=False, unique=True)
+    first_name = Column(String(30), nullable=False, default=" ")
+    last_name = Column(String(30), nullable=False, default=" ")
     email = Column(String(100), nullable=False, unique=True)
-    description = Column(String(400), nullable=True, default="")
+    description = Column(String(400), nullable=True,default=" ")
     password = Column(String, nullable=False)
-    image_url = Column(String(300), default="default.jpg")
-    location = Column(String(100), nullable=True)
+    phone_number = Column(String(30), nullable=True , default=" ")
+    work_experience = Column(String(400), nullable=True, default=" ")
+    position = Column(String(400), nullable=True, default=" ")
+    stack = Column(String(400), nullable=True, default=" ")
+    links = Column(String(400), nullable=True, default=" ")
+    role = Column(String(300), nullable=True)
+    following = Column(Integer, nullable=False , default=0)
+    followers = Column(Integer, nullable=False , default=0)
+    image_url = Column(String(300), default=" ")
+    location = Column(String(100), nullable=True,default=" ")
     is_admin = Column(Boolean, default=False)
+    account_balance = Column(Integer, default=1000)
     created_at = Column(TIMESTAMP(timezone=True),
                         nullable=False, server_default=text('now()'))
-    account_balance = Column(Integer, default=1000)
-    is_admin = Column(Boolean, nullable=True, default=False)
+
 
 
 class Following(Base):
@@ -72,6 +80,7 @@ class Question(Base):
     payment_amount = Column(Integer, nullable=False)
 
     answered = Column(Boolean, server_default='FALSE', nullable=False)
+    tag = Column(String(200),default=" ")    
     total_like = Column(Integer, default=0)
     total_unlike = Column(Integer, default=0)
     created_at = Column(TIMESTAMP(timezone=True),
@@ -80,6 +89,7 @@ class Question(Base):
     owner = relationship('app.model.User')
     # tags = relationship(
     #     "app.model.Tag", secondary="question_tags", backref="questions")
+
     tags = relationship(
         "app.model.Tag", secondary="question_tags", back_populates="questions")
 
