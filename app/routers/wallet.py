@@ -24,7 +24,7 @@ Base = declarative_base()
 
 
 
-@router.put('/earn')
+@router.put('/wallet/earn')
 def add_to_wallet(request: schema.TransactionRequest, db: Session = Depends(get_db)):
     id = request.wallet_address
     user_account = db.query(Wallet).filter(Wallet.id == id).first()
@@ -43,7 +43,7 @@ def add_to_wallet(request: schema.TransactionRequest, db: Session = Depends(get_
             "balance": user_account.balance}
 
 
-@router.put('/spend')
+@router.put('/wallet/spend')
 def remove_from_wallet(request: schema.TransactionRequest, db: Session = Depends(get_db)):
 
     id = request.user_id
