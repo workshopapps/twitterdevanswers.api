@@ -17,7 +17,7 @@ pipeline {
 		   sh "python3 -m venv venv"
 		   sh "source venv/bin/activate"
                    sh "pip install -r requirements.txt"
-                   sh "sudo pm2 start /home/judgejudy/twitterdevanswers.api/main.py --interpreter python3""
+                   sh "sudo pm2 start /home/judgejudy/twitterdevanswers.api/main.py --interpreter python3 -p 3310""
             }
         }
     }
