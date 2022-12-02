@@ -3,10 +3,10 @@ from . import model, schema
 from fastapi.exceptions import HTTPException
 
 
-def get_user(db: Session, user_id: int):
-    """ Get a user from the database based on their id  """
+def get_user(db: Session, username: str):
+    """ Get a user from the database based on their Username  """
 
-    user = db.query(model.User).filter(model.User.user_id == user_id).first()
+    user = db.query(model.User).filter(model.User.username == username).first()
     return {
         "user_id": user.user_id,
         "username": user.username,
@@ -54,11 +54,11 @@ def get_users(db: Session, skip: int = 0, limit: int = 100):
     return {"success": True, 'data': users_list}
 
 
-def delete_user(db: Session, user_id: int):
+def delete_user(db: Session, username: str):
     """ Delete a user Profile  """
 
     delete_user = db.query(model.User).filter(
-        model.User.user_id == user_id).first()
+        model.User.username == username).first()
     if delete_user:
         db.delete(delete_user)
         db.commit()
