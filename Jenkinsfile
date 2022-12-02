@@ -12,10 +12,10 @@ pipeline {
         
         stage('Deploy to Production') {
             steps {
-		    sh "sudo cp -rf ${WORKPACE}/twitterdevanswers.api/* /home/judgejudy/twitterdevanswers.api/backend"
+		    sh "sudo cp -rf ${WORKSPACE}/app/* /home/judgejudy/twitterdevanswers.api/app"
 		    //  sh "sudo su - judgejudy && whoami"
 	    	 //  sh "sudo pm2 stop main"
-                     sh "sudo pm2 start /home/judgejudy/twitterdevanswers.api/main.py --interpreter python3"
+                     sh "sudo pm2 start /home/judgejudy/twitterdevanswers.api/app/main.py --interpreter python3"
             }
         }
     }

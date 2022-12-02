@@ -15,11 +15,11 @@ router = APIRouter(
 @router.post("/", status_code=status.HTTP_201_CREATED)
 def add_question(request: schema.Question, db: Session = Depends(get_db), current_user: int = Depends(oauth.get_current_user)):
     #request.owner_id = current_user.user_id
-<<
-        content=request.content, owner_id=current_user.user_id,a
+
+    content=request.content, owner_id=current_user.user_id,a
     ask_question = model.Question(title=request.title, expected_result=request.expected_result,
                                   content=request.content, owner_id=current_user.user_id, payment_amount=request.payment_amount)
->>
+
     db.add(ask_question)
     db.commit()
     db.refresh(ask_question)
