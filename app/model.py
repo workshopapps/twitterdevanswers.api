@@ -136,9 +136,12 @@ class Blog(Base):
     __tablename__ = 'blog'
     __table_args__ = {'extend_existing': True}
     blog_id = Column(Integer, primary_key=True, nullable=False)
-    title = Column(String, nullable=False)
-    body = Column(String, nullable=False)
-    user = relationship('model.User')
+    title = Column(String(300), nullable=False)
+    body = Column(String(7000), nullable=False)
+    author = Column(String(300), nullable=False)
+    image_url = Column(String(300), default="default.jpg")
+    post_category = Column(String(200), nullable=False)
+    user = relationship('app.model.User')
     date_posted = Column(TIMESTAMP(timezone=True),
                          nullable=False, server_default=text('now()'))
     blog_user_id = Column(Integer, ForeignKey(

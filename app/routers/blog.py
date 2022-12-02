@@ -11,23 +11,23 @@ router = APIRouter(
     tags=['Blog']
 )
 
-#get all blogs paginated
+#get all posts paginated
 @router.get("/",status_code=status.HTTP_200_OK,response_model=LimitOffsetPage[schema.Blog])
 def get_all_post(db: Session = Depends(get_db)):
     get_all_posts = db.query(model.Blog).all()
     return paginate(get_all_posts)
 add_pagination(router)
 
-
+#get all posts not paginated
 @router.get("/",status_code=status.HTTP_200_OK)
 def get_post(db: Session = Depends(get_db)):
     get_post = db.query(model.Blog).all()
     return {"success": True, "data": get_post}    
 
-#post blog by user
+#make posts by a user
 @router.post("/",status_code=status.HTTP_201_CREATED)
 def post_blog(request:schema.Blog,db:Session=Depends(get_db)):
-    new_post =  model.Blog(title=request.title,body=request.body,blog_user_id=request.blog_user_id)
+    new_post =  model.Blog(title=request.title,body=request.body,blog_user_id=request.blog_user_id,author=request.author,image_url=request.image_url,post_category=request.post_category)
     db.add(new_post)
     db.commit()
     db.refresh(new_post)

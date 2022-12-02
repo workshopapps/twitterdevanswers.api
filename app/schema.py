@@ -236,3 +236,7 @@ class Blog(BaseModel):
     title: str
     body: str
     blog_user_id: int
+    author:str
+    image_url:str
+    post_category:str
+    
