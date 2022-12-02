@@ -4,6 +4,22 @@ from sqlalchemy.sql import func
 from sqlalchemy.sql.sqltypes import TIMESTAMP
 from sqlalchemy.sql.expression import text
 from app.database import Base, engine
+from uuid import UUID
+
+
+class Wallet(Base):
+	__tablename__ = 'walletaccount'
+	__table_args__ = {'extend_existing': True}
+
+	id = Column(UUID(as_uuid=True),
+		primary_key=True,
+		server_default=sqlalchemy.text("gen_random_uuid()"),)
+	# id = Column(UUID(as_uuid=True), primary_key=True, default=str(uuid_pkg.uuid4())),
+	balance = Column(Integer, default=1000, nullable=False)
+	deposits_made = Column(Integer, default=0, nullable=False)
+	spendings = Column(Integer, default=0, nullable=False)
+	user_id = Column(Integer, ForeignKey("user.user_id"))
+	created_at = Column(DateTime, nullable=False)
 
 
 class User(Base):
@@ -41,8 +57,12 @@ class Question(Base):
     question_id = Column(Integer, primary_key=True, nullable=False)
     owner_id = Column(Integer, ForeignKey(
         "user.user_id", ondelete="CASCADE"), nullable=False)
+    title = Column(String(400), nullable=False)
     content = Column(String(2000), nullable=False)
-    payment_method = Column(String(100), nullable=False)
+
+    expected_result = Column(String(2000), nullable=False)
+    token_amount = Column(String(100), nullable=False)
+
     answered = Column(Boolean, server_default='FALSE', nullable=False)
     total_like = Column(Integer, default=0)
     total_unlike = Column(Integer, default=0)
