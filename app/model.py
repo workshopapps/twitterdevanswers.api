@@ -66,6 +66,7 @@ class Following(Base):
     ), nullable=False, primary_key=True)
 
 
+
 class Question(Base):
     __tablename__ = "question"
     __table_args__ = {'extend_existing': True}
@@ -86,8 +87,10 @@ class Question(Base):
                         nullable=False, server_default=text('now()'))
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
     owner = relationship('app.model.User')
+    # tags = relationship(
+    #     "app.model.Tag", secondary="question_tags", backref="questions")
     tags = relationship(
-        "app.model.Tag", secondary="question_tags")  # , back_populates="questions"
+        "app.model.Tag", secondary="question_tags", back_populates="questions")
 
 
 class Answer(Base):
@@ -161,24 +164,8 @@ class Tag(Base):
     __table_args__ = {'extend_existing': True}
     tag_id = Column(Integer, primary_key=True, nullable=False)
     tag_name = Column(String(40), nullable=False)
-    questions = relationship("app.model.Question", secondary="question_tags")
-
-
-class Blog(Base):
-
-    __tablename__ = 'blog'
-    __table_args__ = {'extend_existing': True}
-    blog_id = Column(Integer, primary_key=True, nullable=False)
-    title = Column(String(300), nullable=False)
-    body = Column(String(7000), nullable=False)
-    author = Column(String(300), nullable=False)
-    image_url = Column(String(300), default="default.jpg")
-    post_category = Column(String(200), nullable=False)
-    user = relationship('app.model.User')
-    date_posted = Column(TIMESTAMP(timezone=True),
-                         nullable=False, server_default=text('now()'))
-    blog_user_id = Column(Integer, ForeignKey(
-        "user.user_id", ondelete="CASCADE"), nullable=False)
+    questions = relationship("app.model.Question",
+                             secondary="question_tags", back_populates="tags")
 
 
 @compiles(DropTable, "postgresql")
