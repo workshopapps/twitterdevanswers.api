@@ -8,7 +8,7 @@ pipeline {
 		}
 		stage('Deploy to Production') {
 		    steps {
-			    sh "sudo cp -rf ${WORKSPACE}/twitterdevanswera.api/app/* /home/judgejudy/twitterdevanswers.api/"
+			    sh "sudo cp -rf ${WORKSPACE}/* /home/judgejudy/twitterdevanswers.api/"
 			    sh "sudo su - judgejudy && whoami"
 			   // sh "sudo pm2 stop main"
 			    //sh "python3 -m venv venv"
