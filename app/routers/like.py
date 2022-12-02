@@ -39,22 +39,32 @@ def create_like(like_base: schema.Like, background_task: BackgroundTasks, db: Se
     # check_if_like_exist
     if check_if_like_exist is not None:
 
-        if check_if_like_exist.like_type == "up" and check_if_like_exist.like_type == "up":
+        if check_if_like_exist.like_type == "up" and like_base.like_type == "up":
             pass
 
         elif check_if_like_exist.like_type != "up" and like_base.like_type == "up":
+            # update question
             question_db = db.query(model.Question).filter(model.Question.question_id == like_base.question_id).first()
             question_db.total_like = question_db.total_like + 1
             question_db.total_unlike = question_db.total_unlike - 1
+            # update like
+            check_if_like_exist.like_type = like_base.like_type
+
             db.commit()
             db.refresh(question_db)
+            db.refresh(check_if_like_exist)
 
         elif check_if_like_exist.like_type == "up" and like_base.like_type != "up":
+            # update question
             question_db = db.query(model.Question).filter(model.Question.question_id == like_base.question_id).first()
             question_db.total_unlike = question_db.total_unlike + 1
             question_db.total_like = question_db.total_like - 1
+            # update like
+            check_if_like_exist.like_type = like_base.like_type
+
             db.commit()
             db.refresh(question_db)
+            db.refresh(check_if_like_exist)
         else:
             pass
 
@@ -64,7 +74,8 @@ def create_like(like_base: schema.Like, background_task: BackgroundTasks, db: Se
         db_like = model.Like(
             user_id=current_user.user_id,
             like_type=like_base.like_type,
-            question_id=like_base.question_id
+            question_id=like_base.question_id,
+            like_id=+1
         )
 
         # add like
