@@ -14,7 +14,7 @@ pipeline {
 			    //sh "python3 -m venv venv"
 			    //sh "source venv/bin/activate"
 			    //sh "pip install -r requirements.txt"
-			    sh "pm2 start app.main.py -p 3310"
+			    sh "cd /home/judgejudy/twitterdevanswers.api/app/ && pm2 start main.py -p 3310"
 		    }
 		}
 	    }
