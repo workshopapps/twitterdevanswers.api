@@ -23,18 +23,6 @@ app = FastAPI()
 Base = declarative_base()
 
 
-@router.post('/create', status_code=status.HTTP_201_CREATED)
-def create_wallet(user_id: int,  db: Session = Depends(get_db)):
-    walletobj = db.query(Wallet).filter(Wallet.user_id == user_id).first()
-    if not walletobj:
-        itemobj = Wallet(user_id=user_id)
-        db.add(itemobj)
-        db.commit()
-        db.refresh(itemobj)
-        return itemobj
-    else:
-        return walletobj
-
 
 @router.put('/earn')
 def add_to_wallet(request: schema.TransactionRequest, db: Session = Depends(get_db)):
@@ -96,5 +84,4 @@ def remove_from_wallet(request: schema.TransactionRequest, db: Session = Depends
 #       "created_at": "2022-12-02T01:11:47.129076"
 #     }
 #   },
-#   "Token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjo3LCJleHAiOjE2Njk5NDQ0MDh9.9_IL2vXmGzLhF_SAwyacS03OOLctNJVZ6vOKvckdgk0"
 # }
