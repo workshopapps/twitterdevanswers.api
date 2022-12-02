@@ -32,7 +32,7 @@ class User(Base):
     __tablename__ = "user"
     __table_args__ = {'extend_existing': True}
     user_id = Column(Integer, primary_key=True, nullable=False)
-    username = Column(String(15), nullable=False, unique=True)
+    username = Column(String(100), nullable=False, unique=True)
     first_name = Column(String(30), nullable=False, default=" ")
     last_name = Column(String(30), nullable=False, default=" ")
     email = Column(String(100), nullable=False, unique=True)
