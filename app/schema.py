@@ -46,13 +46,10 @@ class User(BaseModel):
     account_balance: int
     is_admin = Optional[bool]
 
-
     class Config:
-		    arbitrary_types_allowed = True
+        arbitrary_types_allowed = True
 
 		
-
-
 
 class UserOut(BaseModel):
     user_id:  int

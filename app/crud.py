@@ -18,7 +18,7 @@ def get_user(db: Session, username: str):
         "work_experience": user.work_experience,
         "position": user.position,
         "stack": user.stack,
-        "links": {" "}, 
+        "links": {""}, 
         "role": user.role,
         "image_url": user.image_url,
         "location": user.location,
