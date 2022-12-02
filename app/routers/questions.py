@@ -74,18 +74,18 @@ def get_question(question_id: int, db: Session = Depends(get_db), current_user: 
     if get_question_db:
         db.commit()
         return {"success": True, "data": {
-            "questionid": get_question_db.question_id,
-            "title": get_question_db.title,
-            "content": get_question_db.content,
-            "expected_result": get_question_db.expected_result,
-            "payment_amount": get_question_db.payment_amount,
-            "answered": True,
-            "createdAt": get_question_db.created_at,
-            "updatedAT": get_question_db.updated_at,
-            "owner": get_question_db.owner_id,
-            "answers": [],
-        }
-        }
+                "questionid": get_question_db.question_id,
+                "title": get_question_db.title,
+                "content": get_question_db.content,
+                "expected_result": get_question_db.expected_result,
+                "payment_amount": get_question_db.payment_amount,
+                "answered": True,
+                "createdAt": get_question_db.created_at,
+                "updatedAT": get_question_db.updated_at,
+                "owner": get_question_db.owner_id,
+                "answers": [],
+                }
+                }
     return {"success": True, "message": "user have not asked any questions"}
 
 
