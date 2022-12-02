@@ -4,6 +4,23 @@ from datetime import datetime
 from typing import Optional, List, Union
 
 
+
+class TransactionRequest(BaseModel):
+	wallet_address: str
+	amount: int
+	user_id: str
+
+	class Config:
+		schema_extra = {
+			"example": {
+				"wallet_address":"e6bd3cthg-8f06-4b3d-b2db-2be907rgade972",
+				"amount": "50",
+				"user_id": "20"
+			}
+		}
+
+
+
 class User(BaseModel):
     user_id:  int
     username: str
