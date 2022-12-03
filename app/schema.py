@@ -123,13 +123,13 @@ class ForgotPassword(BaseModel):
             raise ValueError('passwords do not match')
         return v
 
-
 class Question(BaseModel):
     title: str
     content: str
     expected_result: str
     payment_amount: int
     answered: bool
+    tag: Optional[str]
     # created_at: datetime
     # updated_at: datetime
 
@@ -199,9 +199,6 @@ class Tag(TagBase):
     #tag_id: int
     tag_name: str
     question_id: int
-
-    # class Config:
-    #     orm_mode = True
 
 
 class AddQuestionTag(BaseModel):
