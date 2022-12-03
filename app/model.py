@@ -20,7 +20,7 @@ class Wallet(Base):
     balance = Column(Integer, default=1000, nullable=False)
     deposits_made = Column(Integer, default=0, nullable=False)
     spendings = Column(Integer, default=0, nullable=False)
-    user_id = Column(Integer, ForeignKey("user.user_id"))
+    user_id = Column(Integer, ForeignKey("user.user_id", ondelete="CASCADE"))
     created_at = Column(
         DateTime, default=datetime.datetime.utcnow, nullable=False)
 
