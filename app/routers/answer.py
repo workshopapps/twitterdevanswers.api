@@ -58,7 +58,8 @@ def create_answer(answer: schema.CreateAnswer, background_task: BackgroundTasks,
     )
 
     # update user account by 1000
-    db_user = db.query(model.User).filter(model.User.user_id == current_user.user_id).first()
+    db_user = db.query(model.User).filter(
+        model.User.user_id == current_user.user_id).first()
     db_user.account_balance = db_user.account_balance + 1000
 
     db.add(db_answer)
@@ -69,12 +70,13 @@ def create_answer(answer: schema.CreateAnswer, background_task: BackgroundTasks,
     # This automatically creates a notification by calling create_notification as a background function which
     # runs after returning a response
     notification = schema.NotificationCreate(
-        owner_id=db_question.owner_id, 
-        content_id=db_answer.answer_id, 
+        owner_id=db_question.owner_id,
+        content_id=db_answer.answer_id,
         type="Answer",
         title=f"@{current_user.username} provided an answer to your question.",
     )
-    background_task.add_task(create_notification, notification=notification, db=db)
+    background_task.add_task(
+        create_notification, notification=notification, db=db)
 
     return db_answer
 
@@ -84,11 +86,13 @@ def update_answer(answer_id: int, answer: schema.UpdateAnswer, db: Session = Dep
                   current_user: int = Depends(oauth.get_current_user)):
     """ Update answer endpoint for a specific question """
 
-    db_answer = db.query(model.Answer).filter(model.Answer.answer_id == answer_id).first()
+    db_answer = db.query(model.Answer).filter(
+        model.Answer.answer_id == answer_id).first()
     if db_answer is None:
         raise HTTPException(status_code=404, detail="Invalid answer id")
     elif db_answer.owner_id != current_user.user_id:
-        raise HTTPException(status_code=400, detail="Only owner can update this answer")
+        raise HTTPException(
+            status_code=400, detail="Only owner can update this answer")
     db_answer.content = answer.content
     db.commit()
     db.refresh(db_answer)
@@ -104,8 +108,10 @@ def delete_answer(answer_id: int, db: Session = Depends(get_db),
     if db_answer is None:
         raise HTTPException(status_code=404, detail="Invalid answer id")
     elif db_answer.owner_id != current_user.user_id:
-        raise HTTPException(status_code=400, detail="Only owner can delete this answer")
-    del_answer = db.query(model.Answer).filter(model.Answer.answer_id == answer_id).first()
+        raise HTTPException(
+            status_code=400, detail="Only owner can delete this answer")
+    del_answer = db.query(model.Answer).filter(
+        model.Answer.answer_id == answer_id).first()
     db.delete(del_answer)
     db.commit()
     return {"detail": "success"}
@@ -122,7 +128,8 @@ def vote_answer(answer: schema.AnswerVote, db: Session = Depends(get_db),
         raise HTTPException(status_code=404, detail="Answer Not Found")
 
     # check if user voted before
-    check_user_vote = db.query(model.AnswerVote).filter(model.AnswerVote.answer_id == answer.answer_id).first()
+    check_user_vote = db.query(model.AnswerVote).filter(
+        model.AnswerVote.answer_id == answer.answer_id).first()
 
     if check_user_vote is not None:
         if check_user_vote.owner_id == current_user.user_id:
@@ -135,7 +142,8 @@ def vote_answer(answer: schema.AnswerVote, db: Session = Depends(get_db),
 
             # add vote if previous vote is not add
             elif check_user_vote.vote_type != "add" and answer.vote_type == "add":
-                db_vote_answer = db.query(model.Answer).filter(model.Answer.answer_id == answer.answer_id).first()
+                db_vote_answer = db.query(model.Answer).filter(
+                    model.Answer.answer_id == answer.answer_id).first()
                 db_vote_answer.vote = get_answer_detail.vote + 1
                 check_user_vote.vote_type = answer.vote_type
                 db.commit()
@@ -144,7 +152,8 @@ def vote_answer(answer: schema.AnswerVote, db: Session = Depends(get_db),
 
             # remove vote if previous vote is add
             elif check_user_vote.vote_type == "add" and answer.vote_type != "add":
-                db_vote_answer = db.query(model.Answer).filter(model.Answer.answer_id == answer.answer_id).first()
+                db_vote_answer = db.query(model.Answer).filter(
+                    model.Answer.answer_id == answer.answer_id).first()
                 db_vote_answer.vote = get_answer_detail.vote - 1
                 check_user_vote.vote_type = answer.vote_type
                 db.commit()
@@ -163,7 +172,8 @@ def vote_answer(answer: schema.AnswerVote, db: Session = Depends(get_db),
 
         # update vote point
         get_answer_detail = get_answer(db=db, answer_id=answer.answer_id)
-        db_vote_answer = db.query(model.Answer).filter(model.Answer.answer_id == answer.answer_id).first()
+        db_vote_answer = db.query(model.Answer).filter(
+            model.Answer.answer_id == answer.answer_id).first()
         try:
             db_vote_answer.vote = get_answer_detail.vote + 1 if answer.vote_type == "add" \
                 else get_answer_detail.vote - 1
