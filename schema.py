@@ -5,11 +5,6 @@ from typing import Optional, List, Union
 from uuid import uuid4, UUID
 
 
-class WalletItem(BaseModel):
-    user_name: str
-    first_name: str
-    last_name: str
-
 
 class TransactionRequest(BaseModel):
     amount: int
