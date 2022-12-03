@@ -7,6 +7,7 @@ def get_user(db: Session, username: str):
     """ Get a user from the database based on their Username  """
 
     user = db.query(model.User).filter(model.User.username == username).first()
+
     return {
         "user_id": user.user_id,
         "username": user.username,
@@ -23,7 +24,9 @@ def get_user(db: Session, username: str):
         "image_url": user.image_url,
         "location": user.location,
         "is_admin": user.is_admin,
-        "account_balance": user.account_balance
+        "account_balance": user.account_balance,
+        "followers": user.followers,
+        "following": user.following
     }
 
 
@@ -49,7 +52,9 @@ def get_users(db: Session, skip: int = 0, limit: int = 100):
             "image_url": user.image_url,
             "location": user.location,
             "is_admin": user.is_admin,
-            "account_balance": user.account_balance
+            "account_balance": user.account_balance,
+            "followers": user.followers,
+            "following": user.following
         })
     return {"success": True, 'data': users_list}
 

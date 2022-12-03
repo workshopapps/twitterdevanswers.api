@@ -5,7 +5,7 @@ from typing import List
 from sqlalchemy.orm import Session
 from fastapi import FastAPI, Depends, HTTPException, APIRouter, status, Request, Path
 from app.oauth import get_current_user
-from app import oauth
+from app import oauth, model
 
 router = APIRouter(
     prefix='/admin',
@@ -20,25 +20,25 @@ def fetch_users(skip: int = 0, limit: int = 100, db: Session = Depends(get_db), 
     return crud.get_users(db, skip=skip, limit=limit)
 
 
-@router.get('/{user_id}')
-def fetch_user(user_id: int, db: Session = Depends(get_db), current_user: int = Depends(get_current_user)):
+@router.get('/{username}')
+def fetch_user(username: str, db: Session = Depends(get_db), current_user: int = Depends(get_current_user)):
     """ Fetch a user by it's user_id  """
 
-    user = crud.get_user(db, user_id=user_id)
+    user = crud.get_user(db, username=username)
     if not user:
         raise HTTPException(
-            status=404, detail=f" user with user_id : {user_id} not found")
+            status_code=404, detail=f" user with user_id : {username} not found")
     return {"success": True, 'data': user}
 
 
-@router.delete('/delete/{user_id}')
-def delete_user(user_id: int, db: Session = Depends(get_db)):
+@router.delete('/delete/{username}')
+def delete_user(username: str, db: Session = Depends(get_db)):
     """ Delete a user by it's user_id  """
 
-    delete_user = crud.delete_user(db, user_id=user_id)
+    delete_user = crud.delete_user(db, username=username)
     if not delete_user:
         raise HTTPException(
-            status=404, detail=f"user with user_id : {user_id} does not exist")
+            status_code=404, detail=f"user with user_id : {username} does not exist")
     return delete_user
 
 
@@ -49,7 +49,7 @@ def update_user(user: schema.UserUpdate, user_id: int, db: Session = Depends(get
     user_db = db.query(User).filter(User.user_id == user_id).first()
     if user_db is None:
         raise HTTPException(status_code=404, detail="User not found")
-    if user_db.user_id == current_user.user_id:
+    if user_db.user_id == current_user.user_id or current_user.is_admin == True:
         update_user = db.query(model.User).filter(
             model.User.user_id == user_id).first()
 
@@ -75,7 +75,7 @@ def delete_question(question_id: int, db: Session = Depends(get_db), current_use
     delete_question = db.query(model.Question).filter(
         model.Question.question_id == question_id).first()
     if delete_question:
-        if delete_question.owner_id == current_user.user_id:
+        if delete_question.owner_id == current_user.user_id or current_user.is_admin == True:
             db.delete(delete_question)
             db.commit()
             return {"success": True, "message": delete_question.question_id}
@@ -101,7 +101,7 @@ def delete_answer(answer_id: int, db: Session = Depends(get_db),
     return {"detail": "success"}
 
 
-@router.post("/", status_code=status.HTTP_201_CREATED, response_model=schema.Tag)
+@router.post("/", status_code=status.HTTP_201_CREATED)
 async def create_tag(tag: schema.TagCreate, db: Session = Depends(get_db), user: schema.User = Depends(oauth.get_current_user)):
     """
     Creates a tag
