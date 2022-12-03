@@ -1,7 +1,7 @@
 pipeline { 
     agent any 
     	stages {
-		stage('Build-Backend') { 
+		stage('Build-Backedn') { 
 		    steps { 
 			sh "pip install -r requirements.txt"
 		    }
