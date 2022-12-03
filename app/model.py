@@ -7,7 +7,7 @@ from sqlalchemy.sql.sqltypes import TIMESTAMP
 from sqlalchemy.sql.expression import text
 from app.database import Base, engine
 from uuid import UUID
-from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.dialects.mysql import UUID
 import uuid as uuid_pkg
 import sqlalchemy
 import datetime
