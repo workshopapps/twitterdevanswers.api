@@ -74,7 +74,7 @@ class Question(Base):
     expected_result = Column(String(2000), nullable=False)
     payment_amount = Column(Integer, nullable=False)
 
-    answered = Column(Boolean, server_default=False, nullable=False)
+    answered = Column(Boolean, default=False, nullable=False)
     tag = Column(String(200), default=" ")
     total_like = Column(Integer, default=0)
     total_unlike = Column(Integer, default=0)
