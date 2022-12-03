@@ -19,9 +19,16 @@ router = APIRouter(
     tags=['wallet']
 )
 
-app = FastAPI()
-Base = declarative_base()
 
+@router.get("/wallet/view/{user_id}/user")
+def view_wallet(user_id, db: Session = Depends(get_db)):
+
+    user_account = db.query(Wallet).filter(Wallet.user_id == user_id).first()
+    if not user_account:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                            detail=f'account with the id {user_id} not available.')
+
+    return user_account
 
 
 @router.put('/wallet/earn')

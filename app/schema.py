@@ -123,6 +123,7 @@ class ForgotPassword(BaseModel):
             raise ValueError('passwords do not match')
         return v
 
+
 class Question(BaseModel):
     title: str
     content: str
@@ -187,17 +188,16 @@ class TagBase(BaseModel):
 
 
 class TagCreate(TagBase):
-    id: int
-    owner_id: int
-    question_id: int
+    owner_id: Optional[int]
+    question_id: Optional[int]
     tag_name: str
-    question: Question
-    owner: User
 
 
 class Tag(TagBase):
     #tag_id: int
     tag_name: str
+    question: Question
+    owner: User
     question_id: int
 
 
