@@ -1,4 +1,4 @@
-import model
+from app import model
 from app.oauth import get_current_user
 from fastapi import FastAPI, Depends, HTTPException, APIRouter, Request
 from sqlalchemy.orm import Session
