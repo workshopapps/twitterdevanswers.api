@@ -182,7 +182,3 @@ class Blog(Base):
 
 
 Base.metadata.create_all(bind=engine)
-# Base.metadata.drop_all(bind=engine)
-# Base.metadata.reflect()
-# Base.metadata.clear()
-# Base.metadata.remove(User.__table__)
