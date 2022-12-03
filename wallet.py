@@ -65,7 +65,7 @@ def remove_from_wallet(request: schema.TransactionRequest, db: Session = Depends
                             detail=f'account with the id {id} not available.')
 
     amount = request.amount
-    if user_account.balance <= amount:
+    if user_account.balance >= amount:
 
         user_account.balance -= amount
         user_account.spendings += 1
