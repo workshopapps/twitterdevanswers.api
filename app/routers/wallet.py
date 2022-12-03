@@ -19,10 +19,6 @@ router = APIRouter(
     tags=['wallet']
 )
 
-app = FastAPI()
-Base = declarative_base()
-
-
 
 @router.get("/wallet/view/{user_id}/user")
 def view_wallet(user_id, db: Session = Depends(get_db)):
@@ -33,7 +29,6 @@ def view_wallet(user_id, db: Session = Depends(get_db)):
                             detail=f'account with the id {user_id} not available.')
 
     return user_account
-
 
 
 @router.put('/wallet/earn')
