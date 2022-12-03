@@ -163,10 +163,22 @@ class Tag(Base):
     questions = relationship("app.model.Question",
                              secondary="question_tags", back_populates="tags")
 
+class Blog(Base):
 
-@compiles(DropTable, "postgresql")
-def _compile_drop_table(element, compiler, **kwargs):
-    return compiler.visit_drop_table(element) + " CASCADE"
+    __tablename__ = 'blog'
+    __table_args__ = {'extend_existing': True}
+    blog_id = Column(Integer, primary_key=True, nullable=False)
+    title = Column(String(300), nullable=False)
+    body = Column(String(7000), nullable=False)
+    author = Column(String(300), nullable=False)
+    image_url = Column(String(300), default="default.jpg")
+    post_category = Column(String(200), nullable=False)
+    user = relationship('model.User')
+    date_posted = Column(TIMESTAMP(timezone=True),
+                         nullable=False, server_default=text('now()'))
+    blog_user_id = Column(Integer, ForeignKey(
+        "user.user_id", ondelete="CASCADE"), nullable=False)
+
 
 
 class Blog(Base):
