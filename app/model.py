@@ -37,7 +37,7 @@ class User(Base):
     last_name = Column(String(30), nullable=False, default=" ")
     email = Column(String(100), nullable=False, unique=True)
     description = Column(String(400), nullable=True, default=" ")
-    password = Column(String, nullable=False)
+    password = Column(String(200), nullable=False)
     phone_number = Column(String(30), nullable=True, default=" ")
     work_experience = Column(String(400), nullable=True, default=" ")
     position = Column(String(400), nullable=True, default=" ")
