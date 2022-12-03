@@ -6,8 +6,7 @@ from sqlalchemy.sql import func
 from sqlalchemy.sql.sqltypes import TIMESTAMP
 from sqlalchemy.sql.expression import text
 from app.database import Base, engine
-from uuid import UUID
-from sqlalchemy.dialects.mysql import UUID
+from uuid import uuid4
 import uuid as uuid_pkg
 import sqlalchemy
 import datetime
@@ -17,9 +16,7 @@ class Wallet(Base):
     __tablename__ = 'walletaccount'
     __table_args__ = {'extend_existing': True}
 
-    id = Column(UUID(as_uuid=True),
-                primary_key=True,
-                server_default=sqlalchemy.text("gen_random_uuid()"),)
+    id = Column(String(50), default=uuid4())
     balance = Column(Integer, default=1000, nullable=False)
     deposits_made = Column(Integer, default=0, nullable=False)
     spendings = Column(Integer, default=0, nullable=False)
