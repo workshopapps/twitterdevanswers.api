@@ -50,7 +50,7 @@ def add_to_wallet(request: schema.TransactionRequest, db: Session = Depends(get_
     db.commit()
     db.refresh(user_account)
     return {"code": "success",
-            "message": "Deposit was successfully added",
+            "message": "Token was successfully added",
             "balance": user_account.balance}
 
 
@@ -73,7 +73,7 @@ def remove_from_wallet(request: schema.TransactionRequest, db: Session = Depends
         db.commit()
         db.refresh(user_account)
         return {"code": "success",
-                "message": "Deposit was successfully added",
+                "message": "Token was successfully transferred",
                 "balance": user_account.balance}
     else:
         return {"code": "error", "message": "Wallet Balance Insufficience"}
