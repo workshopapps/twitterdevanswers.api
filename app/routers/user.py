@@ -5,8 +5,7 @@ from sqlalchemy.orm import Session
 from typing import List
 from app.model import *
 from app.database import get_db
-from app import crud
-from app import schema
+from app import crud, schema
 import sys
 sys.path.append('..')
 
