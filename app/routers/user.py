@@ -5,8 +5,7 @@ from sqlalchemy.orm import Session
 from typing import List
 from app.model import *
 from app.database import get_db
-from app import crud
-from app import schema
+from app import crud, schema
 import sys
 sys.path.append('..')
 
@@ -31,7 +30,7 @@ def fetch_user(username: str, db: Session = Depends(get_db), current_user: int =
     user = crud.get_user(db, username=username)
     if not user:
         raise HTTPException(
-            status=404, detail=f" User {username} not found")
+            status_code=404, detail=f" User {username} not found")
     return {"success": True, 'data': user}
 
 
@@ -68,7 +67,7 @@ def delete_user(username: str, db: Session = Depends(get_db), current_user: int 
     delete_user = crud.delete_user(db, username=username)
     if not delete_user:
         raise HTTPException(
-            status=404, detail=f" User {username} does not exist")
+            status_code=404, detail=f" User {username} does not exist")
     return delete_user
 @router.get("/remove-admin/{user_id}")
 def remove_admin(usernname:int, db: Session = Depends(get_db), admin = Depends(get_admin)):
