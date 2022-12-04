@@ -189,7 +189,6 @@ class TagBase(BaseModel):
 class TagCreate(TagBase):
     id: int
     owner_id: int
-    question_id: int
     tag_name: str
     question: Question
     owner: User

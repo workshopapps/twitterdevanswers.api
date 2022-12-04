@@ -10,7 +10,7 @@ router = APIRouter(
 )
 
 
-@@router.post("/", status_code=status.HTTP_201_CREATED)
+@router.post("/", status_code=status.HTTP_201_CREATED)
 def add_question(request: schema.Question, db: Session = Depends(get_db), current_user: int = Depends(oauth.get_current_user)):
     # request.owner_id = current_user.user_id
     ask_question = model.Question(

@@ -39,8 +39,13 @@ def delete_user(user_id: int, db: Session = Depends(get_db)):
     if not delete_user:
         raise HTTPException(
             status=404, detail=f"user with user_id : {user_id} does not exist")
+    if delete_user:
+         raise HTTPException(
+            status=204, detail=f"user with user_id : {user_id} has been deleted")
     return delete_user
-
+    #     return {"success": True, "message": "profile removed"}
+    # else:
+    #     return {"success": False, "message": "User does not exist"}
 
 @router.put("/{user_id}")
 def update_user(user: schema.UserUpdate, user_id: int, db: Session = Depends(get_db), current_user: int = Depends(get_current_user)):
