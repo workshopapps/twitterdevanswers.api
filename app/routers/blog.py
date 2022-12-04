@@ -54,7 +54,7 @@ def get_post_by_blog_id(blog_id, db: Session = Depends(get_db)):
 # get all posts by user_id
 
 
-@router.get("/{user_id}/user", status_code=status.HTTP_200_OK)
+@router.get("/{user_id}/admin", status_code=status.HTTP_200_OK)
 def get_post_by_user_id(user_id, db: Session = Depends(get_db)):
     get_post = db.query(model.Blog).filter(
         model.Blog.blog_user_id == user_id).all()
@@ -65,17 +65,31 @@ def get_post_by_user_id(user_id, db: Session = Depends(get_db)):
 
 # delete post by user_id
 
-
+"""
 @router.delete("/{user_id}/user", status_code=status.HTTP_200_OK)
 def delete_post_by_user_id(user_id, db: Session = Depends(get_db)):
     post_delete = db.query(model.Blog).filter(
         model.Blog.blog_user_id == user_id).delete(synchronize_session=False)
     return {"sucess": True, "data": f"{user_id} deleted"}
+"""
 
+@router.delete("/{blog_id}/admin")
+def delete_post_by_user_id(blog_id, db: Session = Depends(get_db),
+                           current_user: int = Depends(oauth.get_current_user)):
+    db_blog = db.query(model.Blog).filter(model.Blog.blog_id == blog_id).first()
+    if db_blog is None:
+        raise HTTPException(status_code=404, detail="Invalid blog id")
+    elif db_blog.blog_user_id != current_user.user_id:
+        raise HTTPException(
+            status_code=400, detail="Only owner can delete this blog")
+    db.delete(db_blog)
+    db.commit()
+    return {"detail": "success"}
+    
 # update post by user id
 
 
-@router.patch("/{user_id}/user", status_code=status.HTTP_202_ACCEPTED)
+@router.patch("/{user_id}/admin", status_code=status.HTTP_202_ACCEPTED)
 def update_post_by_user_id(user_id, request: schema.Blog, db: Session = Depends(get_db)):
     post_update = db.query(model.Blog).filter(
         model.Blog.blog_user_id == user_id).first()
