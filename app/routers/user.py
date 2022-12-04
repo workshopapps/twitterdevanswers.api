@@ -58,6 +58,8 @@ def update_user(user: schema.UserUpdate, username: str, db: Session = Depends(ge
         db.commit()
         db.refresh(update_user)
         return {"success": True, "message": "Profile Updated", "data": update_data}
+    else:
+        return {"success": False, "message": "You're Not authorized to perform this update"}
 
 
 @router.delete('/delete/{username}')
