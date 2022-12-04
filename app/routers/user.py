@@ -59,14 +59,14 @@ def update_user(user: schema.UserUpdate, username: str, db: Session = Depends(ge
         db.refresh(update_user)
         return {"success": True, "message": "Profile Updated", "data": update_data}
     else:
-        return {"success": False, "message": "You're Not authorized to perform this update"}
+        return {"success": False, "message":  "You're not authorized to perform this update "}
 
 
 @router.delete('/delete/{username}')
 def delete_user(username: str, db: Session = Depends(get_db), current_user: int = Depends(get_current_user)):
     """ Delete a user by username  """
 
-    delete_user = crud.delete_user(db, username=username)
+    delete_user = crud.delete_user(db, username=username,current_user=current_user)
     if not delete_user:
         raise HTTPException(
             status_code=404, detail=f" User {username} does not exist")
