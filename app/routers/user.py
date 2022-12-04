@@ -1,5 +1,5 @@
 from app import model
-from app.oauth import get_current_user
+from app.oauth import get_current_user, get_admin
 from fastapi import FastAPI, Depends, HTTPException, APIRouter, Request
 from sqlalchemy.orm import Session
 from typing import List
@@ -70,3 +70,7 @@ def delete_user(username: str, db: Session = Depends(get_db), current_user: int 
         raise HTTPException(
             status=404, detail=f" User {username} does not exist")
     return delete_user
+@router.get("/remove-admin/{user_id}")
+def remove_admin(usernname:int, db: Session = Depends(get_db), admin = Depends(get_admin)):
+    user = db.query(model.User).filter(model.User.username == usernname).update({'is_admin': False})
+    return {'Success': True, "Details" : "User deactivated as admin "}
