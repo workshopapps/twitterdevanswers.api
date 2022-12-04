@@ -64,9 +64,9 @@ def delete_user(db: Session, username: str):
 
     delete_user = db.query(model.User).filter(
         model.User.username == username).first()
-    wallet = db.query(model.Wallet).filter(
-        model.Wallet.user_id == delete_user.user_id).first()
     if delete_user:
+        wallet = db.query(model.Wallet).filter(
+            model.Wallet.user_id == delete_user.user_id).first()
         db.delete(wallet)
         db.commit()
         db.delete(delete_user)
