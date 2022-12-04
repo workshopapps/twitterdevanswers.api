@@ -38,9 +38,12 @@ def delete_user(username: str, db: Session = Depends(get_db)):
     delete_user = crud.delete_user(db, username=username)
     if not delete_user:
         raise HTTPException(
-            status_code=404, detail=f"user with user_id : {username} does not exist")
+            status=404, detail=f"user with user_id : {user_id} does not exist")
+    if delete_user:
+         raise HTTPException(
+            status=204, detail=f"user with user_id : {user_id} has been deleted")
     return delete_user
-
+ 
 
 @router.put("/{user_id}")
 def update_user(user: schema.UserUpdate, user_id: int, db: Session = Depends(get_db), current_user: int = Depends(get_current_user)):
