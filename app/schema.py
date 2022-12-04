@@ -130,6 +130,7 @@ class Question(BaseModel):
     expected_result: str
     payment_amount: int
     answered: bool
+    tag: Optional[str]
     # created_at: datetime
     # updated_at: datetime
 
@@ -188,19 +189,17 @@ class TagBase(BaseModel):
 
 class TagCreate(TagBase):
     id: int
-    owner_id: int
+    owner_id: Optional[int]
+    question_id: Optional[int]
     tag_name: str
-    question: Question
-    owner: User
 
 
 class Tag(TagBase):
     #tag_id: int
     tag_name: str
+    question: Question
+    owner: User
     question_id: int
-
-    # class Config:
-    #     orm_mode = True
 
 
 class AddQuestionTag(BaseModel):
