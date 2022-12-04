@@ -35,6 +35,7 @@ def view_wallet(user_id, db: Session = Depends(get_db)):
 def add_to_wallet(request: schema.TransactionRequest, db: Session = Depends(get_db)):
     id = request.wallet_address
     user_account = db.query(Wallet).filter(Wallet.id == id).first()
+
     if not user_account:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                             detail=f'account with the id {id} not available.')
@@ -42,6 +43,7 @@ def add_to_wallet(request: schema.TransactionRequest, db: Session = Depends(get_
 
     user_account.balance += amount
     user_account.deposits_made += 1
+
     db.add(user_account)
     db.commit()
     db.refresh(user_account)
@@ -65,6 +67,7 @@ def remove_from_wallet(request: schema.TransactionRequest, db: Session = Depends
 
         user_account.balance -= amount
         user_account.spendings += 1
+        
         db.add(user_account)
         db.commit()
         db.refresh(user_account)
