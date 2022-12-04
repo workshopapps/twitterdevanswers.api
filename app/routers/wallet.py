@@ -35,7 +35,6 @@ def view_wallet(user_id, db: Session = Depends(get_db)):
 def add_to_wallet(request: schema.TransactionRequest, db: Session = Depends(get_db)):
     id = request.wallet_address
     user_account = db.query(Wallet).filter(Wallet.id == id).first()
-    user_balance = db.query(User).filter(User.user_id == user_id).first()
 
     if not user_account:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
@@ -44,11 +43,9 @@ def add_to_wallet(request: schema.TransactionRequest, db: Session = Depends(get_
 
     user_account.balance += amount
     user_account.deposits_made += 1
-    user_balance.acct_balance = user_account.balance
 
     db.add(user_account)
     db.commit()
-    db.refresh(user_balance)
     db.refresh(user_account)
     return {"code": "success",
             "message": "Deposit was successfully added",
@@ -60,7 +57,6 @@ def remove_from_wallet(request: schema.TransactionRequest, db: Session = Depends
 
     id = request.user_id
     user_account = db.query(Wallet).filter(Wallet.user_id == id).first()
-    user_balance = db.query(User).filter(User.user_id == user_id).first()
 
     if not user_account:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
@@ -71,11 +67,9 @@ def remove_from_wallet(request: schema.TransactionRequest, db: Session = Depends
 
         user_account.balance -= amount
         user_account.spendings += 1
-        user_balance.acct_balance = user_account.balance
         
         db.add(user_account)
         db.commit()
-        db.refresh(user_balance)
         db.refresh(user_account)
         return {"code": "success",
                 "message": "Deposit was successfully added",
