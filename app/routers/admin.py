@@ -31,16 +31,17 @@ def fetch_user(username: str, db: Session = Depends(get_db), current_user: int =
     return {"success": True, 'data': user}
 
 
-@router.delete('/delete/{username}')
-def delete_user(username: str, db: Session = Depends(get_db)):
+@router.delete('/delete/{username}/{user_id}')
+def delete_user(username: str, user_id: int, db: Session = Depends(get_db)):
     """ Delete a user by it's username  """
-
-    delete_user = crud.delete_user(db, username=username)
-    if not delete_user:
-        raise HTTPException(
-            status_code=404, detail=f"user with user_id : {username} does not exist")
-
-    return {"success": True, 'details': "user deleted successfully"}
+    try:
+        delete_user = crud.delete_user(db, username=username, current_user = user_id)
+        if not delete_user:
+            raise HTTPException(
+                status_code=404, detail=f"user with user_id : {username} does not exist")
+        return {"success": True, "data": "User has been deleted successfully"}
+    except:
+        return {"error" : "Unable to delete user"}
 
 
 @router.put("/{user_id}")
