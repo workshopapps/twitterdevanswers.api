@@ -36,7 +36,6 @@ async def create_tag(tag: schema.TagCreate, db: Session = Depends(get_db), user:
     db.add(db_tag)
     db.commit()
     db.refresh(db_tag)
-    print(type(db_tag.__dict__))
     #return db_tag.__dict__
     return jsonable_encoder(db_tag)
 
