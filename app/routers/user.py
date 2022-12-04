@@ -59,8 +59,7 @@ def update_user(user: schema.UserUpdate, username: str, db: Session = Depends(ge
         db.refresh(update_user)
         return {"success": True, "message": "Profile Updated", "data": update_data}
     else:
-        return {"success": False, "message": "You're Not authorized to perform this update"}
-
+        return {"success": False, "message":  "You're not authorized to perform this update "}
 
 @router.delete('/delete/{username}/{user_id}')
 def delete_user(username: str, user_id: int, db: Session = Depends(get_db)):
@@ -73,3 +72,5 @@ def delete_user(username: str, user_id: int, db: Session = Depends(get_db)):
         return {"success": True, "data": "User has been deleted successfully"}
     except:
         return {"error" : "Unable to delete user"}
+
+
