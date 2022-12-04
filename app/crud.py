@@ -59,18 +59,21 @@ def get_users(db: Session, skip: int = 0, limit: int = 100):
     return {"success": True, 'data': users_list}
 
 
-def delete_user(db: Session, username: str):
+def delete_user(db: Session, username: str , current_user:int):
     """ Delete a user Profile  """
 
     delete_user = db.query(model.User).filter(
         model.User.username == username).first()
+    wallet = db.query(model.Wallet).filter(
+        model.Wallet.user_id == delete_user.user_id).first()
     if delete_user:
-        wallet = db.query(model.Wallet).filter(
-            model.Wallet.user_id == delete_user.user_id).first()
-        db.delete(wallet)
-        db.commit()
-        db.delete(delete_user)
-        db.commit()
-        return {"success": True, "message": "profile removed"}
+        if delete_user.user_id == current_user.user_id:
+            db.delete(wallet)
+            db.commit()
+            db.delete(delete_user)
+            db.commit()
+            return {"success": True, "message": "profile removed"}
+        else :   
+            return {"success": False, "message": "You're not authorized to perform this operation"}
     else:
         return {"success": False, "message": "User does not exist"}
