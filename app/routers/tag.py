@@ -18,7 +18,7 @@ async def list_all_tags(db: Session = Depends(get_db), skip: int = 0, limit: int
     Lists all available tags
     """
     tags = db.query(model.Tag).offset(skip).limit(limit).all()
-    return {"success": True, "data": tags}
+    return [jsonable_encoder(tag) for tag in tags] 
 
 
 @router.post("/", status_code=status.HTTP_201_CREATED, response_model=schema.Tag)
@@ -26,18 +26,19 @@ async def create_tag(tag: schema.TagCreate, db: Session = Depends(get_db), user:
     """
     Creates a tag
     """
-    db_question = db.query(model.Question).filter(
-        model.Question.question_id == tag.question_id).first()
-    if db_question is None:
-        raise HTTPException(status_code=404, detail="Invalid Question ID")
-    owner_id = user.user_id
-    db_tag = model.Tag(tag_name=tag.tag_name,
-                       owner_id=owner_id, question_id=tag.question_id)
+    # db_question = db.query(model.Question).filter(
+    #     model.Question.question_id == tag.question_id).first()
+    # if db_question is None:
+    #     raise HTTPException(status_code=404, detail="Invalid Question ID")
+
+    db_tag = model.Tag(tag_name=tag.tag_name)
 
     db.add(db_tag)
     db.commit()
     db.refresh(db_tag)
-    return {"success": True, "tag_name": tag.tag_name, "tag_id": db_tag.tag_id, "question_id": db_tag.question_id}
+    print(type(db_tag.__dict__))
+    #return db_tag.__dict__
+    return jsonable_encoder(db_tag)
 
 
 @router.delete("/{tag_id}", status_code=status.HTTP_200_OK)
@@ -61,9 +62,9 @@ async def delete_tag(
     return {"Successfully deleted"}
 
 
-@router.post("/add-question/")
+@router.post("/add-question")
 async def add_tag_to_question(
-    add_tag_model: schema.Tag,
+    add_tag_model: schema.AddQuestionTag,
     db: Session = Depends(get_db),
     user: schema.User = Depends(oauth.get_current_user)
 ):
