@@ -19,9 +19,18 @@ def follow_user(request: schema.Follow, db: Session = Depends(get_db),
         if current_user.user_id != target_user.user_id:
             following = Following(target_user=target_user.user_id,
                                   user_from=current_user.user_id)
+            # update target user
+            target_user.followers = target_user.followers + 1
+            # update current user
+            following_user = db.query(User).filter(
+                User.user_id == current_user.user_id).first()
+            following_user.following = following_user.following + 1
+
             db.add(following)
             db.commit()
             db.refresh(following)
+            db.refresh(target_user)
+            db.refresh(following_user)
             return {"success": True, "msg": f"You successfully {target_user.username}", "status": status.HTTP_201_CREATED}
         return {"success": False, "msg": "You can't follow yourself", "status": status.HTTP_403_FORBIDDEN}
     else:
@@ -36,8 +45,18 @@ def delete_user(user_id: int, db: Session = Depends(get_db), current_user: int =
         Following.target_user == user_id).first()
     if following:
         if following.user_from == current_user.user_id:
+            # update target user
+            target_user.followers = target_user.followers - 1
+            # update current user
+            following_user = db.query(User).filter(
+                User.user_id == current_user.user_id).first()
+            following_user.following = following_user.following - 1
+
             db.delete(following)
             db.commit()
+            db.refresh(target_user)
+            db.refresh(following_user)
+
             return {"success": True, "msg": f"unfollowed {target_user.username}", "status": status.HTTP_200_OK}
         else:
             return HTTPException(status_code=403, detail="unauthorized to make this request")

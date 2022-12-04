@@ -57,10 +57,15 @@ def create_answer(answer: schema.CreateAnswer, background_task: BackgroundTasks,
         question_id=answer.question_id
     )
 
-    # update user account by 1000
-    db_user = db.query(model.User).filter(
-        model.User.user_id == current_user.user_id).first()
-    db_user.account_balance = db_user.account_balance + 1000
+    # update user account balance
+    try:
+        db_user = db.query(model.User).filter(
+            model.User.user_id == current_user.user_id).first()
+        db_user.account_balance = db_user.account_balance + db_question.payment_amount
+    except Exception as e:
+        db_user = db.query(model.User).filter(
+            model.User.user_id == current_user.user_id).first()
+        db_user.account_balance = db_user.account_balance + 0
 
     db.add(db_answer)
     db.commit()
