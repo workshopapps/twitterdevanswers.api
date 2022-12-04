@@ -40,7 +40,7 @@ def delete_user(username: str, db: Session = Depends(get_db)):
         raise HTTPException(
             status_code=404, detail=f"user with user_id : {username} does not exist")
 
-    return {"success": True, 'data': delete_user}
+    return {"success": True, 'details': "user deleted successfully"}
 
 
 @router.put("/{user_id}")
