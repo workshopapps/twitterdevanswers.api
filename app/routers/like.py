@@ -1,10 +1,10 @@
 from fastapi import APIRouter, Depends, BackgroundTasks
 from fastapi.exceptions import HTTPException
-import schema, model, oauth
+from app import schema, model, oauth
 from sqlalchemy.orm import Session
-from database import get_db
-from routers.answer import get_question
-from routers.notification import create_notification
+from app.database import get_db
+from app.routers.answer import get_question
+from app.routers.notification import create_notification
 
 
 router = APIRouter(
