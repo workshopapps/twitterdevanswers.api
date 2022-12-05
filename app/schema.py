@@ -80,7 +80,6 @@ class UserUpdate(BaseModel):
     username: Optional[str] = None
     first_name: Optional[str] = None
     last_name: Optional[str] = None
-    email: Optional[str] = None
     description: Optional[str] = None
     phone_number: Optional[str] = None
     work_experience: Optional[str] = None
