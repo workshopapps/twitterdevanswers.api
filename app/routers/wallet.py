@@ -33,8 +33,8 @@ def view_wallet(user_id, db: Session = Depends(get_db)):
 
 @router.put('/wallet/earn')
 def add_to_wallet(request: schema.TransactionRequest, db: Session = Depends(get_db)):
-    id = request.wallet_address
-    user_account = db.query(Wallet).filter(Wallet.id == id).first()
+    id = request.user_id
+    user_account = db.query(Wallet).filter(Wallet.user_id == id).first()
 
     if not user_account:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
@@ -72,26 +72,10 @@ def remove_from_wallet(request: schema.TransactionRequest, db: Session = Depends
         db.commit()
         db.refresh(user_account)
         return {"code": "success",
-                "message": "Deposit was successfully added",
+                "message": "Payment successful",
                 "balance": user_account.balance}
     else:
         return {"code": "error", "message": "Wallet Balance Insufficience"}
 
 
-# {
-#   "Success": true,
-#   "Message": "user added successfully",
-#   "data": {
-#     "user_id": 7,
-#     "userName": "strong",
-#     "email": "strong@example.com",
-#     "wallet": {
-#       "user_id": 7,
-#       "balance": 1000,
-#       "deposits_made": 0,
-#       "spendings": 0,
-#       "id": "e6bd3c1c-8f06-4b3d-b2db-2be00707e972",
-#       "created_at": "2022-12-02T01:11:47.129076"
-#     }
-#   },
-# }
+
