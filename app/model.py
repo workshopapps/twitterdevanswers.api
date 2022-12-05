@@ -86,7 +86,7 @@ class Question(Base):
     #     "app.model.Tag", secondary="question_tags", backref="questions")
 
     tags = relationship(
-        "app.model.Tag", secondary="question_tags") #, back_populates="questions"
+        "app.model.Tag", secondary="question_tags", back_populates="questions")
 
 
 class Answer(Base):
@@ -161,7 +161,7 @@ class Tag(Base):
     tag_id = Column(Integer, primary_key=True, nullable=False)
     tag_name = Column(String(40), nullable=False)
     questions = relationship("app.model.Question",
-                             secondary="question_tags") #, back_populates="tags"
+                             secondary="question_tags", back_populates="tags")
 
 
 class Blog(Base):
@@ -174,7 +174,7 @@ class Blog(Base):
     author = Column(String(300), nullable=False)
     image_url = Column(String(300), default="default.jpg")
     post_category = Column(String(200), nullable=False)
-    user = relationship('app.model.User')
+    user = relationship('model.User')
     date_posted = Column(TIMESTAMP(timezone=True),
                          nullable=False, server_default=text('now()'))
     blog_user_id = Column(Integer, ForeignKey(
