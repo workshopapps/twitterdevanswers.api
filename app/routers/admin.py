@@ -1,11 +1,11 @@
-import schema, crud
-from database import get_db
-from model import *
+from app import schema, crud
+from app.database import get_db
+from app.model import *
 from typing import List
 from sqlalchemy.orm import Session
 from fastapi import FastAPI, Depends, HTTPException, APIRouter, status, Request, Path
-from oauth import get_current_user
-import oauth, model
+from app.oauth import get_current_user
+from app import oauth, model
 
 router = APIRouter(
     prefix='/admin',
