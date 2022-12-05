@@ -30,7 +30,6 @@ async def create_tag(tag: schema.TagCreate, db: Session = Depends(get_db), user:
     #     model.Question.question_id == tag.question_id).first()
     # if db_question is None:
     #     raise HTTPException(status_code=404, detail="Invalid Question ID")
-
     db_tag = model.Tag(tag_name=tag.tag_name)
 
     db.add(db_tag)
