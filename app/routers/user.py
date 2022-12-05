@@ -30,7 +30,7 @@ def fetch_user(username: str, db: Session = Depends(get_db), current_user: int =
     user = crud.get_user(db, username=username)
     if not user:
         raise HTTPException(
-            status=404, detail=f" User {username} not found")
+            status_code=404, detail=f" User {username} not found")
     return {"success": True, 'data': user}
 
 
@@ -58,14 +58,19 @@ def update_user(user: schema.UserUpdate, username: str, db: Session = Depends(ge
         db.commit()
         db.refresh(update_user)
         return {"success": True, "message": "Profile Updated", "data": update_data}
+    else:
+        return {"success": False, "message":  "You're not authorized to perform this update "}
+
+@router.delete('/delete/{username}/{user_id}')
+def delete_user(username: str, user_id: int, db: Session = Depends(get_db)):
+    """ Delete a user by it's username  """
+    try:
+        delete_user = crud.delete_user(db, username=username, current_user = user_id)
+        if not delete_user:
+            raise HTTPException(
+                status_code=404, detail=f"user with user_id : {username} does not exist")
+        return {"success": True, "data": "User has been deleted successfully"}
+    except:
+        return {"error" : "Unable to delete user"}
 
 
-@router.delete('/delete/{username}')
-def delete_user(username: str, db: Session = Depends(get_db), current_user: int = Depends(get_current_user)):
-    """ Delete a user by username  """
-
-    delete_user = crud.delete_user(db, username=username)
-    if not delete_user:
-        raise HTTPException(
-            status=404, detail=f" User {username} does not exist")
-    return delete_user
