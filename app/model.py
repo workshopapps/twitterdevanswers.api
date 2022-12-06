@@ -5,7 +5,7 @@ from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from sqlalchemy.sql.sqltypes import TIMESTAMP
 from sqlalchemy.sql.expression import text
-from app.database import Base, engine
+from database import Base, engine
 from uuid import uuid4
 import uuid as uuid_pkg
 import sqlalchemy
@@ -81,12 +81,12 @@ class Question(Base):
     created_at = Column(TIMESTAMP(timezone=True),
                         nullable=False, server_default=text('now()'))
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
-    owner = relationship('app.model.User')
+    owner = relationship('model.User')
     # tags = relationship(
-    #     "app.model.Tag", secondary="question_tags", backref="questions")
+    #     "model.Tag", secondary="question_tags", backref="questions")
 
     tags = relationship(
-        "app.model.Tag", secondary="question_tags", back_populates="questions")
+        "model.Tag", secondary="question_tags", back_populates="questions")
 
 
 class Answer(Base):
@@ -102,8 +102,8 @@ class Answer(Base):
                         nullable=False, server_default=text('now()'))
     is_answered = Column(Boolean, nullable=True)
     vote = Column(Integer, default=0)
-    owner = relationship('app.model.User')
-    question = relationship('app.model.Question')
+    owner = relationship('model.User')
+    question = relationship('model.Question')
 
 
 class AnswerVote(Base):
@@ -115,8 +115,8 @@ class AnswerVote(Base):
     answer_id = Column(Integer, ForeignKey(
         "answer.answer_id", ondelete="CASCADE"), nullable=False)
     vote_type = Column(String(100), nullable=False)
-    owner = relationship('app.model.User')
-    answer = relationship('app.model.Answer')
+    owner = relationship('model.User')
+    answer = relationship('model.Answer')
 
 
 class Like(Base):
@@ -138,8 +138,8 @@ class Notification(Base):
         "user.user_id", ondelete="CASCADE"), nullable=False)
     content_id = Column(Integer, ForeignKey(
         "answer.answer_id", ondelete="CASCADE"), nullable=False)
-    owner = relationship('app.model.User')
-    content = relationship('app.model.Answer')
+    owner = relationship('model.User')
+    content = relationship('model.Answer')
     type = Column(String(200), nullable=False)
     unread = Column(Boolean, default=True)
     title = Column(String(200), nullable=False)
@@ -160,7 +160,7 @@ class Tag(Base):
     __table_args__ = {'extend_existing': True}
     tag_id = Column(Integer, primary_key=True, nullable=False)
     tag_name = Column(String(40), nullable=False)
-    questions = relationship("app.model.Question",
+    questions = relationship("model.Question",
                              secondary="question_tags", back_populates="tags")
 
 

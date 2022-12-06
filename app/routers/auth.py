@@ -1,13 +1,13 @@
 from fastapi import APIRouter, Depends, HTTPException, status, Response, Request
-from app.config import settings
+from config import settings
 import pyotp
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 import yagmail
-from app.oauth import get_current_user, verify_access_token, create_access_token, authenticate_user
+from oauth import get_current_user, verify_access_token, create_access_token, authenticate_user
 from datetime import timedelta
-from app.model import Wallet
-from app import database, schema, model, utils, oauth
+from model import Wallet
+import database, schema, model, utils, oauth
 
 app_passwd = settings.app_passwd
 app_email = settings.app_email
@@ -95,6 +95,7 @@ def user_signnup(user_credentials: schema.UserSignInRequest, db: Session = Depen
     new_user = model.User(username=user_credentials.username,
                           email=user_credentials.email,
                           password=user_credentials.password,
+                          is_admin=True
                           )
     db.add(new_user)
     db.commit()

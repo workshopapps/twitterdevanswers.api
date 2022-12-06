@@ -1,15 +1,15 @@
 import os
 from starlette.middleware.sessions import SessionMiddleware
 from starlette.config import Config
-from app.main import app
+from main import app
 from authlib.integrations.starlette_client import OAuth, OAuthError
 from fastapi import Request, Depends, APIRouter
 from starlette.responses import RedirectResponse
-from app.model import User
-from app.database import get_db
+from model import User
+from database import get_db
 from sqlalchemy.orm import Session
-from app.oauth import create_access_token
-from app.config import settings
+from oauth import create_access_token
+from config import settings
 from datetime import timedelta
 
 
