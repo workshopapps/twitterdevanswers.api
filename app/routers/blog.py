@@ -26,10 +26,10 @@ def get_post(db: Session = Depends(get_db)):
 
 #make posts by a user
 @router.post("/",status_code=status.HTTP_201_CREATED)
-def post_blog(user_id,request:schema.Blog,db:Session=Depends(get_db)):
+def post_blog(user_id,request:schema.Blog,db:Session=Depends(get_db), admin=Depends(oauth.get_admin)):
     new_post =  model.Blog(title=request.title,body=request.body,blog_user_id=user_id,author=request.author,image_url=request.image_url,post_category=request.post_category)
     db.add(new_post)
-    db.commit()
+    db.commit() 
     db.refresh(new_post)
     return {"success":True,"data":new_post}
 
@@ -51,13 +51,13 @@ def get_post_by_user_id(user_id,db:Session=Depends(get_db)):
 
 #delete post by user_id
 @router.delete("/{user_id}/user",status_code=status.HTTP_200_OK)
-def delete_post_by_user_id(user_id,db:Session=Depends(get_db)):
+def delete_post_by_user_id(user_id,db:Session=Depends(get_db), admin = Depends(oauth.get_admin)):
     post_delete = db.query(model.Blog).filter(model.Blog.blog_user_id == user_id).delete(synchronize_session=False)
     return {"sucess":True,"data":f"{user_id} deleted"}
 
 #update post by user id
 @router.patch("/{user_id}/user",status_code=status.HTTP_202_ACCEPTED)
-def update_post_by_user_id(user_id,request:schema.Blog,db:Session=Depends(get_db)):
+def update_post_by_user_id(user_id,request:schema.Blog,db:Session=Depends(get_db),  admin = Depends(oauth.get_admin)):
     post_update = db.query(model.Blog).filter(model.Blog.blog_user_id == user_id).first()
     if not post_update:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail=f"{user_id} does not exist")

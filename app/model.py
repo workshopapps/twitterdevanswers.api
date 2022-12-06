@@ -20,7 +20,7 @@ class Wallet(Base):
     balance = Column(Integer, default=1000, nullable=False)
     deposits_made = Column(Integer, default=0, nullable=False)
     spendings = Column(Integer, default=0, nullable=False)
-    user_id = Column(Integer, ForeignKey("user.user_id"))
+    user_id = Column(Integer, ForeignKey("user.user_id", ondelete="CASCADE"))
     created_at = Column(
         DateTime, default=datetime.datetime.utcnow, nullable=False)
 
@@ -30,8 +30,8 @@ class User(Base):
     __table_args__ = {'extend_existing': True}
     user_id = Column(Integer, primary_key=True, nullable=False)
     username = Column(String(100), nullable=False, unique=True)
-    first_name = Column(String(30), nullable=False, default=" ")
-    last_name = Column(String(30), nullable=False, default=" ")
+    first_name = Column(String(30), nullable=True, default=" ")
+    last_name = Column(String(30), nullable=True, default=" ")
     email = Column(String(100), nullable=False, unique=True)
     description = Column(String(400), nullable=True, default=" ")
     password = Column(String(200), nullable=False)
@@ -41,25 +41,24 @@ class User(Base):
     stack = Column(String(400), nullable=True, default=" ")
     links = Column(String(400), nullable=True, default=" ")
     role = Column(String(300), nullable=True)
-    following = Column(Integer, nullable=False, default=0)
-    followers = Column(Integer, nullable=False, default=0)
-    image_url = Column(String(300), default=" ")
+    following = Column(Integer, nullable=True, default=0)
+    followers = Column(Integer, nullable=True, default=0)
+    image_url = Column(String(300), nullable=True, default=" ")
     location = Column(String(100), nullable=True, default=" ")
     is_admin = Column(Boolean, default=False)
     account_balance = Column(Integer, default=1000)
     created_at = Column(TIMESTAMP(timezone=True),
                         nullable=False, server_default=text('now()'))
-
-
+    mfa_hash = Column(String())
 class Following(Base):
     __tablename__ = "following"
     __table_args__ = {'extend_existing': True}
     user_from = Column(Integer, ForeignKey(
         "user.user_id", ondelete="CASCADE"
-    ), nullable=False, primary_key=True)
+    ), nullable=True, primary_key=True)
     target_user = Column(Integer, ForeignKey(
         "user.user_id", ondelete="CASCADE"
-    ), nullable=False, primary_key=True)
+    ), nullable=True, primary_key=True)
 
 
 class Question(Base):
@@ -163,23 +162,6 @@ class Tag(Base):
     questions = relationship("app.model.Question",
                              secondary="question_tags", back_populates="tags")
 
-class Blog(Base):
-
-    __tablename__ = 'blog'
-    __table_args__ = {'extend_existing': True}
-    blog_id = Column(Integer, primary_key=True, nullable=False)
-    title = Column(String(300), nullable=False)
-    body = Column(String(7000), nullable=False)
-    author = Column(String(300), nullable=False)
-    image_url = Column(String(300), default="default.jpg")
-    post_category = Column(String(200), nullable=False)
-    user = relationship('model.User')
-    date_posted = Column(TIMESTAMP(timezone=True),
-                         nullable=False, server_default=text('now()'))
-    blog_user_id = Column(Integer, ForeignKey(
-        "user.user_id", ondelete="CASCADE"), nullable=False)
-
-
 
 class Blog(Base):
 
@@ -196,8 +178,6 @@ class Blog(Base):
                          nullable=False, server_default=text('now()'))
     blog_user_id = Column(Integer, ForeignKey(
         "user.user_id", ondelete="CASCADE"), nullable=False)
+
+
 Base.metadata.create_all(bind=engine)
-# Base.metadata.drop_all(bind=engine)
-# Base.metadata.reflect()
-# Base.metadata.clear()
-# Base.metadata.remove(User.__table__)
