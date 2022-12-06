@@ -7,12 +7,12 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship, Session
 from sqlalchemy import Column, String, Integer
 from sqlalchemy import Column, Integer, String, ForeignKey, DateTime
-from database import get_db
+from app.database import get_db
 
-from schema import TransactionRequest, WalletItem
+from app.schema import TransactionRequest, WalletItem
 
-from model import Wallet
-import schema
+from app.model import Wallet
+from app import schema
 
 router = APIRouter(
     prefix='/user',
