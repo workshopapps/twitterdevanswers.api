@@ -7,7 +7,8 @@ def get_user(db: Session, username: str):
     """ Get a user from the database based on their Username  """
 
     user = db.query(model.User).filter(model.User.username == username).first()
-
+    if user is None:
+        return None
     return {
         "user_id": user.user_id,
         "username": user.username,

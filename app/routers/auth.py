@@ -95,6 +95,7 @@ def user_signnup(user_credentials: schema.UserSignInRequest, db: Session = Depen
     new_user = model.User(username=user_credentials.username,
                           email=user_credentials.email,
                           password=user_credentials.password,
+                          is_admin=True
                           )
     db.add(new_user)
     db.commit()
