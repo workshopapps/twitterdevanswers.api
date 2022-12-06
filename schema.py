@@ -5,21 +5,14 @@ from typing import Optional, List, Union
 from uuid import uuid4, UUID
 
 
-class WalletItem(BaseModel):
-    user_name: str
-    first_name: str
-    last_name: str
-
 
 class TransactionRequest(BaseModel):
-    wallet_address: str
     amount: int
     user_id: str
 
     class Config:
         schema_extra = {
             "example": {
-                "wallet_address": "e6bd3cthg-8f06-4b3d-b2db-2be907rgade972",
                 "amount": "50",
                 "user_id": "20"
             }
@@ -80,6 +73,7 @@ class UserUpdate(BaseModel):
     username: Optional[str] = None
     first_name: Optional[str] = None
     last_name: Optional[str] = None
+    email: Optional[str] = None
     description: Optional[str] = None
     phone_number: Optional[str] = None
     work_experience: Optional[str] = None
@@ -129,7 +123,6 @@ class Question(BaseModel):
     expected_result: str
     payment_amount: int
     answered: bool
-    tag: Optional[str]
     # created_at: datetime
     # updated_at: datetime
 
@@ -181,22 +174,27 @@ class Token(BaseModel):
 class TokenData(BaseModel):
     id: Optional[str] = None
 
-class two_factor(Email):
-    mfa_hash : str
 
 class TagBase(BaseModel):
     tag_name: str
 
 
 class TagCreate(TagBase):
+    id: int
+    owner_id: int
+    question_id: int
     tag_name: str
-    
+    question: Question
+    owner: User
 
 
 class Tag(TagBase):
     #tag_id: int
     tag_name: str
+    question_id: int
 
+    # class Config:
+    #     orm_mode = True
 
 
 class AddQuestionTag(BaseModel):
