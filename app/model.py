@@ -180,5 +180,5 @@ class Blog(Base):
     blog_user_id = Column(Integer, ForeignKey(
         "user.user_id", ondelete="CASCADE"), nullable=False)
 
-
+# create tables
 Base.metadata.create_all(bind=engine)
