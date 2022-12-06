@@ -80,7 +80,6 @@ class UserUpdate(BaseModel):
     username: Optional[str] = None
     first_name: Optional[str] = None
     last_name: Optional[str] = None
-    email: Optional[str] = None
     description: Optional[str] = None
     phone_number: Optional[str] = None
     work_experience: Optional[str] = None
@@ -188,17 +187,14 @@ class TagBase(BaseModel):
 
 
 class TagCreate(TagBase):
-    id: int
-    owner_id: Optional[int]
     tag_name: str
+    
 
 
 class Tag(TagBase):
     #tag_id: int
     tag_name: str
-    question: Question
-    owner: User
-    question_id: int
+
 
 
 class AddQuestionTag(BaseModel):
