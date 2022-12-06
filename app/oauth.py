@@ -1,12 +1,12 @@
-from utils import verify_password
+from app.utils import verify_password
 from jose import JWTError
 from jose import jwt
 from datetime import datetime, timedelta
-import schema, database, model
+from app import schema, database, model
 from fastapi import Depends, status, HTTPException
 from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.orm import Session
-from config import settings
+from app.config import settings
 from pydantic import BaseModel
 from typing import Union
 oauth2scheme = OAuth2PasswordBearer(tokenUrl='auth/signin')
