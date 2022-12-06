@@ -1,3 +1,5 @@
+import sys
+sys.path.append('..')
 from app import model
 from app.oauth import get_current_user, get_admin
 from fastapi import FastAPI, Depends, HTTPException, APIRouter, Request
@@ -6,8 +8,7 @@ from typing import List
 from app.model import *
 from app.database import get_db
 from app import crud, schema
-import sys
-sys.path.append('..')
+
 
 
 router = APIRouter(
