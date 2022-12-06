@@ -65,7 +65,7 @@ def update_user(user: schema.UserUpdate, username: str, db: Session = Depends(ge
 def delete_user(username: str, user_id: int, db: Session = Depends(get_db)):
     """ Delete a user by it's username  """
     try:
-        delete_user = crud.delete_user(db, username=username, current_user = user_id))
+        delete_user = crud.delete_user(db, username=username, current_user = user_id)
         if not delete_user:
             raise HTTPException(
                 status_code=404, detail=f"user with user_id : {username} does not exist")
