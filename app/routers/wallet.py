@@ -9,10 +9,10 @@ from sqlalchemy import Column, String, Integer
 from sqlalchemy import Column, Integer, String, ForeignKey, DateTime
 from app.database import get_db
 
-from schema import TransactionRequest, WalletItem
+from app.schema import TransactionRequest, WalletItem
 
-from model import Wallet
-import schema
+from app.model import Wallet
+from app import schema
 
 router = APIRouter(
     prefix='/user',
@@ -67,7 +67,7 @@ def remove_from_wallet(request: schema.TransactionRequest, db: Session = Depends
 
         user_account.balance -= amount
         user_account.spendings += 1
-        
+
         db.add(user_account)
         db.commit()
         db.refresh(user_account)

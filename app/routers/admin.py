@@ -1,4 +1,4 @@
-import schema, crud
+from app import schema, crud
 from app.database import get_db
 from app.model import *
 from typing import List

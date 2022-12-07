@@ -1,5 +1,5 @@
 from app import model
-from oauth import get_current_user
+from app.oauth import get_current_user
 from fastapi import FastAPI, Depends, HTTPException, APIRouter, Request
 from sqlalchemy.orm import Session
 from typing import List
@@ -61,16 +61,16 @@ def update_user(user: schema.UserUpdate, username: str, db: Session = Depends(ge
     else:
         return {"success": False, "message":  "You're not authorized to perform this update "}
 
+
 @router.delete('/delete/{username}/{user_id}')
 def delete_user(username: str, user_id: int, db: Session = Depends(get_db)):
     """ Delete a user by it's username  """
     try:
-        delete_user = crud.delete_user(db, username=username, current_user = user_id)
+        delete_user = crud.delete_user(
+            db, username=username, current_user=user_id)
         if not delete_user:
             raise HTTPException(
                 status_code=404, detail=f"user with user_id : {username} does not exist")
         return {"success": True, "data": "User has been deleted successfully"}
     except:
-        return {"error" : "Unable to delete user"}
-
-
+        return {"error": "Unable to delete user"}
