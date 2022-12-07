@@ -2,7 +2,7 @@ from app import schema, crud
 from app.database import get_db
 from app.model import *
 from sqlalchemy.orm import Session
-from fastapi import Depends, HTTPException, APIRouter, status, Request, Path
+from fastapi import Depends, HTTPException, APIRouter, status, Path
 from app.oauth import get_current_user
 from app.routers.answer import get_answer
 from app import oauth, model, schema
