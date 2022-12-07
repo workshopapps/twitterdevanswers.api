@@ -11,7 +11,10 @@ from sqlalchemy.sql.expression import text
 from sqlalchemy import MetaData
 from app.database import Base, engine
 
+
 from uuid import uuid4
+
+
 import uuid as uuid_pkg
 import sqlalchemy
 import datetime
@@ -23,7 +26,7 @@ class Wallet(Base):
     __tablename__ = 'walletaccount'
     __table_args__ = {'extend_existing': True}
 
-    id = Column(String(50), default=uuid4(), primary_key=True)
+    id = Column(String(50), primary_key=True)
     balance = Column(Integer, default=1000, nullable=False)
     deposits_made = Column(Integer, default=0, nullable=False)
     spendings = Column(Integer, default=0, nullable=False)
