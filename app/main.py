@@ -5,7 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 
 
-from routers import user, notification, questions, auth, like, answer, following, tag, blog, wallet, admin
+from app.routers import user, notification, questions, auth, like, answer, following, tag, blog, wallet, admin
 import sentry_sdk
 
 
