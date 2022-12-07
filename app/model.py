@@ -5,8 +5,16 @@ from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from sqlalchemy.sql.sqltypes import TIMESTAMP
 from sqlalchemy.sql.expression import text
+
+
+
 from sqlalchemy import MetaData
 from app.database import Base, engine
+
+
+from uuid import uuid4
+
+
 import uuid as uuid_pkg
 import sqlalchemy
 import datetime
