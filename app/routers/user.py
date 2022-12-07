@@ -1,11 +1,11 @@
-from app import model
-from app.oauth import get_current_user
+import model
+from oauth import get_current_user
 from fastapi import FastAPI, Depends, HTTPException, APIRouter, Request
 from sqlalchemy.orm import Session
 from typing import List
-from app.model import *
-from app.database import get_db
-from app import crud, schema
+from model import *
+from database import get_db
+import crud, schema
 import sys
 sys.path.append('..')
 

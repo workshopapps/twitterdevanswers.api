@@ -6,8 +6,8 @@ import logging
 from sqlalchemy import desc
 from sqlalchemy.orm import Session
 
-from app.database import get_db
-from app import model, schema, oauth
+from database import get_db
+import model, schema, oauth
 
 from typing import List
 
