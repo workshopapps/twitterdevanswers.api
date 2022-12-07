@@ -1,7 +1,7 @@
 pipeline { 
     agent any 
     	stages {
-		stage('Build_') { 
+		stage('Build_Backend') { 
 		    steps { 
 			sh "pip install -r requirements.txt"
 			sh "pip install --upgrade 'sentry-sdk[fastapi]'"
