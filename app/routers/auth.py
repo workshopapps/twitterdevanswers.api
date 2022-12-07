@@ -1,13 +1,13 @@
 from fastapi import APIRouter, Depends, HTTPException, status, Response, Request
-from config import settings
+from app.config import settings
 import pyotp
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 import yagmail
-from oauth import get_current_user, verify_access_token, create_access_token, authenticate_user
+from app.oauth import get_current_user, verify_access_token, create_access_token, authenticate_user
 from datetime import timedelta
-from model import Wallet
-import database, schema, model, utils, oauth
+from app.model import Wallet
+from app import database, schema, model, utils, oauth
 
 app_passwd = settings.app_passwd
 app_email = settings.app_email

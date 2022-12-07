@@ -1,8 +1,8 @@
 from fastapi import APIRouter, status, Response, Depends, FastAPI
 from fastapi.exceptions import HTTPException
-import schema, model, oauth
+from app import schema, model, oauth
 from sqlalchemy.orm import Session
-from database import get_db
+from app.database import get_db
 # from fastapi_pagination import LimitOffsetPage, add_pagination, paginate
 
 
