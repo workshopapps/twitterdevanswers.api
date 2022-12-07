@@ -5,11 +5,14 @@ from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from sqlalchemy.sql.sqltypes import TIMESTAMP
 from sqlalchemy.sql.expression import text
+from sqlalchemy import MetaData
 from app.database import Base, engine
 from uuid import uuid4
 import uuid as uuid_pkg
 import sqlalchemy
 import datetime
+
+metadata = MetaData()
 
 
 class Wallet(Base):
@@ -176,6 +179,7 @@ class Blog(Base):
                          nullable=False, server_default=text('now()'))
     blog_user_id = Column(Integer, ForeignKey(
         "user.user_id", ondelete="CASCADE"), nullable=False)
+
 
 # create tables
 Base.metadata.create_all(bind=engine)
