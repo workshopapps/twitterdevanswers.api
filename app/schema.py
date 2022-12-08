@@ -84,11 +84,25 @@ class UserSignInRequest(BaseModel):
         return v
 
 
+class UserSignInAdminRequest(BaseModel):
+    username: str
+    email: EmailStr
+    password: str
+    confirmPassword: str
+    email_verification_code: Optional[str]
+    is_admin: Optional[str]
+
+    @validator('confirmPassword')
+    def passwords_match(cls, v, values, **kwargs):
+        if 'password' in values and v != values['password']:
+            raise ValueError('passwords do not match')
+        return v
+
+
 class UserUpdate(BaseModel):
     username: Optional[str] = None
     first_name: Optional[str] = None
     last_name: Optional[str] = None
-    email: Optional[str] = None
     description: Optional[str] = None
     phone_number: Optional[str] = None
     work_experience: Optional[str] = None
@@ -192,22 +206,21 @@ class TokenData(BaseModel):
     id: Optional[str] = None
 
 
+class two_factor(Email):
+    mfa_hash: str
+
+
 class TagBase(BaseModel):
     tag_name: str
 
 
 class TagCreate(TagBase):
-    id: int
-    owner_id: Optional[int]
     tag_name: str
 
 
 class Tag(TagBase):
     #tag_id: int
     tag_name: str
-    question: Question
-    owner: User
-    question_id: int
 
 
 class AddQuestionTag(BaseModel):

@@ -38,8 +38,9 @@ def retrieve_question(question_id: int, db: Session = Depends(get_db), current_u
 def delete_question(question_id: int, db: Session = Depends(get_db), current_user: int = Depends(oauth.get_current_user)):
     delete_question = db.query(model.Question).filter(
         model.Question.question_id == question_id).first()
+    
     if delete_question:
-        if delete_question.owner_id == current_user.user_id:
+        if delete_question.owner_id == current_user.user_id or current_user.is_admin:
             db.delete(delete_question)
             db.commit()
             return {"success": True, "message": delete_question.question_id}

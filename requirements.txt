@@ -93,3 +93,4 @@ wrapt==1.14.1
 yagmail==0.15.293
 yarl==1.8.1
 mysqlclient
+sentry_sdk
