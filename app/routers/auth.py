@@ -93,18 +93,18 @@ def user_signnup(user_credentials: schema.UserSignInRequest, db: Session = Depen
     if user:
         return HTTPException(status_code=400, detail={"msg": "User already exists"})
 
-    if auth_otp(secret, user_credentials.email_verification_code):
+    #  if auth_otp(secret, user_credentials.email_verification_code):
 
-        new_user = model.User(username=user_credentials.username,
-                            email=user_credentials.email,
-                            password=user_credentials.password,
-                            )
-        db.add(new_user)
-        db.commit()
-        db.refresh(new_user)
-    else:
-        raise HTTPException(status_code=status.HTTP_412_PRECONDITION_FAILED,
-                             detail="OTP is either a wrong one or has expired ")
+    new_user = model.User(username=user_credentials.username,
+			    email=user_credentials.email,
+			    password=user_credentials.password,
+			    )
+    db.add(new_user)
+    db.commit()
+    db.refresh(new_user)
+#     else:
+#         raise HTTPException(status_code=status.HTTP_412_PRECONDITION_FAILED,
+#                              detail="OTP is either a wrong one or has expired ")
 
 
 
