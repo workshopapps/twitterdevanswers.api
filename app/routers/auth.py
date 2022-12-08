@@ -8,6 +8,7 @@ from app.oauth import get_current_user, verify_access_token, create_access_token
 from datetime import timedelta
 from app.model import Wallet
 from app import database, schema, model, utils, oauth
+from uuid import uuid4
 
 app_passwd = settings.app_passwd
 app_email = settings.app_email
@@ -106,8 +107,10 @@ def user_signnup(user_credentials: schema.UserSignInRequest, db: Session = Depen
                              detail="OTP is either a wrong one or has expired ")
 
 
+
     # creating User Wallet
-    wallet_obj = Wallet(user_id=new_user.user_id)
+    wallet_id = uuid4()
+    wallet_obj = Wallet(user_id=new_user.user_id, id=wallet_id)
     db.add(wallet_obj)
     db.commit()
     db.refresh(wallet_obj)

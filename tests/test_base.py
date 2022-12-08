@@ -2,7 +2,7 @@
 General testing module for app
 """
 import unittest
-from app import main
+import main
 from fastapi.testclient import TestClient
 from fastapi import FastAPI, Header, HTTPException
 from pydantic import BaseModel

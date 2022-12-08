@@ -1,7 +1,7 @@
 from fastapi import FastAPI, status
 from fastapi.middleware.cors import CORSMiddleware
-import sys
-sys.path.append('..')
+#import sys
+#sys.path.append('..')
 # from app.routers import googleauth
 
 from app.routers import user, notification, questions, auth, like, answer, following, tag, blog, wallet, admin
@@ -18,6 +18,7 @@ sentry_sdk.init(
     # We recommend adjusting this value in production,
     traces_sample_rate=1.0,
 )
+
 
 
 

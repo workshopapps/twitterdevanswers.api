@@ -67,7 +67,7 @@ def remove_from_wallet(request: schema.TransactionRequest, db: Session = Depends
 
         user_account.balance -= amount
         user_account.spendings += 1
-        
+
         db.add(user_account)
         db.commit()
         db.refresh(user_account)

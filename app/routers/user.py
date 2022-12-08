@@ -62,16 +62,19 @@ def update_user(user: schema.UserUpdate, username: str, db: Session = Depends(ge
     else:
         return {"success": False, "message":  "You're not authorized to perform this update "}
 
+
 @router.delete('/delete/{username}/{user_id}')
 def delete_user(username: str, user_id: int, db: Session = Depends(get_db)):
     """ Delete a user by it's username  """
     try:
-        delete_user = crud.delete_user(db, username=username, current_user = user_id)
+        delete_user = crud.delete_user(
+            db, username=username, current_user=user_id)
         if not delete_user:
             raise HTTPException(
                 status_code=404, detail=f"user with user_id : {username} does not exist")
         return {"success": True, "data": "User has been deleted successfully"}
     except:
+
         return {"error" : "Unable to delete user"}
 
 
@@ -83,7 +86,9 @@ def remove_admin(usernname:int, db: Session = Depends(get_db), admin = Depends(g
 
 @router.get("/make-admin/{user_id}")
 def remove_admin(usernname:int, db: Session = Depends(get_db), admin = Depends(get_admin)):
-    user = db.query(model.User).filter(model.User.username == usernname).update({'is_admin': True})
-    return {'Success': True, "Details" : "User deactivated as admin "}
-
-
+    try:
+        user = db.query(model.User).filter(model.User.username == usernname).update({'is_admin': True})
+        return {'Success': True, "Details" : "User deactivated as admin "}
+    except:
+        raise HTTPException(
+                status_code=405, detail=f"An error occured pls try again ")
