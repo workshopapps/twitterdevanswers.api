@@ -15,7 +15,6 @@ router = APIRouter(
 )
 
 
-
 def get_question(question_id: int, amount: int, db: Session = Depends(get_db)):
 	"""
 		gets question with given question id and amount
@@ -115,9 +114,4 @@ def admin_transactions(item: AdminPayments,  db: Session = Depends(get_db)):
 				"message": "extra tokens has been added for maximum voted answer",
 				"earned": earned_value,
 				"wallet": answerer_account}
-
-		
-
-
-
 
