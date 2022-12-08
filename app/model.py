@@ -59,7 +59,7 @@ class User(Base):
     account_balance = Column(Integer, default=1000)
     created_at = Column(TIMESTAMP(timezone=True),
                         nullable=False, server_default=text('now()'))
-    mfa_hash = Column(String())
+    mfa_hash = Column(String(300))
 class Following(Base):
     __tablename__ = "following"
     __table_args__ = {'extend_existing': True}
