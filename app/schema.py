@@ -40,6 +40,8 @@ class User(BaseModel):
     first_name: str
     last_name: str
     email: EmailStr
+    date_of_birth :str
+    gender: str
     description: str
     image_url: str
     phone_number: str
@@ -105,6 +107,8 @@ class UserUpdate(BaseModel):
     last_name: Optional[str] = None
     description: Optional[str] = None
     phone_number: Optional[str] = None
+    date_of_birth: Optional[str] = None
+    gender: Optional[str] = None
     work_experience: Optional[str] = None
     position: Optional[str] = None
     stack: Optional[str] = None

@@ -5,16 +5,9 @@ from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from sqlalchemy.sql.sqltypes import TIMESTAMP
 from sqlalchemy.sql.expression import text
-
-
-
 from sqlalchemy import MetaData
 from app.database import Base, engine
-
-
 from uuid import uuid4
-
-
 import uuid as uuid_pkg
 import sqlalchemy
 import datetime
@@ -43,6 +36,8 @@ class User(Base):
     first_name = Column(String(30), nullable=True, default=" ")
     last_name = Column(String(30), nullable=True, default=" ")
     email = Column(String(100), nullable=False, unique=True)
+    date_of_birth = Column(Date,nullable=True, default=" ")
+    gender = Column(String(7), nullable=False ,default=" ")
     description = Column(String(400), nullable=True, default=" ")
     password = Column(String(200), nullable=False)
     phone_number = Column(String(30), nullable=True, default=" ")
@@ -91,9 +86,6 @@ class Question(Base):
                         nullable=False, server_default=text('now()'))
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
     owner = relationship('model.User')
-    # tags = relationship(
-    #     "model.Tag", secondary="question_tags", backref="questions")
-
     tags = relationship(
         "model.Tag", secondary="question_tags", back_populates="questions")
 
