@@ -1,5 +1,5 @@
 from fastapi.testclient import TestClient
-from app import main
+import main
 from tests.test_base import fake_db
 
 dummy_user = {
