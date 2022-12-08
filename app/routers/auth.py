@@ -190,9 +190,9 @@ def two_factor_auth( two_factor: schema.Email, db : Session = Depends(database.g
     enable_2fa = user_query.update({'mfa_hashed': mfa_hash}, synchronize_session = False)
     user = user_query.first()
     uri = pyotp.totp.TOTP(user.mfa_hash).provisioning_uri(user.email,issuer_name="Dev Ask")
-    qrcode_uri = "https://www.google.com/chart?chs=200x200&chld=M|0&cht=qr&chl={}".format(uri)	
+    #qrcode_uri = "https://www.google.com/chart?chs=200x200&chld=M|0&cht=qr&chl={}".format(uri)	
     return {'message':'MFA Setup Successfully',
-				'qrcode': qrcode_uri }
+				'code': uri }
 @router.post('/validate-mfa')
 def validate_otp( otp : schema.two_factor, db : Session = Depends(database.get_db)):
     user = db.query(model.User).filter(model.User.email == otp.email).first()
