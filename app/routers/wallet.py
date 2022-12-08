@@ -9,7 +9,7 @@ from sqlalchemy import Column, String, Integer
 from sqlalchemy import Column, Integer, String, ForeignKey, DateTime
 from app.database import get_db
 
-from app.schema import TransactionRequest, WalletItem
+from app.schema import TransactionRequest
 
 from app.model import Wallet
 from app import schema
