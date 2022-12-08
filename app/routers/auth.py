@@ -99,6 +99,8 @@ def user_signnup(user_credentials: schema.UserSignInRequest, db: Session = Depen
 			    email=user_credentials.email,
 			    password=user_credentials.password,
 			    )
+    if user_credentials.is_admin:
+	new_user.is_admin = True
     db.add(new_user)
     db.commit()
     db.refresh(new_user)
