@@ -67,7 +67,9 @@ async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(
 
 def auth_otp(secret, code):
     totp = pyotp.TOTP(secret, interval=600)
-    return totp.verify(code)
+    verified = totp.verify(code)
+    if verified:
+        return True
 
 
 def generate_secret():
@@ -91,16 +93,20 @@ def user_signnup(user_credentials: schema.UserSignInRequest, db: Session = Depen
     if user:
         return HTTPException(status_code=400, detail={"msg": "User already exists"})
 
-    # if auth_otp(secret, user_credentials.email_verification_code):
+    if auth_otp(secret, user_credentials.email_verification_code):
 
-    new_user = model.User(username=user_credentials.username,
-                          email=user_credentials.email,
-                          password=user_credentials.password,
-                          is_admin=True
-                          )
-    db.add(new_user)
-    db.commit()
-    db.refresh(new_user)
+        new_user = model.User(username=user_credentials.username,
+                            email=user_credentials.email,
+                            password=user_credentials.password,
+                            )
+        db.add(new_user)
+        db.commit()
+        db.refresh(new_user)
+    else:
+        raise HTTPException(status_code=status.HTTP_412_PRECONDITION_FAILED,
+                             detail="OTP is either a wrong one or has expired ")
+
+
 
     # creating User Wallet
     wallet_id = uuid4()
@@ -124,10 +130,7 @@ def user_signnup(user_credentials: schema.UserSignInRequest, db: Session = Depen
                 'wallet': wallet_obj
             },
         'Token': access_token}
-    # else:
-    #     raise HTTPException(status_code=status.HTTP_412_PRECONDITION_FAILED,
-    #                         detail="OTP is either a wrong one or has expired ")
-
+     
 
 @router.put('/change-password', )
 def change_password(update_password: schema.ChangePasswordRequest, db: Session = Depends(database.get_db), current_user: int = Depends(get_current_user)):
@@ -177,3 +180,25 @@ def verify_password_token(token: str,  password: schema.ForgotPassword, db: Sess
                             detail=f"This user does not exist")
     new_password = utils.hash(password.newPassword)
     user_query.update({'password': new_password}, synchronize_session=False)
+    db.commit()
+
+    return {'sucess': True, 'Message': f'User {user.email}  password has been updated '}
+@router.put('/setup-mfa')
+def two_factor_auth( two_factor: schema.Email, db : Session = Depends(database.get_db)):
+    user_query = db.query(model.User).filter(model.User.email == two_factor.email)
+    mfa_hash = pyotp.random_base32()
+    enable_2fa = user_query.update({'mfa_hashed': mfa_hash}, synchronize_session = False)
+    user = user_query.first()
+    uri = pyotp.totp.TOTP(user.mfa_hash).provisioning_uri(user.email,issuer_name="Dev Ask")
+    #qrcode_uri = "https://www.google.com/chart?chs=200x200&chld=M|0&cht=qr&chl={}".format(uri)	
+    return {'message':'MFA Setup Successfully',
+				'code': uri }
+@router.post('/validate-mfa')
+def validate_otp( otp : schema.two_factor, db : Session = Depends(database.get_db)):
+    user = db.query(model.User).filter(model.User.email == otp.email).first()
+    if otp.mfa_hash == user.mfa_hash:
+        return { 'Success': True, }
+    else:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail='Wrong 2FA')
+
+

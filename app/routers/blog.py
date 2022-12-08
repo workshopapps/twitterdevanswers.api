@@ -27,15 +27,17 @@ def get_post(db: Session = Depends(get_db)):
     get_post = db.query(model.Blog).all()
     return {"success": True, "data": get_post}
 
+
+#make posts by a user
+@router.post("/",status_code=status.HTTP_201_CREATED)
+def post_blog(user_id,request:schema.Blog,db:Session=Depends(get_db), admin=Depends(oauth.get_admin)):
+    new_post =  model.Blog(title=request.title,body=request.body,blog_user_id=user_id,author=request.author,image_url=request.image_url,post_category=request.post_category)
 # make posts by a user
 
 
-@router.post("/", status_code=status.HTTP_201_CREATED)
-def post_blog(user_id, request: schema.Blog, db: Session = Depends(get_db)):
-    new_post = model.Blog(title=request.title, body=request.body, blog_user_id=user_id,
-                          author=request.author, image_url=request.image_url, post_category=request.post_category)
+
     db.add(new_post)
-    db.commit()
+    db.commit() 
     db.refresh(new_post)
     return {"success": True, "data": new_post}
 
@@ -63,7 +65,6 @@ def get_post_by_user_id(user_id, db: Session = Depends(get_db)):
                             detail=f"{user_id} does not exist")
     return get_post
 
-# delete post by user_id
 
 """
 @router.delete("/{user_id}/user", status_code=status.HTTP_200_OK)
@@ -75,11 +76,11 @@ def delete_post_by_user_id(user_id, db: Session = Depends(get_db)):
 
 @router.delete("/{blog_id}/admin")
 def delete_post_by_user_id(blog_id, db: Session = Depends(get_db),
-                           current_user: int = Depends(oauth.get_current_user)):
+                           admin = Depends(oauth.get_admin)):
     db_blog = db.query(model.Blog).filter(model.Blog.blog_id == blog_id).first()
     if db_blog is None:
         raise HTTPException(status_code=404, detail="Invalid blog id")
-    elif db_blog.blog_user_id != current_user.user_id:
+    elif db_blog.blog_user_id != admin.user_id:
         raise HTTPException(
             status_code=400, detail="Only owner can delete this blog")
     db.delete(db_blog)
@@ -90,9 +91,10 @@ def delete_post_by_user_id(blog_id, db: Session = Depends(get_db),
 
 
 @router.patch("/{user_id}/admin", status_code=status.HTTP_202_ACCEPTED)
-def update_post_by_user_id(user_id, request: schema.Blog, db: Session = Depends(get_db)):
+def update_post_by_user_id(user_id, request: schema.Blog, db: Session = Depends(get_db), admin = Depends(oauth.get_admin)):
     post_update = db.query(model.Blog).filter(
         model.Blog.blog_user_id == user_id).first()
+
     if not post_update:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                             detail=f"{user_id} does not exist")

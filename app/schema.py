@@ -181,6 +181,8 @@ class Token(BaseModel):
 class TokenData(BaseModel):
     id: Optional[str] = None
 
+class two_factor(Email):
+    mfa_hash : str
 
 class TagBase(BaseModel):
     tag_name: str
