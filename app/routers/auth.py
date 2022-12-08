@@ -96,17 +96,15 @@ def user_signnup(user_credentials: schema.UserSignInRequest, db: Session = Depen
     #  if auth_otp(secret, user_credentials.email_verification_code):
 
     new_user = model.User(username=user_credentials.username,
-			    email=user_credentials.email,
-			    password=user_credentials.password,
-			    )
+                          email=user_credentials.email,
+                          password=user_credentials.password,
+                          )
     db.add(new_user)
     db.commit()
     db.refresh(new_user)
 #     else:
 #         raise HTTPException(status_code=status.HTTP_412_PRECONDITION_FAILED,
 #                              detail="OTP is either a wrong one or has expired ")
-
-
 
     # creating User Wallet
     wallet_id = uuid4()
@@ -130,7 +128,53 @@ def user_signnup(user_credentials: schema.UserSignInRequest, db: Session = Depen
                 'wallet': wallet_obj
             },
         'Token': access_token}
-     
+
+
+@router.post('/admin-signup', status_code=status.HTTP_201_CREATED)
+def admin_signnup(user_credentials: schema.UserSignInAdminRequest, db: Session = Depends(database.get_db)):
+    user_credentials.password = utils.hash(user_credentials.password)
+    user = db.query(model.User).filter(
+        model.User.email == user_credentials.email).first()
+    if user:
+        return HTTPException(status_code=400, detail={"msg": "User already exists"})
+
+    #  if auth_otp(secret, user_credentials.email_verification_code):
+
+    new_user = model.User(username=user_credentials.username,
+                          email=user_credentials.email,
+                          password=user_credentials.password,
+                          is_admin=True
+                          )
+    db.add(new_user)
+    db.commit()
+    db.refresh(new_user)
+#     else:
+#         raise HTTPException(status_code=status.HTTP_412_PRECONDITION_FAILED,
+#                              detail="OTP is either a wrong one or has expired ")
+
+    # creating User Wallet
+    wallet_id = uuid4()
+    wallet_obj = Wallet(user_id=new_user.user_id, id=wallet_id)
+    db.add(wallet_obj)
+    db.commit()
+    db.refresh(wallet_obj)
+
+    user = db.query(model.User).filter(
+        model.User.email == user_credentials.email).first()
+    access_token = oauth.create_access_token(
+        data={'user_id': user.user_id})
+    return {
+        'Success': True,
+        'Message': 'user added successfully',
+        'data':
+            {
+                'user_id': user.user_id,
+                'userName': user.username,
+                'email': user.email,
+                'wallet': wallet_obj
+            },
+        'Token': access_token}
+
 
 @router.put('/change-password', )
 def change_password(update_password: schema.ChangePasswordRequest, db: Session = Depends(database.get_db), current_user: int = Depends(get_current_user)):
@@ -183,22 +227,28 @@ def verify_password_token(token: str,  password: schema.ForgotPassword, db: Sess
     db.commit()
 
     return {'sucess': True, 'Message': f'User {user.email}  password has been updated '}
+
+
 @router.put('/setup-mfa')
-def two_factor_auth( two_factor: schema.Email, db : Session = Depends(database.get_db)):
-    user_query = db.query(model.User).filter(model.User.email == two_factor.email)
+def two_factor_auth(two_factor: schema.Email, db: Session = Depends(database.get_db)):
+    user_query = db.query(model.User).filter(
+        model.User.email == two_factor.email)
     mfa_hash = pyotp.random_base32()
-    enable_2fa = user_query.update({'mfa_hashed': mfa_hash}, synchronize_session = False)
+    enable_2fa = user_query.update(
+        {'mfa_hashed': mfa_hash}, synchronize_session=False)
     user = user_query.first()
-    uri = pyotp.totp.TOTP(user.mfa_hash).provisioning_uri(user.email,issuer_name="Dev Ask")
-    #qrcode_uri = "https://www.google.com/chart?chs=200x200&chld=M|0&cht=qr&chl={}".format(uri)	
-    return {'message':'MFA Setup Successfully',
-				'code': uri }
+    uri = pyotp.totp.TOTP(user.mfa_hash).provisioning_uri(
+        user.email, issuer_name="Dev Ask")
+    #qrcode_uri = "https://www.google.com/chart?chs=200x200&chld=M|0&cht=qr&chl={}".format(uri)
+    return {'message': 'MFA Setup Successfully',
+            'code': uri}
+
+
 @router.post('/validate-mfa')
-def validate_otp( otp : schema.two_factor, db : Session = Depends(database.get_db)):
+def validate_otp(otp: schema.two_factor, db: Session = Depends(database.get_db)):
     user = db.query(model.User).filter(model.User.email == otp.email).first()
     if otp.mfa_hash == user.mfa_hash:
-        return { 'Success': True, }
+        return {'Success': True, }
     else:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail='Wrong 2FA')
-
-
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN, detail='Wrong 2FA')

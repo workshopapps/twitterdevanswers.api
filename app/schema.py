@@ -76,6 +76,21 @@ class UserSignInRequest(BaseModel):
         return v
 
 
+class UserSignInAdminRequest(BaseModel):
+    username: str
+    email: EmailStr
+    password: str
+    confirmPassword: str
+    email_verification_code: Optional[str]
+    is_admin: Optional[str]
+
+    @validator('confirmPassword')
+    def passwords_match(cls, v, values, **kwargs):
+        if 'password' in values and v != values['password']:
+            raise ValueError('passwords do not match')
+        return v
+
+
 class UserUpdate(BaseModel):
     username: Optional[str] = None
     first_name: Optional[str] = None
@@ -181,8 +196,10 @@ class Token(BaseModel):
 class TokenData(BaseModel):
     id: Optional[str] = None
 
+
 class two_factor(Email):
-    mfa_hash : str
+    mfa_hash: str
+
 
 class TagBase(BaseModel):
     tag_name: str
@@ -190,13 +207,11 @@ class TagBase(BaseModel):
 
 class TagCreate(TagBase):
     tag_name: str
-    
 
 
 class Tag(TagBase):
     #tag_id: int
     tag_name: str
-
 
 
 class AddQuestionTag(BaseModel):
