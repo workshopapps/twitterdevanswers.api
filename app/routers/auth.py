@@ -66,26 +66,21 @@ async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(
             "token_type": "bearer"}
 
 
-secret_key=''
+totp=''
 
 
-def generate_secret():
-    secret = pyotp.random_base32()
-    
-    return secret
 
 @router.post('/send_email_code', status_code=status.HTTP_200_OK)
 def user_signnup(request: schema.Email):
-    global secret_key
-    secret_key = generate_secret()
-    totp = pyotp.TOTP(secret_key,interval=600).now()
-    send_signup_mail(request.email, totp)
+    global totp
+    secret_key = pyotp.random_base32()
+    totp = pyotp.TOTP(secret_key,interval=600)
+    send_signup_mail(request.email, totp.now())
     return {"msg": "email sent"}
 
 
-def auth_otp(secret, code):
-    otp = pyotp.TOTP(secret).verify(str(code))
-    return otp
+def auth_otp(code):
+    return totp.verify(code)
 
 @router.post('/signup', status_code=status.HTTP_201_CREATED)
 def user_signnup(user_credentials: schema.UserSignInRequest, db: Session = Depends(database.get_db)):
@@ -96,7 +91,7 @@ def user_signnup(user_credentials: schema.UserSignInRequest, db: Session = Depen
     if user:
         return HTTPException(status_code=400, detail={"msg": "User already exists"})
 
-    if auth_otp(secret=secret_key,code=user_credentials.email_verification_code):
+    if auth_otp(code=user_credentials.email_verification_code):
 
         new_user = model.User(username=user_credentials.username,
                             email=user_credentials.email,
