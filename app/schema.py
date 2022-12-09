@@ -5,21 +5,29 @@ from typing import Optional, List, Union
 from uuid import uuid4, UUID
 
 
-class WalletItem(BaseModel):
-    user_name: str
-    first_name: str
-    last_name: str
+class AdminPayments(BaseModel):
+    question_id: int
+    amount: int
+    commission: int
+    admin_id: int
 
+    class Config:
+        schema_extra = {
+            "example": {
+                "amount": "50",
+                "question_id": "20",
+                "commission": "10",
+                "admin_id": "2"
+            }
+        }
 
 class TransactionRequest(BaseModel):
-    wallet_address: str
     amount: int
     user_id: str
 
     class Config:
         schema_extra = {
             "example": {
-                "wallet_address": "e6bd3cthg-8f06-4b3d-b2db-2be907rgade972",
                 "amount": "50",
                 "user_id": "20"
             }
@@ -32,6 +40,8 @@ class User(BaseModel):
     first_name: str
     last_name: str
     email: EmailStr
+    date_of_birth :str
+    gender: str
     description: str
     image_url: str
     phone_number: str
@@ -97,6 +107,8 @@ class UserUpdate(BaseModel):
     last_name: Optional[str] = None
     description: Optional[str] = None
     phone_number: Optional[str] = None
+    date_of_birth: Optional[str] = None
+    gender: Optional[str] = None
     work_experience: Optional[str] = None
     position: Optional[str] = None
     stack: Optional[str] = None
@@ -104,6 +116,7 @@ class UserUpdate(BaseModel):
     role: Optional[str] = None
     image_url: Optional[str] = None
     location: Optional[str] = None
+    is_admin: Optional[bool] = None
 
 
 class UserSignInResponse(BaseModel):

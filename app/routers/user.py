@@ -63,34 +63,16 @@ def update_user(user: schema.UserUpdate, username: str, db: Session = Depends(ge
         return {"success": False, "message":  "You're not authorized to perform this update "}
 
 
-@router.delete('/delete/{username}/{user_id}')
-def delete_user(username: str, user_id: int, db: Session = Depends(get_db),current_user = Depends(get_current_user) ):
-    """ Delete a user by it's username  """
-   
-    if user_id == current_user.user_id or current_user.is_admin:
-        try:
-            delete_user = crud.delete_user(
-                db, username=username, current_user=user_id)
-            if not delete_user:
-                raise HTTPException(
-                    status_code=404, detail=f"user with user_id : {username} does not exist")
-            return {"success": True, "data": "User has been deleted successfully"}
-        except:
-
-            return {"error" : "Unable to delete user"}
-
-
-
 @router.get("/remove-admin/{user_id}")
-def remove_admin(usernname:int, db: Session = Depends(get_db), admin = Depends(get_admin)):
-    user = db.query(model.User).filter(model.User.username == usernname).update({'is_admin': False})
+def remove_admin(user_id:int, db: Session = Depends(get_db), admin = Depends(get_admin)):
+    user = db.query(model.User).filter(model.User.user_id == user_id).update({'is_admin': False})
     return {'Success': True, "Details" : "User deactivated as admin "}
 
 @router.get("/make-admin/{user_id}")
-def remove_admin(usernname:int, db: Session = Depends(get_db), admin = Depends(get_admin)):
+def make_admin(user_id:int, db: Session = Depends(get_db), admin = Depends(get_admin)):
     try:
-        user = db.query(model.User).filter(model.User.username == usernname).update({'is_admin': True})
-        return {'Success': True, "Details" : "User deactivated as admin "}
+        user = db.query(model.User).filter(model.User.user_id == user_id).update({'is_admin': True})
+        return {'Success': True, "Details" : "User made an admin "}
     except:
         raise HTTPException(
                 status_code=405, detail=f"An error occured pls try again ")

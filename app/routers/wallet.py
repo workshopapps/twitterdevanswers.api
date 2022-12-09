@@ -9,7 +9,7 @@ from sqlalchemy import Column, String, Integer
 from sqlalchemy import Column, Integer, String, ForeignKey, DateTime
 from app.database import get_db
 
-from app.schema import TransactionRequest, WalletItem
+from app.schema import TransactionRequest
 
 from app.model import Wallet, User
 from app import schema
@@ -20,7 +20,7 @@ router = APIRouter(
 )
 
 
-@router.get("/wallet/view/{user_id}/user")
+@router.get("/wallet/view/{user_id}")
 def view_wallet(user_id, db: Session = Depends(get_db)):
 
     user_account = db.query(Wallet).filter(Wallet.user_id == user_id).first()
@@ -33,21 +33,22 @@ def view_wallet(user_id, db: Session = Depends(get_db)):
 
 @router.put('/wallet/earn')
 def add_to_wallet(request: schema.TransactionRequest, db: Session = Depends(get_db)):
-    id = request.wallet_address
-    user_account = db.query(Wallet).filter(Wallet.id == id).first()
+    id = request.user_id
+    user_account = db.query(Wallet).filter(Wallet.user_id == id).first()
 
     if not user_account:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                             detail=f'account with the id {id} not available.')
+
     user_obj = db.query(User).filter(
         User.user_id == user_account.user_id).first()
     amount = request.amount
-
     user_account.balance += amount
     user_account.deposits_made += 1
-    user_obj.balance = user_account.balance
+    user_obj.account_balance = user_account.balance
 
     db.add(user_account)
+    db.add(user_obj)
     db.commit()
     db.add(user_obj)
     db.commit()
@@ -68,36 +69,21 @@ def remove_from_wallet(request: schema.TransactionRequest, db: Session = Depends
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                             detail=f'account with the id {id} not available.')
 
+    user_obj = db.query(User).filter(
+        User.user_id == user_account.user_id).first()
     amount = request.amount
     if user_account.balance >= amount:
-
         user_account.balance -= amount
         user_account.spendings += 1
-
+        user_obj.account_balance = user_account.balance
         db.add(user_account)
+        db.add(user_obj)
         db.commit()
         db.refresh(user_account)
+        db.refresh(user_obj)
+
         return {"code": "success",
-                "message": "Deposit was successfully added",
+                "message": "Payment successful",
                 "balance": user_account.balance}
     else:
         return {"code": "error", "message": "Wallet Balance Insufficience"}
-
-
-# {
-#   "Success": true,
-#   "Message": "user added successfully",
-#   "data": {
-#     "user_id": 7,
-#     "userName": "strong",
-#     "email": "strong@example.com",
-#     "wallet": {
-#       "user_id": 7,
-#       "balance": 1000,
-#       "deposits_made": 0,
-#       "spendings": 0,
-#       "id": "e6bd3c1c-8f06-4b3d-b2db-2be00707e972",
-#       "created_at": "2022-12-02T01:11:47.129076"
-#     }
-#   },
-# }
