@@ -28,6 +28,7 @@ def get_correct_answer(question_id: int, db: Session):
 
     # check if question exists
     db_question = get_question(db=db, question_id=question_id)
+
     if db_question is None:
         raise HTTPException(status_code=404, detail="Invalid Question ID")
 
@@ -71,23 +72,13 @@ def create_answer(answer: schema.CreateAnswer, background_task: BackgroundTasks,
     db_answer = model.Answer(
         owner_id=current_user.user_id,
         content=answer.content,
-        question_id=answer.question_id
+        question_id=answer.question_id,
+        is_answered=True
     )
-
-    # update user account balance
-    # try:
-    #     db_user = db.query(model.User).filter(
-    #         model.User.user_id == current_user.user_id).first()
-    #     db_user.account_balance = db_user.account_balance + db_question.payment_amount
-    # except Exception as e:
-    #     db_user = db.query(model.User).filter(
-    #         model.User.user_id == current_user.user_id).first()
-    #     db_user.account_balance = db_user.account_balance + 0
 
     db.add(db_answer)
     db.commit()
     db.refresh(db_answer)
-    # db.refresh(db_user)
 
     # This automatically creates a notification by calling create_notification as a background function which
     # runs after returning a response

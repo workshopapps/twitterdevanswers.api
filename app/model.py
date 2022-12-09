@@ -26,8 +26,9 @@ class Wallet(Base):
     earnings = Column(Integer, default=0, nullable=False)
     total_spent = Column(Integer, default=0, nullable=False)
     total_earned = Column(Integer, default=0, nullable=False)
+    is_devask_wallet = Column(Boolean, default=False)
     user_id = Column(Integer, ForeignKey(
-        "user.user_id", ondelete="CASCADE"), default=1)
+        "user.user_id", ondelete="CASCADE"), nullable=True)
     created_at = Column(
         DateTime, default=datetime.datetime.utcnow, nullable=False)
 
@@ -59,6 +60,8 @@ class User(Base):
         'walletaccount.balance', ondelete="CASCADE"), nullable=True)
     created_at = Column(TIMESTAMP(timezone=True),
                         nullable=False, server_default=text('now()'))
+    verification_code = Column(String(300), nullable=True, default=" ")
+    is_verified = Column(Boolean, nullable=True, default=False)
     mfa_hash = Column(String(300))
 
 
