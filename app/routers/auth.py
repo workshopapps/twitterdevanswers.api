@@ -78,14 +78,14 @@ def generate_secret():
 def user_signnup(request: schema.Email):
     global secret_key
     secret_key = generate_secret()
-    otp = pyotp.TOTP(secret_key).now()
-    send_signup_mail(request.email, otp)
+    totp = pyotp.TOTP(secret_key,interval=600).now()
+    send_signup_mail(request.email, totp)
     return {"msg": "email sent"}
 
 
 def auth_otp(secret, code):
-    totp = pyotp.TOTP(secret).verify(code)
-    return totp
+    otp = pyotp.TOTP(secret).verify(str(code))
+    return otp
 
 @router.post('/signup', status_code=status.HTTP_201_CREATED)
 def user_signnup(user_credentials: schema.UserSignInRequest, db: Session = Depends(database.get_db)):
@@ -95,7 +95,6 @@ def user_signnup(user_credentials: schema.UserSignInRequest, db: Session = Depen
     
     if user:
         return HTTPException(status_code=400, detail={"msg": "User already exists"})
-    print(secret_key)
 
     if auth_otp(secret=secret_key,code=user_credentials.email_verification_code):
 
