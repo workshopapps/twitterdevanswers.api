@@ -24,7 +24,7 @@ def get_answer(answer_id: int, db: Session):
 
 
 def get_correct_answer(question_id: int, db: Session):
-    """ Get correct answer  function """
+    """ Get correct answer function """
 
     # check if question exists
     db_question = get_question(db=db, question_id=question_id)
@@ -121,8 +121,8 @@ def update_answer(answer_id: int, answer: schema.UpdateAnswer, db: Session = Dep
     return db_answer
 
 
-@router.patch("/correct")
-def update_correct_answer(answer: schema.UpdateCorrectAnswer, db: Session = Depends(get_db),
+@router.patch("/select-correct-answer")
+def select_correct_answer(answer: schema.UpdateCorrectAnswer, db: Session = Depends(get_db),
                           current_user: int = Depends(oauth.get_current_user)):
     """ Add correct answer endpoint """
 
@@ -154,7 +154,7 @@ def update_correct_answer(answer: schema.UpdateCorrectAnswer, db: Session = Depe
         return check_answer
     else:
         raise HTTPException(
-            status_code=400, detail="Already have correct answer")
+            status_code=400, detail="Already added correct answer")
 
 
 @router.delete("/{answer_id}")
