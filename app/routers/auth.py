@@ -19,6 +19,7 @@ router = APIRouter(
 )
 
 
+
 # send reset email
 def send_reset_mail(email, token):
     msg = f'''
@@ -65,46 +66,49 @@ async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(
             "token_type": "bearer"}
 
 
-def auth_otp(secret, code):
-    totp = pyotp.TOTP(secret, interval=600)
-    verified = totp.verify(code)
-    if verified:
-        return True
+secret_key=''
 
 
 def generate_secret():
     secret = pyotp.random_base32()
+    
     return secret
-
 
 @router.post('/send_email_code', status_code=status.HTTP_200_OK)
 def user_signnup(request: schema.Email):
-    global secret
-    secret = generate_secret()
-    send_signup_mail(request.email, secret)
+    global secret_key
+    secret_key = generate_secret()
+    otp = pyotp.TOTP(secret_key).now()
+    send_signup_mail(request.email, otp)
     return {"msg": "email sent"}
 
+
+def auth_otp(secret, code):
+    totp = pyotp.TOTP(secret).verify(code)
+    return totp
 
 @router.post('/signup', status_code=status.HTTP_201_CREATED)
 def user_signnup(user_credentials: schema.UserSignInRequest, db: Session = Depends(database.get_db)):
     user_credentials.password = utils.hash(user_credentials.password)
     user = db.query(model.User).filter(
         model.User.email == user_credentials.email).first()
+    
     if user:
         return HTTPException(status_code=400, detail={"msg": "User already exists"})
+    print(secret_key)
 
-    #  if auth_otp(secret, user_credentials.email_verification_code):
+    if auth_otp(secret=secret_key,code=user_credentials.email_verification_code):
 
-    new_user = model.User(username=user_credentials.username,
-                          email=user_credentials.email,
-                          password=user_credentials.password,
-                          )
-    db.add(new_user)
-    db.commit()
-    db.refresh(new_user)
-#     else:
-#         raise HTTPException(status_code=status.HTTP_412_PRECONDITION_FAILED,
-#                              detail="OTP is either a wrong one or has expired ")
+        new_user = model.User(username=user_credentials.username,
+                            email=user_credentials.email,
+                            password=user_credentials.password,
+                            )
+        db.add(new_user)
+        db.commit()
+        db.refresh(new_user)
+    else:
+         raise HTTPException(status_code=status.HTTP_412_PRECONDITION_FAILED,
+                              detail="OTP is either a wrong one or has expired ")
 
     # creating User Wallet
     wallet_id = uuid4()

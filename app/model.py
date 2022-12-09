@@ -1,6 +1,6 @@
 from sqlalchemy.ext.compiler import compiles
 from sqlalchemy.schema import DropTable
-from sqlalchemy import Column, Integer, String, Boolean, ForeignKey, DateTime, Table
+from sqlalchemy import Column, Integer, String, Boolean, ForeignKey, Date, DateTime, Table
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from sqlalchemy.sql.sqltypes import TIMESTAMP
@@ -36,7 +36,7 @@ class User(Base):
     first_name = Column(String(30), nullable=True, default=" ")
     last_name = Column(String(30), nullable=True, default=" ")
     email = Column(String(100), nullable=False, unique=True)
-    date_of_birth = Column(DateTime,nullable=True, default=" ")
+    #date_of_birth = Column(DateTime,nullable=True, default=" ")
     gender = Column(String(7), nullable=False ,default=" ")
     description = Column(String(400), nullable=True, default=" ")
     password = Column(String(200), nullable=False)
@@ -51,10 +51,13 @@ class User(Base):
     image_url = Column(String(300), nullable=True, default=" ")
     location = Column(String(100), nullable=True, default=" ")
     is_admin = Column(Boolean, default=False)
-    account_balance = Column(Integer, default=1000)
+    account_balance = Column(Integer, ForeignKey(
+        'walletaccount.balance', ondelete="CASCADE"), nullable=True)
     created_at = Column(TIMESTAMP(timezone=True),
                         nullable=False, server_default=text('now()'))
     mfa_hash = Column(String(300))
+
+
 class Following(Base):
     __tablename__ = "following"
     __table_args__ = {'extend_existing': True}
