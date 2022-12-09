@@ -63,17 +63,17 @@ def delete_user(username: str, db: Session = Depends(get_db), current_user: sche
     if not check_admin(current_user):
         raise HTTPException(
             status_code=401, detail=f"You must be an admin to access this endpoint")
-    try:
-        delete_user = db.query(model.User).filter(username=username).first()
-        if not delete_user:
-            raise HTTPException(
-                status_code=404, detail=f"user with user_id : {username} does not exist")
-        db.delete(delete_user)
-        db.commit()
-        db.refresh(delete_user)
-        return {"success": True, "data": "User has been deleted successfully"}
-    except:
-        return {"error": "Unable to delete user"}
+
+    delete_user = db.query(model.User).filter(
+        model.User.username == username).first()
+    if not delete_user:
+        raise HTTPException(
+            status_code=404, detail=f"user with user_id : {username} does not exist")
+    db.delete(delete_user)
+    db.commit()
+    return {"success": True, "data": "User has been deleted successfully"}
+    # except:
+    #     return {"error": "Unable to delete user"}
 
 
 @router.put("/user/{username}")
