@@ -4,6 +4,22 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.routers import user, notification, questions, auth, like, answer, following, tag, blog, wallet, admin, admin_utils
 
+import sentry_sdk
+
+##DO NOT COMMENT OUT SENTRY PACKAGE, IF YOUR CODE DOESNT WORK, pip install --upgrade 'sentry-sdk[fastapi]' WOULD INSTALL NECESSARY PACKAGES.
+
+# Integration of Sentry Monitoring
+
+sentry_sdk.init(
+    dsn="https://45476b789dc3420faec99388d0e830c3@o4504279440097280.ingest.sentry.io/4504279970676736",
+
+    # Set traces_sample_rate to 1.0 to capture 100%
+    # of transactions for performance monitoring.
+    # We recommend adjusting this value in production,
+    traces_sample_rate=1.0,
+)
+
+
 
 #  Description of Dev ASk Api
 description = """
