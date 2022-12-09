@@ -51,10 +51,13 @@ class User(Base):
     image_url = Column(String(300), nullable=True, default=" ")
     location = Column(String(100), nullable=True, default=" ")
     is_admin = Column(Boolean, default=False)
-    account_balance = Column(Integer, default=1000)
+    account_balance = Column(Integer, ForeignKey(
+        'walletaccount.balance', ondelete="CASCADE"), nullable=True)
     created_at = Column(TIMESTAMP(timezone=True),
                         nullable=False, server_default=text('now()'))
     mfa_hash = Column(String(300))
+
+
 class Following(Base):
     __tablename__ = "following"
     __table_args__ = {'extend_existing': True}
