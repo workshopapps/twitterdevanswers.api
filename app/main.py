@@ -4,7 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 # sys.path.append('..')
 # from app.routers import googleauth
 
-from routers import user, notification, questions, auth, like, answer, following, tag, blog, wallet, admin, admin_utils
+from app.routers import user, notification, questions, auth, like, answer, following, tag, blog, wallet, admin, admin_utils
 
 import sentry_sdk
 
