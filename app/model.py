@@ -1,6 +1,6 @@
 from sqlalchemy.ext.compiler import compiles
 from sqlalchemy.schema import DropTable
-from sqlalchemy import Column, Integer, String, Boolean, ForeignKey, DateTime, Table
+from sqlalchemy import Column, Integer, String, Boolean, ForeignKey, Date, DateTime, Table
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from sqlalchemy.sql.sqltypes import TIMESTAMP
