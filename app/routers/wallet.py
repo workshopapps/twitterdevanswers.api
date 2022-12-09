@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 
 from pydantic import BaseModel, Field
-from fastapi import FastAPI, HTTPException
+from fastapi import HTTPException
 from uuid import uuid4, UUID
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship, Session
@@ -11,7 +11,7 @@ from app.database import get_db
 
 from app.schema import TransactionRequest, WalletItem
 
-from app.model import Wallet
+from app.model import Wallet, User
 from app import schema
 
 router = APIRouter(
@@ -39,14 +39,20 @@ def add_to_wallet(request: schema.TransactionRequest, db: Session = Depends(get_
     if not user_account:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                             detail=f'account with the id {id} not available.')
+    user_obj = db.query(User).filter(
+        User.user_id == user_account.user_id).first()
     amount = request.amount
 
     user_account.balance += amount
     user_account.deposits_made += 1
+    user_obj.balance = user_account.balance
 
     db.add(user_account)
     db.commit()
+    db.add(user_obj)
+    db.commit()
     db.refresh(user_account)
+    db.refresh(user_obj)
     return {"code": "success",
             "message": "Deposit was successfully added",
             "balance": user_account.balance}
