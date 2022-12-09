@@ -6,9 +6,10 @@ sys.path.append('..')
 # from app.routers import googleauth
 
 from app.routers import user, notification, questions, auth, like, answer, following, tag, blog, wallet, admin
+
 import sentry_sdk
 
-# DO NOT COMMENT OUT SENTRY PACKAGE, IF YOUR CODE DOESNT WORK, pip install --upgrade 'sentry-sdk[fastapi]' WOULD INSTALL NECESSARY PACKAGES.
+##DO NOT COMMENT OUT SENTRY PACKAGE, IF YOUR CODE DOESNT WORK, pip install --upgrade 'sentry-sdk[fastapi]' WOULD INSTALL NECESSARY PACKAGES.
 
 # Integration of Sentry Monitoring
 
@@ -20,6 +21,7 @@ sentry_sdk.init(
     # We recommend adjusting this value in production,
     traces_sample_rate=1.0,
 )
+
 
 
 #  Description of Dev ASk Api

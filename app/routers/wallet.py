@@ -48,7 +48,6 @@ def add_to_wallet(request: schema.TransactionRequest, db: Session = Depends(get_
     user_obj.account_balance = user_account.balance
 
     db.add(user_account)
-    db.add(user_obj)
     db.commit()
     db.add(user_obj)
     db.commit()
