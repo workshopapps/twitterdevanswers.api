@@ -104,19 +104,14 @@ def admin_transactions(item: AdminPayments,  db: Session = Depends(get_db),
 	question_owner_id = question_obj.owner_id
 	
 	res_obj = admin_deduction(question_owner_id=question_owner_id, amount=amount, db=db, devask_account=devask_account)
-	# return res_obj
+
 	
 	admin_obj = res_obj['devask_account']
 	question_owner = res_obj['question_owner']
 
 	
-	# gets max voted answer with question id
+	# gets correct selected answer
 	correct_answer = get_correct_answer(question_id=question_id, db=db)
-	# return correct_answer
-
-
-	# correct_answer = db.query(model.Answer).filter(model.Answer.question_id == question_id, 
-	# model.Answer.answer_id == answer_id) #answered
 	
 	if not correct_answer:
 		raise HTTPException(status_code=404,
