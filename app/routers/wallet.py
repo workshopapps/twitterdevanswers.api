@@ -9,7 +9,7 @@ from sqlalchemy import Column, String, Integer
 from sqlalchemy import Column, Integer, String, ForeignKey, DateTime
 from app.database import get_db
 
-from app.schema import TransactionRequest, WalletItem
+from app.schema import TransactionRequest
 
 from app.model import Wallet
 from app import schema
@@ -33,8 +33,8 @@ def view_wallet(user_id, db: Session = Depends(get_db)):
 
 @router.put('/wallet/earn')
 def add_to_wallet(request: schema.TransactionRequest, db: Session = Depends(get_db)):
-    id = request.wallet_address
-    user_account = db.query(Wallet).filter(Wallet.id == id).first()
+    id = request.user_id
+    user_account = db.query(Wallet).filter(Wallet.user_id == id).first()
 
     if not user_account:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail=f'account with the id {id} not available.')
@@ -78,8 +78,8 @@ def remove_from_wallet(request: schema.TransactionRequest, db: Session = Depends
         db.refresh(user_obj)
 
         return {"code": "success",
-                "message": "Deposit was successfully added",
+                "message": "Payment successful",
                 "balance": user_account.balance}
     else:
-        return {"code": "error", "message": "Wallet Balance Insufficient"}
+        return {"code": "error", "message": "Wallet Balance Insufficience"}
 
