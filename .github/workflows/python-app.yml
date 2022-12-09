@@ -30,6 +30,6 @@ jobs:
         pip install --upgrade 'sentry-sdk[fastapi]'
         pip install gunicorn
     - name: Run
-      run: "gunicorn app.main:app -k uvicorn.workers.UvicornWorker"
+      run: "gunicorn app.main:app"
     
     
