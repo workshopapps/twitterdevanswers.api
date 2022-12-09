@@ -5,6 +5,7 @@ import asyncio
 import logging
 from sqlalchemy import desc
 from sqlalchemy.orm import Session
+from app.oauth import get_current_user
 
 from app.database import get_db
 from app import model, schema, oauth
@@ -18,7 +19,7 @@ router = APIRouter(
 
 
 MESSAGE_STREAM_DELAY = 2  # second
-MESSAGE_STREAM_RETRY_TIMEOUT = 15000  # milisecond
+MESSAGE_STREAM_RETRY_TIMEOUT = 150  # milisecond
 
 logger = logging.getLogger()
 
@@ -67,7 +68,7 @@ def set_unread_to_false(id: int, db: Session):
 
 
 @router.get("/")
-async def notification_stream(request: Request, db: Session = Depends(get_db), token: str = Query(default=..., title="Bearer token", description="The JWT authorization token")):
+async def notification_stream(request: Request, db: Session = Depends(get_db), current_user: int = Depends(get_current_user)):
     """
     Periodically streams the user's notifications to the client using SSE.
     The client communicates with this endpoint using an EventSource object.
@@ -75,48 +76,43 @@ async def notification_stream(request: Request, db: Session = Depends(get_db), t
     """
     async def event_generator(user_id: int):
         PREVIOUS_NO_UNREAD, FIRST_STREAM = 0, True
-        while True:
-            if await request.is_disconnected():
-                logger.debug("Request disconnected")
-                break
 
-            # Gets the user's notifications
-            notifications, number_of_unread = await get_notifications(id=user_id, db=db)
-            data = {
-                "number_of_unread": number_of_unread,
-                "notifications": notifications
+        if await request.is_disconnected():
+            logger.debug("Request disconnected")
+            # break
+
+        # Gets the user's notifications
+        notifications, number_of_unread = await get_notifications(id=user_id, db=db)
+        data = {
+            "number_of_unread": number_of_unread,
+            "notifications": notifications
+        }
+        if FIRST_STREAM is True:
+            # Streams the data to the client
+            yield {
+                "event": "new_notification",
+                "data": jsonable_encoder(data),
+                "id": "message_id",
+                "retry": MESSAGE_STREAM_RETRY_TIMEOUT
             }
-            if FIRST_STREAM is True:
-                # Streams the data to the client
-                yield {
-                    "event": "new_notification",
-                    "data": jsonable_encoder(data),
-                    "id": "message_id",
-                    "retry": MESSAGE_STREAM_RETRY_TIMEOUT
-                }
-                FIRST_STREAM = False
-                PREVIOUS_NO_UNREAD = number_of_unread
+            FIRST_STREAM = False
+            PREVIOUS_NO_UNREAD = number_of_unread
 
-            elif number_of_unread != PREVIOUS_NO_UNREAD:
-                # Streams the data to the client
-                yield {
-                    "event": "new_notification",
-                    "data": jsonable_encoder(data),
-                    "id": "message_id",
-                    "retry": MESSAGE_STREAM_RETRY_TIMEOUT
-                }
-                PREVIOUS_NO_UNREAD = number_of_unread
+        elif number_of_unread != PREVIOUS_NO_UNREAD:
+            # Streams the data to the client
+            yield {
+                "event": "new_notification",
+                "data": jsonable_encoder(data),
+                "id": "message_id",
+                "retry": MESSAGE_STREAM_RETRY_TIMEOUT
+            }
+            PREVIOUS_NO_UNREAD = number_of_unread
 
-            await asyncio.sleep(MESSAGE_STREAM_DELAY)
-
-    try:
-        credentials_exception = HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED, detail="Authorization token invalid")
-        token = oauth.verify_access_token(
-            token=token, credentials_exception=credentials_exception)
-    except:
-        raise credentials_exception
-    return EventSourceResponse(event_generator(token.id))
+        await asyncio.sleep(MESSAGE_STREAM_DELAY)
+    if current_user:
+        return EventSourceResponse(event_generator(current_user.user_id))
+    else:
+        return HTTPException(status_code=401, detail="Unauthorized")
 
 
 @router.get("/all")
