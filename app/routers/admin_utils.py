@@ -50,7 +50,7 @@ def get_question(question_id: int, amount: int, db: Session = Depends(get_db)):
 	return question_obj
 
 def admin_deduction(question_owner_id: int, amount:int, db: Session = Depends(get_db),
- devask_account =  Depends(get_devask_wallet)):
+	devask_account =  Depends(get_devask_wallet)):
 	
 	"""
 		deducts question allocated payment amount from question owner account
@@ -142,8 +142,9 @@ def admin_transactions(item: AdminPayments,  db: Session = Depends(get_db),
 
 		return {"code": "success",
 				"message": "extra tokens has been added for owner of selected correct answer",
-				"earned": earned_value,
+				"amount earned": earned_value,
 				"Answer Owner Transaction History": answerer_account,
+				"amount deducted": amount,
 				"Question Owner History": question_owner
 				}
 
