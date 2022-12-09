@@ -1,13 +1,20 @@
 from sqlalchemy.ext.compiler import compiles
 from sqlalchemy.schema import DropTable
-from sqlalchemy import Column, Integer, String, Boolean, ForeignKey, DateTime, Table, Date
+from sqlalchemy import Column, Integer, String, Boolean, ForeignKey, DateTime, Table
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from sqlalchemy.sql.sqltypes import TIMESTAMP
 from sqlalchemy.sql.expression import text
+
+
+
 from sqlalchemy import MetaData
 from app.database import Base, engine
+
+
 from uuid import uuid4
+
+
 import uuid as uuid_pkg
 import sqlalchemy
 import datetime
@@ -23,6 +30,9 @@ class Wallet(Base):
     balance = Column(Integer, default=1000, nullable=False)
     deposits_made = Column(Integer, default=0, nullable=False)
     spendings = Column(Integer, default=0, nullable=False)
+    earnings = Column(Integer, default=0, nullable=False)
+    total_spent = Column(Integer, default=0, nullable=False)
+    total_earned = Column(Integer, default=0, nullable=False)
     user_id = Column(Integer, ForeignKey("user.user_id", ondelete="CASCADE"))
     created_at = Column(
         DateTime, default=datetime.datetime.utcnow, nullable=False)
@@ -36,8 +46,6 @@ class User(Base):
     first_name = Column(String(30), nullable=True, default=" ")
     last_name = Column(String(30), nullable=True, default=" ")
     email = Column(String(100), nullable=False, unique=True)
-    # date_of_birth = Column(Date,nullable=True, default=" ")
-    gender = Column(String(7), nullable=False ,default=" ")
     description = Column(String(400), nullable=True, default=" ")
     password = Column(String(200), nullable=False)
     phone_number = Column(String(30), nullable=True, default=" ")
@@ -86,6 +94,9 @@ class Question(Base):
                         nullable=False, server_default=text('now()'))
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
     owner = relationship('app.model.User')
+    # tags = relationship(
+    #     "model.Tag", secondary="question_tags", backref="questions")
+
     tags = relationship(
         "app.model.Tag", secondary="question_tags") #, back_populates="questions"
 

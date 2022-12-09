@@ -46,6 +46,7 @@ def admin_deduction(question_owner_id: int, amount:int, admin_id: int, db: Sessi
 	"""
 	question_owner_account = db.query(Wallet).filter(Wallet.user_id == question_owner_id).first()
 
+
 	if question_owner_account.balance >= amount:
 		
 		admin_obj = db.query(model.User).filter(admin_id == model.User.user_id).first()
@@ -53,20 +54,24 @@ def admin_deduction(question_owner_id: int, amount:int, admin_id: int, db: Sessi
 		if not admin_obj.is_admin:
 			
 			raise  HTTPException(status_code=401, detail="Authorization needed")
+		
 		question_owner_account.balance -= amount
 		question_owner_account.spendings += 1
 		question_owner_account.total_spent += amount
 		db.add(question_owner_account)
-
-		admin_obj.account_balance += amount
-		admin_obj.earnings += 1
-		admin_obj.total_earned += amount
-		db.add(admin_obj)
 		db.commit()
-		db.refresh(admin_obj)
+
+		admin_account = db.query(Wallet).filter(Wallet.user_id == admin_id).first()
+		admin_account.balance += amount
+		admin_account.earnings += 1
+		admin_account.total_earned += amount
+		db.add(admin_account)
+		db.add(question_owner_account)
+		db.commit()
+		db.refresh(admin_account)
 		db.refresh(question_owner_account)
 
-		return {"admin_obj": admin_obj, 
+		return {"admin_obj": admin_account, 
 		"question_owner": question_owner_account}
 	else:
 		return {"code": "error", "balance": question_owner_account.balance,
@@ -88,34 +93,38 @@ def admin_transactions(item: AdminPayments,  db: Session = Depends(get_db)):
 	except:
 			raise HTTPException(status_code=404, detail="question not found")
 	question_owner_id = question_obj.owner_id
-
+	
 	admin_obj = db.query(model.User).filter(admin_id == model.User.user_id).first()
+
 	if not admin_obj.is_admin:
 			raise  HTTPException(status_code=401, detail="Authorization needed")
 	
 	try:
 		res_obj = admin_deduction(question_owner_id, amount, admin_id, db)
+
 	except:
 		raise  HTTPException(status_code=401, detail=f"Payment Failed for user {question_owner_id}")
 	
 	admin_obj = res_obj['admin_obj']
 	question_owner = res_obj['question_owner']
 
+	return  question_owner
 	
 	answer_exists = db.query(model.Answer).filter(model.Answer.question_id == question_id).order_by(
 		desc(model.Answer.vote)).first()
 
+	# Check if answer exists
 	if not answer_exists:
 		raise HTTPException(status_code=404, detail=f"No answer available for question {question_obj.content}")
 
-	if admin_obj.account_balance >= amount:
+	if admin_obj.balance >= amount:
 
 		# Admins remits earnings and subtracts commision
 		answer_owner_id = answer_exists.owner_id
 		earned_value = amount - commission		
 		answerer_account = db.query(Wallet).filter(Wallet.user_id == answer_owner_id).first()
 		
-		admin_obj.account_balance  -= earned_value
+		admin_obj.balance  -= earned_value
 		admin_obj.spendings += 1
 		admin_obj.total_spent += earned_value
 
@@ -139,6 +148,11 @@ def admin_transactions(item: AdminPayments,  db: Session = Depends(get_db)):
 
 
 
+# Admin -adminone
+
+# "user_id": 6,
+#     "userName": "adminone",
+
 # "user_id": 1, AUTHORIZED
 #     "userName": "stringo",
 #     "email": "usero@example.com",
@@ -156,7 +170,7 @@ def admin_transactions(item: AdminPayments,  db: Session = Depends(get_db)):
 #     "userName": "twyone",
 #     "email": "twyone@example.com",
 
-# "user_id": 5,
+# "user_id": 5, ADMIN
 #     "userName": "nikola",
 #     "email": "nikola@example.com",
 
@@ -164,13 +178,17 @@ def admin_transactions(item: AdminPayments,  db: Session = Depends(get_db)):
 # question_id": 1,
 #       "content": "what is pointers in C",
 
-# "owner_id": 1,
+# "data": [
+#     {
+#       "owner_id": 1,
 #       "title": "coding",
-#       "expected_result": "function pointers definition",
+#       "expected_result": "python dict",
 #       "answered": false,
 #       "total_like": 0,
-#       "created_at": "2022-12-09T12:10:16",
-#       "question_id": 2,
-#       "content": "what is function pointers in C",
-#       "payment_amount": 100,
-#       "tag": "programming",
+#       "created_at": "2022-12-09T13:22:04",
+#       "question_id": 1,
+#       "content": "What is dict in Python",
+#       "payment_amount": 70,
+#       "tag": "string",
+#       "total_unlike": 0,
+#       "updated_at": null
