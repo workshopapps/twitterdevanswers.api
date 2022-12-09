@@ -8,6 +8,7 @@ from app.oauth import get_current_user
 from app import model, schema, oauth
 from app.schema import AdminPayments
 from app.database import engine, get_db
+from routers.answer import get_correct_answer
 
 router = APIRouter(
     prefix='/admin',
@@ -103,23 +104,29 @@ def admin_transactions(item: AdminPayments,  db: Session = Depends(get_db),
 	question_owner_id = question_obj.owner_id
 	
 	res_obj = admin_deduction(question_owner_id=question_owner_id, amount=amount, db=db, devask_account=devask_account)
-	#return res_obj
+	# return res_obj
 	
 	admin_obj = res_obj['devask_account']
 	question_owner = res_obj['question_owner']
 
 	
 	# gets max voted answer with question id
-	answer_exists = db.query(model.Answer).filter(model.Answer.question_id == question_id).order_by(
-		desc(model.Answer.vote)).first()
+	correct_answer = get_correct_answer(question_id=question_id, db=db)
+	# return correct_answer
+
+
+	# correct_answer = db.query(model.Answer).filter(model.Answer.question_id == question_id, 
+	# model.Answer.answer_id == answer_id) #answered
 	
-	if not answer_exists:
-		raise HTTPException(status_code=404, detail=f"No answer available for question {question_obj.content}")
+	if not correct_answer:
+		raise HTTPException(status_code=404,
+		detail=f"No answer available for question {question_obj.content}")
+
 
 	if admin_obj.balance >= amount:
 
 		# Admins remits earnings and subtracts commision
-		answer_owner_id = answer_exists.owner_id
+		answer_owner_id = correct_answer.owner_id
 		earned_value = amount - commission		
 		answerer_account = db.query(Wallet).filter(Wallet.user_id == answer_owner_id).first()
 		
@@ -139,7 +146,7 @@ def admin_transactions(item: AdminPayments,  db: Session = Depends(get_db),
 		db.refresh(question_owner)
 
 		return {"code": "success",
-				"message": "extra tokens has been added for maximum voted answer",
+				"message": "extra tokens has been added for owner of selected correct answer",
 				"earned": earned_value,
 				"Answer Owner Transaction History": answerer_account,
 				"Question Owner History": question_owner

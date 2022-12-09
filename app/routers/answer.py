@@ -23,6 +23,24 @@ def get_answer(answer_id: int, db: Session):
     return db.query(model.Answer).filter(model.Answer.answer_id == answer_id).first()
 
 
+def get_correct_answer(question_id: int, db: Session):
+    """ Get correct answer  function """
+
+    # check if question exists
+    db_question = get_question(db=db, question_id=question_id)
+
+    if db_question is None:
+        raise HTTPException(status_code=404, detail="Invalid Question ID")
+
+    # check correct answer
+    check_answer = db.query(model.Answer).filter(
+        model.Answer.question_id == question_id,
+        model.Answer.is_answered == True
+    ).first()
+
+    return check_answer
+
+
 @router.get("/{question_id}")
 def list_answer(question_id: int, db: Session = Depends(get_db)):
     """ List answers endpoint for a specific question """
@@ -54,7 +72,8 @@ def create_answer(answer: schema.CreateAnswer, background_task: BackgroundTasks,
     db_answer = model.Answer(
         owner_id=current_user.user_id,
         content=answer.content,
-        question_id=answer.question_id
+        question_id=answer.question_id,
+        is_answered=True
     )
 
 
@@ -94,6 +113,9 @@ def update_answer(answer_id: int, answer: schema.UpdateAnswer, db: Session = Dep
     db.commit()
     db.refresh(db_answer)
     return db_answer
+
+
+
 
 
 @router.delete("/{answer_id}")
