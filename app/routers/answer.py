@@ -145,9 +145,12 @@ def update_correct_answer(answer: schema.UpdateCorrectAnswer, db: Session = Depe
     ).first()
 
     if check_answer is None:
+        check_question = db.query(model.Question).filter(model.Question.question_id == answer.question_id).first()
+        check_question.answered = True
         check_answer.is_answered = True
         db.commit()
         db.refresh(check_answer)
+        db.refresh(check_question)
         return check_answer
     else:
         raise HTTPException(
