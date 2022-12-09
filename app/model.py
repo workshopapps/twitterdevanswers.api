@@ -15,6 +15,8 @@ import datetime
 metadata = MetaData()
 
 
+
+
 class Wallet(Base):
     __tablename__ = 'walletaccount'
     __table_args__ = {'extend_existing': True}
@@ -26,8 +28,8 @@ class Wallet(Base):
     earnings = Column(Integer, default=0, nullable=False)
     total_spent = Column(Integer, default=0, nullable=False)
     total_earned = Column(Integer, default=0, nullable=False)
-    user_id = Column(Integer, ForeignKey(
-        "user.user_id", ondelete="CASCADE"), default=1)
+    is_devask_wallet = Column(Boolean, default=False)
+    user_id = Column(Integer, ForeignKey("user.user_id", ondelete="CASCADE"), nullable=True)
     created_at = Column(
         DateTime, default=datetime.datetime.utcnow, nullable=False)
 
