@@ -272,6 +272,18 @@ class AnswerVote(AnswerVoteBase):
     pass
 
 
+class UpdateCorrectAnswerBase(BaseModel):
+    """ Answer BaseModel for Update Answer endpoint """
+
+    answer_id: id
+    question_id: id
+
+
+class UpdateCorrectAnswer(UpdateCorrectAnswerBase):
+    """ Answer BaseModel for Update Answer endpoint """
+    pass
+
+
 class LikeBase(BaseModel):
     """ Like BaseModel for Add Like endpoint """
 

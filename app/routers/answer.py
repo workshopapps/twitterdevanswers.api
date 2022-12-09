@@ -23,6 +23,23 @@ def get_answer(answer_id: int, db: Session):
     return db.query(model.Answer).filter(model.Answer.answer_id == answer_id).first()
 
 
+def get_correct_answer(question_id: int, db: Session):
+    """ Get correct answer  function """
+
+    # check if question exists
+    db_question = get_question(db=db, question_id=question_id)
+    if db_question is None:
+        raise HTTPException(status_code=404, detail="Invalid Question ID")
+
+    # check correct answer
+    check_answer = db.query(model.Answer).filter(
+        model.Answer.question_id == question_id,
+        model.Answer.is_answered == True
+    ).first()
+
+    return check_answer
+
+
 @router.get("/{question_id}")
 def list_answer(question_id: int, db: Session = Depends(get_db)):
     """ List answers endpoint for a specific question """
@@ -102,6 +119,39 @@ def update_answer(answer_id: int, answer: schema.UpdateAnswer, db: Session = Dep
     db.commit()
     db.refresh(db_answer)
     return db_answer
+
+
+@router.patch("/correct")
+def update_correct_answer(answer: schema.UpdateCorrectAnswer, db: Session = Depends(get_db),
+                          current_user: int = Depends(oauth.get_current_user)):
+    """ Add correct answer endpoint """
+
+    db_answer = get_answer(db=db, answer_id=answer.answer_id)
+    db_question = get_question(db=db, question_id=answer.question_id)
+
+    if db_answer is None:
+        raise HTTPException(status_code=404, detail="Invalid answer id")
+
+    if db_question is None:
+        raise HTTPException(status_code=404, detail="Invalid Question ID")
+
+    if db_question.owner_id != current_user.user_id:
+        raise HTTPException(
+            status_code=400, detail="Not Authorized to perform this action")
+
+    check_answer = db.query(model.Answer).filter(
+        model.Answer.answer_id == answer.answer_id,
+        model.Answer.is_answered == True
+    ).first()
+
+    if check_answer is None:
+        check_answer.is_answered = True
+        db.commit()
+        db.refresh(check_answer)
+        return check_answer
+    else:
+        raise HTTPException(
+            status_code=400, detail="Already have correct answer")
 
 
 @router.delete("/{answer_id}")
