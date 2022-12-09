@@ -36,7 +36,7 @@ class User(Base):
     first_name = Column(String(30), nullable=True, default=" ")
     last_name = Column(String(30), nullable=True, default=" ")
     email = Column(String(100), nullable=False, unique=True)
-    date_of_birth = Column(Date,nullable=True, default=" ")
+    date_of_birth = Column(DateTime,nullable=True, default=" ")
     gender = Column(String(7), nullable=False ,default=" ")
     description = Column(String(400), nullable=True, default=" ")
     password = Column(String(200), nullable=False)
