@@ -61,6 +61,8 @@ class User(Base):
         'walletaccount.balance', ondelete="CASCADE"), nullable=True)
     created_at = Column(TIMESTAMP(timezone=True),
                         nullable=False, server_default=text('now()'))
+    verification_code = Column(String(300), nullable=True, default=" "))
+    is_verified = Column(Boolean, nullable=True, default=False))
     mfa_hash = Column(String(300))
 
 
