@@ -58,11 +58,9 @@ def create_answer(answer: schema.CreateAnswer, background_task: BackgroundTasks,
     )
 
 
-
     db.add(db_answer)
     db.commit()
     db.refresh(db_answer)
-    # db.refresh(db_user)
 
     # This automatically creates a notification by calling create_notification as a background function which
     # runs after returning a response
