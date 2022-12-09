@@ -34,7 +34,7 @@ def get_question(question_id: int, amount: int, db: Session = Depends(get_db)):
 	
 	return question_obj
 
-def admin_deduction(question_owner_balance: int, amount:int, admin_id: int, db: Session = Depends(get_db)):
+def admin_deduction(question_owner_id: int, amount:int, admin_id: int, db: Session = Depends(get_db)):
 	
 	"""
 		deducts question allocated payment amount from question owner account
@@ -44,26 +44,37 @@ def admin_deduction(question_owner_balance: int, amount:int, admin_id: int, db: 
 			admin_id
 		Return: admin obj
 	"""
-	if question_owner_balance >= amount:
+	question_owner_account = db.query(Wallet).filter(Wallet.user_id == question_owner_id).first()
+
+	if question_owner_account.balance >= amount:
 		
 		admin_obj = db.query(model.User).filter(admin_id == model.User.user_id).first()
 
 		if not admin_obj.is_admin:
 			
 			raise  HTTPException(status_code=401, detail="Authorization needed")
-		question_owner_balance -= amount
+		question_owner_account.balance -= amount
+		question_owner_account.spendings += 1
+		question_owner_account.total_spent += amount
+		db.add(question_owner_account)
+
 		admin_obj.account_balance += amount
+		admin_obj.earnings += 1
+		admin_obj.total_earned += amount
 		db.add(admin_obj)
 		db.commit()
 		db.refresh(admin_obj)
-		return admin_obj
+		db.refresh(question_owner_account)
+
+		return {"admin_obj": admin_obj, 
+		"question_owner": question_owner_account}
 	else:
 		return {"code": "error", "balance": question_owner_account.balance,
 			"message": "Wallet Balance Insufficience"}
 
 
 
-@router.post('/payments')
+@router.post('/transactions')
 def admin_transactions(item: AdminPayments,  db: Session = Depends(get_db)):
 
 	question_id=item.question_id
@@ -71,47 +82,95 @@ def admin_transactions(item: AdminPayments,  db: Session = Depends(get_db)):
 	admin_id = item.admin_id
 	commission = item.commission
 
-	admin_obj = db.query(model.User).filter(admin_id == model.User.user_id).first()
-	if not admin_obj.is_admin:
-			raise  HTTPException(status_code=401, detail="Authorization needed")
 
 	try:
 		question_obj = get_question(question_id, amount, db)
 	except:
 			raise HTTPException(status_code=404, detail="question not found")
-
-	# verfying account owner account balance
 	question_owner_id = question_obj.owner_id
-	question_owner_account = db.query(Wallet).filter(Wallet.user_id == question_owner_id).first()
-	try:
-		admin_obj = admin_deduction(question_owner_account.balance, amount, admin_id, db)
-	except:
-		raise  HTTPException(status_code=401, detail="Authorization needed")
 
-	if admin_obj.account_balance: 
-		# checks if answer exists
-		answer_exists = db.query(model.Answer).filter(model.Answer.question_id == question_id).order_by(
-			desc(model.Answer.vote)).first()
+	admin_obj = db.query(model.User).filter(admin_id == model.User.user_id).first()
+	if not admin_obj.is_admin:
+			raise  HTTPException(status_code=401, detail="Authorization needed")
 	
-		if not answer_exists:
-			raise HTTPException(status_code=404, detail=f"No answer available for question {question_obj}")
+	try:
+		res_obj = admin_deduction(question_owner_id, amount, admin_id, db)
+	except:
+		raise  HTTPException(status_code=401, detail=f"Payment Failed for user {question_owner_id}")
+	
+	admin_obj = res_obj['admin_obj']
+	question_owner = res_obj['question_owner']
 
-		# Admins remits earnings
+	
+	answer_exists = db.query(model.Answer).filter(model.Answer.question_id == question_id).order_by(
+		desc(model.Answer.vote)).first()
+
+	if not answer_exists:
+		raise HTTPException(status_code=404, detail=f"No answer available for question {question_obj.content}")
+
+	if admin_obj.account_balance >= amount:
+
+		# Admins remits earnings and subtracts commision
 		answer_owner_id = answer_exists.owner_id
 		earned_value = amount - commission		
 		answerer_account = db.query(Wallet).filter(Wallet.user_id == answer_owner_id).first()
 		
 		admin_obj.account_balance  -= earned_value
+		admin_obj.spendings += 1
+		admin_obj.total_spent += earned_value
+
+
 		answerer_account.balance += earned_value
-		admin_balance = admin_obj.account_balance
+		answerer_account.earnings += 1
+		answerer_account.total_earned += earned_value
 
 		db.add(answerer_account)
 		db.add(admin_obj)
 		db.commit()
 		db.refresh(answerer_account)
+		db.refresh(question_owner_account)
 
 		return {"code": "success",
 				"message": "extra tokens has been added for maximum voted answer",
 				"earned": earned_value,
-				"wallet": answerer_account}
+				"Answer Owner Transaction History": answerer_account,
+				"Question Owner History": question_owner_account
+				}
 
+
+
+# "user_id": 1, AUTHORIZED
+#     "userName": "stringo",
+#     "email": "usero@example.com",
+
+
+# "user_id": 2,
+#     "userName": "one",
+#     "email": "one@example.com",
+
+# "user_id": 3,
+#     "userName": "twone",
+#     "email": "twone@example.com",
+
+# "user_id": 4,
+#     "userName": "twyone",
+#     "email": "twyone@example.com",
+
+# "user_id": 5,
+#     "userName": "nikola",
+#     "email": "nikola@example.com",
+
+# QUESTIONS
+# question_id": 1,
+#       "content": "what is pointers in C",
+
+# "owner_id": 1,
+#       "title": "coding",
+#       "expected_result": "function pointers definition",
+#       "answered": false,
+#       "total_like": 0,
+#       "created_at": "2022-12-09T12:10:16",
+#       "question_id": 2,
+#       "content": "what is function pointers in C",
+#       "payment_amount": 100,
+#       "tag": "programming",
