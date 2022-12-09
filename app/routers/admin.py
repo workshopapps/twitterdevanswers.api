@@ -35,6 +35,24 @@ def make_admin(username: str, db: Session = Depends(get_db), current_user: schem
     return {"success": True, "message": f"User with username {username} is now an admin"}
 
 
+@router.post("/remove/{username}")
+def remove_admin(username: str, db: Session = Depends(get_db), current_user: schema.User = Depends(get_current_user)):
+    "Remove an admin user using his/her username"
+    if not check_admin(current_user):
+        raise HTTPException(
+            status_code=401, detail=f"You must be an admin to access this endpoint")
+    user = db.query(model.User).filter(model.User.username == username).first()
+    if user is None:
+        raise HTTPException(
+            status_code=404, detial=f"No user found for this username: {username}")
+    user.is_admin = False
+    db.add(user)
+    db.commit()
+    db.refresh(user)
+
+    return {"success": True, "message": f"User with username {username} has been stripped of Admin priviledges"}
+
+
 @router.get('/users')
 def fetch_users(skip: int = 0, limit: int = 100, db: Session = Depends(get_db), current_user: schema.User = Depends(get_current_user)):
     """ List to get all users """
