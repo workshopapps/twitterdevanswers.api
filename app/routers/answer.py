@@ -58,19 +58,19 @@ def create_answer(answer: schema.CreateAnswer, background_task: BackgroundTasks,
     )
 
     # update user account balance
-    try:
-        db_user = db.query(model.User).filter(
-            model.User.user_id == current_user.user_id).first()
-        db_user.account_balance = db_user.account_balance + db_question.payment_amount
-    except Exception as e:
-        db_user = db.query(model.User).filter(
-            model.User.user_id == current_user.user_id).first()
-        db_user.account_balance = db_user.account_balance + 0
+    # try:
+    #     db_user = db.query(model.User).filter(
+    #         model.User.user_id == current_user.user_id).first()
+    #     db_user.account_balance = db_user.account_balance + db_question.payment_amount
+    # except Exception as e:
+    #     db_user = db.query(model.User).filter(
+    #         model.User.user_id == current_user.user_id).first()
+    #     db_user.account_balance = db_user.account_balance + 0
 
     db.add(db_answer)
     db.commit()
     db.refresh(db_answer)
-    db.refresh(db_user)
+    # db.refresh(db_user)
 
     # This automatically creates a notification by calling create_notification as a background function which
     # runs after returning a response
