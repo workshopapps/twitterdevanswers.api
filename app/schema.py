@@ -9,7 +9,6 @@ class AdminPayments(BaseModel):
     question_id: int
     amount: int
     commission: int
-    admin_id: int
 
     class Config:
         schema_extra = {
@@ -17,7 +16,6 @@ class AdminPayments(BaseModel):
                 "amount": "50",
                 "question_id": "20",
                 "commission": "10",
-                "admin_id": "2"
             }
         }
 
