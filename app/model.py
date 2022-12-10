@@ -18,7 +18,6 @@ from sqlalchemy_utils.types.choice import ChoiceType
 metadata = MetaData()
 
 
-
 class Transaction(Base):
     TYPES = [
         ('earned','Earned' ),
@@ -50,7 +49,8 @@ class Wallet(Base):
     total_spent = Column(Integer, default=0, nullable=False)
     total_earned = Column(Integer, default=0, nullable=False)
     is_devask_wallet = Column(Boolean, default=False)
-    user_id = Column(Integer, ForeignKey("user.user_id", ondelete="CASCADE"), nullable=True)
+    user_id = Column(Integer, ForeignKey(
+        "user.user_id", ondelete="CASCADE"), nullable=True)
     created_at = Column(
         DateTime, default=datetime.datetime.utcnow, nullable=False)
 
@@ -79,9 +79,11 @@ class User(Base):
     location = Column(String(100), nullable=True, default=" ")
     is_admin = Column(Boolean, default=False)
     account_balance = Column(Integer, ForeignKey(
-        'walletaccount.balance', ondelete="CASCADE"), nullable=True)
+        'walletaccount.balance', ondelete="CASCADE"), nullable=False)
     created_at = Column(TIMESTAMP(timezone=True),
                         nullable=False, server_default=text('now()'))
+    verification_code = Column(String(300), nullable=True, default=" ")
+    is_verified = Column(Boolean, nullable=True, default=False)
     mfa_hash = Column(String(300))
 
 

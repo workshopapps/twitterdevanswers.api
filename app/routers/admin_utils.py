@@ -8,8 +8,9 @@ from app.oauth import get_current_user
 from app import model, schema, oauth
 from app.schema import AdminPayments
 from app.database import engine, get_db
-from routers.answer import get_correct_answer
 from sqlalchemy.sql import functions
+from app.routers.answer import get_correct_answer
+
 
 router = APIRouter(
     prefix='/admin',
