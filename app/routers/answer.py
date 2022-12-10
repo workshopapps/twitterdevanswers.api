@@ -78,7 +78,7 @@ def create_answer(answer: schema.CreateAnswer, background_task: BackgroundTasks,
         owner_id=current_user.user_id,
         content=answer.content,
         question_id=answer.question_id,
-        is_answered=True
+        is_answered=False
     )
 
     db.add(db_answer)
@@ -117,12 +117,12 @@ def update_answer(answer_id: int, answer: schema.UpdateAnswer, db: Session = Dep
     return db_answer
 
 
-@router.patch("/select-correct-answer")
-def select_correct_answer(answer: schema.UpdateCorrectAnswer, db: Session = Depends(get_db),
+@router.patch("/select-correct-answer/{answer_id}")
+def select_correct_answer(answer_id, answer: schema.UpdateCorrectAnswer, db: Session = Depends(get_db),
                           current_user: int = Depends(oauth.get_current_user)):
     """ Add correct answer endpoint """
 
-    db_answer = get_answer(db=db, answer_id=answer.answer_id)
+    db_answer = get_answer(db=db, answer_id=answer_id)
     db_question = get_question(db=db, question_id=answer.question_id)
 
     if db_answer is None:
@@ -135,19 +135,22 @@ def select_correct_answer(answer: schema.UpdateCorrectAnswer, db: Session = Depe
         raise HTTPException(
             status_code=400, detail="Not Authorized to perform this action")
 
+    if db_answer.question_id != answer.question_id:
+        raise HTTPException(
+            status_code=400, detail="Cannot perform this action")
+
     check_answer = db.query(model.Answer).filter(
-        model.Answer.answer_id == answer.answer_id,
+        model.Answer.answer_id == answer_id,
         model.Answer.is_answered == True
     ).first()
 
     if check_answer is None:
-        check_question = db.query(model.Question).filter(model.Question.question_id == answer.question_id).first()
-        check_question.answered = True
-        check_answer.is_answered = True
+        db_question.answered = True
+        db_answer.is_answered = True
         db.commit()
-        db.refresh(check_answer)
-        db.refresh(check_question)
-        return check_answer
+        db.refresh(db_question)
+        db.refresh(db_answer)
+        return {"detail": "success"}
     else:
         raise HTTPException(
             status_code=400, detail="Already added correct answer")
