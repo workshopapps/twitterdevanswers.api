@@ -44,7 +44,7 @@ def add_to_wallet(request: schema.TransactionRequest, db: Session = Depends(get_
         User.user_id == user_account.user_id).first()
     amount = request.amount
     user_account.balance += amount
-    user_account.deposits_made += 1
+    # user_account.deposits_made += 1
     user_obj.account_balance = user_account.balance
 
     db.add(user_account)

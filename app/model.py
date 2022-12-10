@@ -20,21 +20,21 @@ metadata = MetaData()
 
 class Transaction(Base):
     TYPES = [
-        ('earned','Earned' ),
-        ('spent','Spent'),
+        ('earned', 'Earned'),
+        ('spent', 'Spent'),
     ]
 
     __tablename__ = 'transactions'
     __table_args__ = {'extend_existing': True}
 
     transaction_id = Column(Integer, primary_key=True, nullable=False)
-    user_id = Column(Integer, ForeignKey("user.user_id", ondelete="CASCADE"), nullable=True)
+    user_id = Column(Integer, ForeignKey(
+        "user.user_id", ondelete="CASCADE"), nullable=True)
     transacion_type = Column(ChoiceType(TYPES))
     amount = Column(Integer, default=0, nullable=False)
     description = Column(String(1024), nullable=True)
     transaction_date = Column(TIMESTAMP(timezone=True),
-                        nullable=False, server_default=text('now()'))
-
+                              nullable=False, server_default=text('now()'))
 
 
 class Wallet(Base):
@@ -42,14 +42,14 @@ class Wallet(Base):
     __table_args__ = {'extend_existing': True}
 
     id = Column(String(50), primary_key=True)
-    balance = Column(Integer, default=1000, nullable=False)
+    balance = Column(Integer, default=1000, nullable=True)
     spendings = Column(Integer, default=0, nullable=False)
     earnings = Column(Integer, default=0, nullable=False)
     total_spent = Column(Integer, default=0, nullable=False)
     total_earned = Column(Integer, default=0, nullable=False)
     is_devask_wallet = Column(Boolean, default=False)
     user_id = Column(Integer, ForeignKey(
-        "user.user_id", ondelete="CASCADE"), nullable=True)
+        "user.user_id", ondelete="CASCADE"), nullable=False)
     created_at = Column(
         DateTime, default=datetime.datetime.utcnow, nullable=False)
 
@@ -78,7 +78,7 @@ class User(Base):
     location = Column(String(100), nullable=True, default=" ")
     is_admin = Column(Boolean, default=False)
     account_balance = Column(Integer, ForeignKey(
-        'walletaccount.balance', ondelete="CASCADE"), nullable=False)
+        'walletaccount.balance', ondelete="CASCADE"), nullable=True)
     created_at = Column(TIMESTAMP(timezone=True),
                         nullable=False, server_default=text('now()'))
     verification_code = Column(String(300), nullable=True, default=" ")
@@ -206,6 +206,7 @@ class Blog(Base):
     author = Column(String(300), nullable=False)
     image_url = Column(String(300), default="default.jpg")
     post_category = Column(String(200), nullable=False)
+    is_approved = Column(Boolean, default=False, nullable=False)
     user = relationship('model.User')
     date_posted = Column(TIMESTAMP(timezone=True),
                          nullable=False, server_default=text('now()'))
