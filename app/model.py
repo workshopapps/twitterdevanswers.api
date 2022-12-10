@@ -43,7 +43,6 @@ class Wallet(Base):
 
     id = Column(String(50), primary_key=True)
     balance = Column(Integer, default=1000, nullable=False)
-    deposits_made = Column(Integer, default=0, nullable=False)
     spendings = Column(Integer, default=0, nullable=False)
     earnings = Column(Integer, default=0, nullable=False)
     total_spent = Column(Integer, default=0, nullable=False)

@@ -176,7 +176,7 @@ def admin_transactions(item: AdminPayments,  db: Session = Depends(get_db),
 				}
 
 #skip: int = 0, limit: int = 100, 
-@router.get('/transactions_history/users/{user_id}')
+@router.get('/transactions/users/{user_id}')
 def get_transactions(user_id: int, skip: int = 0, limit: int = 30, db: Session = Depends(get_db)):
 
 	transactions = db.query(model.Transaction)\
