@@ -5,7 +5,9 @@ from sqlalchemy.orm import Session
 from fastapi import Depends, HTTPException, APIRouter, status, Path
 from app.oauth import get_current_user
 from app.routers.answer import get_answer
+from app.routers.admin_utils import get_devask_wallet
 from app import oauth, model, schema
+
 
 router = APIRouter(
     prefix='/admin',
@@ -53,6 +55,16 @@ def remove_admin(username: str, db: Session = Depends(get_db), current_user: sch
     return {"success": True, "message": f"User with username {username} has been stripped of Admin priviledges"}
 
 
+@router.get("/viewdevaskwallet")
+def get_escrow_wallet(db: Session = Depends(get_db),current_user: schema.User = Depends(get_current_user)):
+    "View Admin Wallet"
+    if not check_admin(current_user):
+        raise HTTPException(
+            status_code=401, detail=f"You must be an admin to access this endpoint")
+    devaskwallet = get_devask_wallet(db)
+    return {"success":True,"data":devaskwallet}
+
+
 @router.get('/users')
 def fetch_users(skip: int = 0, limit: int = 100, db: Session = Depends(get_db), current_user: schema.User = Depends(get_current_user)):
     """ List to get all users """
@@ -81,17 +93,17 @@ def delete_user(username: str, db: Session = Depends(get_db), current_user: sche
     if not check_admin(current_user):
         raise HTTPException(
             status_code=401, detail=f"You must be an admin to access this endpoint")
-
-    delete_user = db.query(model.User).filter(
-        model.User.username == username).first()
-    if not delete_user:
-        raise HTTPException(
-            status_code=404, detail=f"user with user_id : {username} does not exist")
-    db.delete(delete_user)
-    db.commit()
-    return {"success": True, "data": "User has been deleted successfully"}
-    # except:
-    #     return {"error": "Unable to delete user"}
+    try:
+        delete_user = db.query(model.User).filter(username=username).first()
+        if not delete_user:
+            raise HTTPException(
+                status_code=404, detail=f"user with user_id : {username} does not exist")
+        db.delete(delete_user)
+        db.commit()
+        db.refresh(delete_user)
+        return {"success": True, "data": "User has been deleted successfully"}
+    except:
+        return {"error": "Unable to delete user"}
 
 
 @router.put("/user/{username}")
