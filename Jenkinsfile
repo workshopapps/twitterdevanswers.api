@@ -11,7 +11,7 @@ pipeline {
 		    steps {
 			    sh "sudo cp -fr ${WORKSPACE}/app/* /home/judgejudy/twitterdevanswers.api/app"
 			    
-			    //sh "source venv/bin/activate"
+			    ///
 			    //sh "pip install -r requirements.txt"
 			    //sh "pip install --upgrade 'sentry-sdk[fastapi]'"
 			    sh "sudo bash /home/judgejudy/start_twitterdev.api.sh"
