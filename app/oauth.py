@@ -98,9 +98,9 @@ def get_current_user(db: Session = Depends(database.get_db), token: str = Depend
     return user
 
 
-def get_admin():
-    user_admin = get_current_user()
-    if user_admin.is_admin:
-        return user_admin
-    else:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN)
+# def get_admin():
+#     user_admin = get_current_user()
+#     if user_admin.is_admin:
+#         return user_admin
+#     else:
+#         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN)
