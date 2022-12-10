@@ -1,14 +1,13 @@
+from app import crud, schema
+from app.database import get_db
+from app.model import *
+from typing import List
+from sqlalchemy.orm import Session
+from fastapi import FastAPI, Depends, HTTPException, APIRouter, Request
+from app.oauth import get_current_user
+from app import model
 import sys
 sys.path.append('..')
-from app import model
-from app.oauth import get_current_user, get_admin
-from fastapi import FastAPI, Depends, HTTPException, APIRouter, Request
-from sqlalchemy.orm import Session
-from typing import List
-from app.model import *
-from app.database import get_db
-from app import crud, schema
-
 
 
 router = APIRouter(
@@ -18,14 +17,14 @@ router = APIRouter(
 
 
 @router.get('/')
-def fetch_users(skip: int = 0, limit: int = 100, db: Session = Depends(get_db), current_user = Depends(get_current_user)):
+def fetch_users(skip: int = 0, limit: int = 100, db: Session = Depends(get_db), current_user=Depends(get_current_user)):
     """ List to get all users """
 
     return crud.get_users(db, skip=skip, limit=limit)
 
 
 @router.get('/{username}')
-def fetch_user(username: str, db: Session = Depends(get_db), current_user = Depends(get_current_user)):
+def fetch_user(username: str, db: Session = Depends(get_db), current_user=Depends(get_current_user)):
     """ Fetch a user by username  """
 
     user = crud.get_user(db, username=username)
@@ -36,7 +35,7 @@ def fetch_user(username: str, db: Session = Depends(get_db), current_user = Depe
 
 
 @router.patch('/edit/{username}')
-def update_user(user: schema.UserUpdate, username: str, db: Session = Depends(get_db), current_user = Depends(get_current_user)):
+def update_user(user: schema.UserUpdate, username: str, db: Session = Depends(get_db), current_user=Depends(get_current_user)):
     """ Update a User profile by username  """
 
     user_db = db.query(User).filter(User.username == username).first()
