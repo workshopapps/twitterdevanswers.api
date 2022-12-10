@@ -10,8 +10,6 @@ pipeline {
 		stage('Deploy to Production') {
 		    steps {
 			    sh "sudo cp -fr ${WORKSPACE}/app/* /home/judgejudy/twitterdevanswers.api/app"
-		
-			   // sh "sudo  stop main"
 			    //sh "python3 -m venv venv"
 			    //sh "source venv/bin/activate"
 			    //sh "pip install -r requirements.txt"
