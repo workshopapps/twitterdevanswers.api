@@ -11,9 +11,36 @@ from uuid import uuid4
 import uuid as uuid_pkg
 import sqlalchemy
 import datetime
+import enum
+from sqlalchemy import types
+from sqlalchemy_utils.types.choice import ChoiceType
 
 metadata = MetaData()
 
+
+# class choices(enum.Enum):
+#     earned = "earned"
+#     spent = "spent"
+
+
+class Transaction(Base):
+    TYPES = [
+        ('earned','Earned' ),
+        ('spent','Spent'),
+    ]
+
+    __tablename__ = 'walletaccount'
+    __table_args__ = {'extend_existing': True}
+
+    transaction_id = Column(String(50), primary_key=True, nullable=False)
+    user_id = Column(Integer, ForeignKey("user.user_id", ondelete="CASCADE"), nullable=True)
+    transacion_type = Column(ChoiceType(TYPES))
+    amount = Column(Integer, default=0, nullable=False)
+    description = Column(String(1024), nullable=True)
+    transaction_date = Column(TIMESTAMP(timezone=True),
+                        nullable=False, server_default=text('now()'))
+    total_earned = Column(Integer, default=0, nullable=False)
+    total_spent = Column(Integer, default=0, nullable=False)
 
 
 

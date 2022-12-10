@@ -71,6 +71,7 @@ def admin_deduction(question_owner_id: int, amount:int, db: Session = Depends(ge
 		db.add(question_owner_account)
 		db.commit()
 
+		
 
 		devask_account.balance += amount
 		devask_account.earnings += 1
@@ -80,6 +81,13 @@ def admin_deduction(question_owner_id: int, amount:int, db: Session = Depends(ge
 		db.commit()
 		db.refresh(devask_account)
 		db.refresh(question_owner_account)
+
+		# initialize transactions history instance for asker
+		question_transaction = Transaction(transacion_type='spent',
+		amount=amount, total_spent=question_owner_account.total_spent,
+		total_earned=question_owner_account.total_earned)
+		db.add(question_transaction)
+		db.commit()
 
 		return {"devask_account": devask_account, 
 		"question_owner": question_owner_account}
@@ -140,6 +148,13 @@ def admin_transactions(item: AdminPayments,  db: Session = Depends(get_db),
 		db.refresh(answerer_account)
 		db.refresh(question_owner)
 
+		# initialize transactions history instance for answerer
+		answerer_transaction = Transaction(transacion_type='earned',
+		amount=amount, total_spent=answerer_account.total_spent,
+		total_earned=answerer_account.total_earned)
+		db.add(answerer_transaction)
+		db.commit()
+
 		return {"code": "success",
 				"message": "extra tokens has been added for owner of selected correct answer",
 				"amount earned": earned_value,
@@ -148,4 +163,7 @@ def admin_transactions(item: AdminPayments,  db: Session = Depends(get_db),
 				"Question Owner History": question_owner
 				}
 
-
+@router.get('/transactions_history/users/{user_id}')
+def get_transactions(user_id: int, db: Session = Depends(get_db)):
+	transactions = db.query(model.Transaction).filter(user_id == user_id).all()
+	return transactions
