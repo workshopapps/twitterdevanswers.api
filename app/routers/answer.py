@@ -38,7 +38,12 @@ def get_correct_answer(question_id: int, db: Session):
         model.Answer.is_answered == True
     ).first()
 
-    return check_answer
+    if check_answer is None:
+        return False
+    elif check_answer.is_answered is True:
+        return True
+    else:
+        return False
 
 
 @router.get("/{question_id}")
