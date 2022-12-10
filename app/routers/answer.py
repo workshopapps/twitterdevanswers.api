@@ -39,11 +39,19 @@ def get_correct_answer(question_id: int, db: Session):
     ).first()
 
     if check_answer is None:
-        return False
+        return {"status": False}
     elif check_answer.is_answered is True:
-        return True
+        return {
+            "status": True,
+            "answer_id": check_answer.answer_id,
+            "owner_id": check_answer.owner_id,
+            "question_id": check_answer.question_id,
+            "is_answered": check_answer.is_answered,
+            "payment_amount": db_question.payment_amount,
+            "question_owner_id": db_question.owner_id
+        }
     else:
-        return False
+        return {"status": False}
 
 
 @router.get("/{question_id}")
