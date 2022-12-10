@@ -61,18 +61,3 @@ def update_user(user: schema.UserUpdate, username: str, db: Session = Depends(ge
         return {"success": True, "message": "Profile Updated", "data": update_data}
     else:
         return {"success": False, "message":  "You're not authorized to perform this update "}
-
-
-@router.get("/remove-admin/{user_id}")
-def remove_admin(user_id:int, db: Session = Depends(get_db), admin = Depends(get_admin)):
-    user = db.query(model.User).filter(model.User.user_id == user_id).update({'is_admin': False})
-    return {'Success': True, "Details" : "User deactivated as admin "}
-
-@router.get("/make-admin/{user_id}")
-def make_admin(user_id:int, db: Session = Depends(get_db), admin = Depends(get_admin)):
-    try:
-        user = db.query(model.User).filter(model.User.user_id == user_id).update({'is_admin': True})
-        return {'Success': True, "Details" : "User made an admin "}
-    except:
-        raise HTTPException(
-                status_code=405, detail=f"An error occured pls try again ")
