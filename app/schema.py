@@ -275,8 +275,8 @@ class AnswerVote(AnswerVoteBase):
 class UpdateCorrectAnswerBase(BaseModel):
     """ Answer BaseModel for Update Answer endpoint """
 
-    answer_id: id
-    question_id: id
+    answer_id: int
+    question_id: int
 
 
 class UpdateCorrectAnswer(UpdateCorrectAnswerBase):
