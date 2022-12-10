@@ -9,6 +9,7 @@ from app import model, schema, oauth
 from app.schema import AdminPayments
 from app.database import engine, get_db
 from routers.answer import get_correct_answer
+from sqlalchemy.sql import functions
 
 router = APIRouter(
     prefix='/admin',
@@ -65,6 +66,7 @@ def admin_deduction(question_owner_id: int, amount:int, db: Session = Depends(ge
 
 	if question_owner_account.balance >= amount:
 		
+		# deduct payment amount
 		question_owner_account.balance -= amount
 		question_owner_account.spendings += 1
 		question_owner_account.total_spent += amount
@@ -72,22 +74,28 @@ def admin_deduction(question_owner_id: int, amount:int, db: Session = Depends(ge
 		db.commit()
 
 		
-
+		# adds deducted amount to devask wallet
 		devask_account.balance += amount
 		devask_account.earnings += 1
 		devask_account.total_earned += amount
 		db.add(devask_account)
 		db.add(question_owner_account)
 		db.commit()
+		
+
+		# initialize transactions history instance for the  asker
+		question_transaction = Transaction(transacion_type='spent',
+		amount=amount,
+		user_id=question_owner_id,
+		description=f"{amount} tokens has been deducted for question payments")
+		db.add(question_transaction)
+		db.commit()
+
+
 		db.refresh(devask_account)
 		db.refresh(question_owner_account)
 
-		# initialize transactions history instance for asker
-		question_transaction = Transaction(transacion_type='spent',
-		amount=amount, total_spent=question_owner_account.total_spent,
-		total_earned=question_owner_account.total_earned)
-		db.add(question_transaction)
-		db.commit()
+
 
 		return {"devask_account": devask_account, 
 		"question_owner": question_owner_account}
@@ -118,7 +126,7 @@ def admin_transactions(item: AdminPayments,  db: Session = Depends(get_db),
 	question_owner = res_obj['question_owner']
 
 	
-	# gets correct selected answer
+	# checks for  correct selected answer
 	correct_answer = get_correct_answer(question_id=question_id, db=db)
 	
 	if not correct_answer:
@@ -128,7 +136,7 @@ def admin_transactions(item: AdminPayments,  db: Session = Depends(get_db),
 
 	if admin_obj.balance >= amount:
 
-		# Admins remits earnings and subtracts commision
+		# Admins subtracts commision and remits earnings
 		answer_owner_id = correct_answer.owner_id
 		earned_value = amount - commission		
 		answerer_account = db.query(Wallet).filter(Wallet.user_id == answer_owner_id).first()
@@ -137,33 +145,41 @@ def admin_transactions(item: AdminPayments,  db: Session = Depends(get_db),
 		admin_obj.spendings += 1
 		admin_obj.total_spent += earned_value
 
-
+		# Admins remits answerer earning
 		answerer_account.balance += earned_value
 		answerer_account.earnings += 1
 		answerer_account.total_earned += earned_value
-
 		db.add(answerer_account)
 		db.add(admin_obj)
 		db.commit()
-		db.refresh(answerer_account)
-		db.refresh(question_owner)
+		
+		
 
 		# initialize transactions history instance for answerer
 		answerer_transaction = Transaction(transacion_type='earned',
-		amount=amount, total_spent=answerer_account.total_spent,
-		total_earned=answerer_account.total_earned)
+		amount=earned_value,user_id=answerer_account.user_id,
+		description=f"{earned_value} Tokens has been added  for selected correct answer")
 		db.add(answerer_transaction)
 		db.commit()
 
-		return {"code": "success",
-				"message": "extra tokens has been added for owner of selected correct answer",
+		db.refresh(question_owner)
+		db.refresh(answerer_account)
+
+
+		return {
 				"amount earned": earned_value,
 				"Answer Owner Transaction History": answerer_account,
 				"amount deducted": amount,
 				"Question Owner History": question_owner
 				}
 
+
 @router.get('/transactions_history/users/{user_id}')
 def get_transactions(user_id: int, db: Session = Depends(get_db)):
-	transactions = db.query(model.Transaction).filter(user_id == user_id).all()
-	return transactions
+	transactions = db.query(model.Transaction).filter(model.Transaction.user_id==user_id).all()
+	
+	return {
+		"transaction_history": transactions
+	}
+
+
