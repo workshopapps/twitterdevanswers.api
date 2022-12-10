@@ -9,6 +9,7 @@ from sqlalchemy.orm import sessionmaker
 # production
 SQLALCHEMY_DATABASE_URI = "mysql+mysqldb://devask:HNG#9devask@localhost/devask"
 
+
 # SQLALCHEMY_DATABASE_URI = "mysql+mysqldb://sql8582000:YTyl3z4HAW@sql8.freemysqlhosting.net/sql8582000"
 # SQLALCHEMY_DATABASE_URI = "postgresql://hswuttzzoonnuj:84da1bb239e309794b0e3d88aebbc5d8069e908be6667a86e990d31759cf3d22@ec2-54-160-109-68.compute-1.amazonaws.com:5432/dcv4jf04kkfo1d"
 #SQLALCHEMY_DATABASE_URI = "mysql+pymysql://devask:HNG#9devask@127.0.0.1/devask"
@@ -31,4 +32,4 @@ def get_db():
         # db.close()
 
 
-# Base.metadata.create_all(bind=engine)
+Base.metadata.create_all(bind=engine)

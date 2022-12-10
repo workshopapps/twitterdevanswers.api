@@ -11,8 +11,30 @@ from uuid import uuid4
 import uuid as uuid_pkg
 import sqlalchemy
 import datetime
+import enum
+from sqlalchemy import types
+from sqlalchemy_utils.types.choice import ChoiceType
 
 metadata = MetaData()
+
+
+class Transaction(Base):
+    TYPES = [
+        ('earned','Earned' ),
+        ('spent','Spent'),
+    ]
+
+    __tablename__ = 'transactions'
+    __table_args__ = {'extend_existing': True}
+
+    transaction_id = Column(Integer, primary_key=True, nullable=False)
+    user_id = Column(Integer, ForeignKey("user.user_id", ondelete="CASCADE"), nullable=True)
+    transacion_type = Column(ChoiceType(TYPES))
+    amount = Column(Integer, default=0, nullable=False)
+    description = Column(String(1024), nullable=True)
+    transaction_date = Column(TIMESTAMP(timezone=True),
+                        nullable=False, server_default=text('now()'))
+
 
 
 class Wallet(Base):
@@ -21,9 +43,13 @@ class Wallet(Base):
 
     id = Column(String(50), primary_key=True)
     balance = Column(Integer, default=1000, nullable=False)
-    deposits_made = Column(Integer, default=0, nullable=False)
     spendings = Column(Integer, default=0, nullable=False)
-    user_id = Column(Integer, ForeignKey("user.user_id", ondelete="CASCADE"))
+    earnings = Column(Integer, default=0, nullable=False)
+    total_spent = Column(Integer, default=0, nullable=False)
+    total_earned = Column(Integer, default=0, nullable=False)
+    is_devask_wallet = Column(Boolean, default=False)
+    user_id = Column(Integer, ForeignKey(
+        "user.user_id", ondelete="CASCADE"), nullable=True)
     created_at = Column(
         DateTime, default=datetime.datetime.utcnow, nullable=False)
 
@@ -36,8 +62,8 @@ class User(Base):
     first_name = Column(String(30), nullable=True, default=" ")
     last_name = Column(String(30), nullable=True, default=" ")
     email = Column(String(100), nullable=False, unique=True)
-    #date_of_birth = Column(DateTime,nullable=True, default=" ")
-    gender = Column(String(7), nullable=False ,default=" ")
+    date_of_birth = Column(String(100), nullable=True, default=" ")
+    gender = Column(String(7), nullable=False, default=" ")
     description = Column(String(400), nullable=True, default=" ")
     password = Column(String(200), nullable=False)
     phone_number = Column(String(30), nullable=True, default=" ")
@@ -52,9 +78,11 @@ class User(Base):
     location = Column(String(100), nullable=True, default=" ")
     is_admin = Column(Boolean, default=False)
     account_balance = Column(Integer, ForeignKey(
-        'walletaccount.balance', ondelete="CASCADE"), nullable=True)
+        'walletaccount.balance', ondelete="CASCADE"), nullable=False)
     created_at = Column(TIMESTAMP(timezone=True),
                         nullable=False, server_default=text('now()'))
+    verification_code = Column(String(300), nullable=True, default=" ")
+    is_verified = Column(Boolean, nullable=True, default=False)
     mfa_hash = Column(String(300))
 
 
@@ -120,7 +148,7 @@ class AnswerVote(Base):
         "answer.answer_id", ondelete="CASCADE"), nullable=False)
     vote_type = Column(String(100), nullable=False)
     owner = relationship('model.User')
-    answer = relationship('model.Answer')
+    answer = relationship('model.Answer', )
 
 
 class Like(Base):

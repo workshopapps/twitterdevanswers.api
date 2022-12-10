@@ -5,7 +5,9 @@ from sqlalchemy.orm import Session
 from fastapi import Depends, HTTPException, APIRouter, status, Path
 from app.oauth import get_current_user
 from app.routers.answer import get_answer
+from app.routers.admin_utils import get_devask_wallet
 from app import oauth, model, schema
+
 
 router = APIRouter(
     prefix='/admin',
@@ -33,6 +35,34 @@ def make_admin(username: str, db: Session = Depends(get_db), current_user: schem
     db.refresh(user)
 
     return {"success": True, "message": f"User with username {username} is now an admin"}
+
+
+@router.post("/remove/{username}")
+def remove_admin(username: str, db: Session = Depends(get_db), current_user: schema.User = Depends(get_current_user)):
+    "Remove an admin user using his/her username"
+    if not check_admin(current_user):
+        raise HTTPException(
+            status_code=401, detail=f"You must be an admin to access this endpoint")
+    user = db.query(model.User).filter(model.User.username == username).first()
+    if user is None:
+        raise HTTPException(
+            status_code=404, detial=f"No user found for this username: {username}")
+    user.is_admin = False
+    db.add(user)
+    db.commit()
+    db.refresh(user)
+
+    return {"success": True, "message": f"User with username {username} has been stripped of Admin priviledges"}
+
+
+@router.get("/viewdevaskwallet")
+def get_escrow_wallet(db: Session = Depends(get_db),current_user: schema.User = Depends(get_current_user)):
+    "View Admin Wallet"
+    if not check_admin(current_user):
+        raise HTTPException(
+            status_code=401, detail=f"You must be an admin to access this endpoint")
+    devaskwallet = get_devask_wallet(db)
+    return {"success":True,"data":devaskwallet}
 
 
 @router.get('/users')
@@ -64,10 +94,13 @@ def delete_user(username: str, db: Session = Depends(get_db), current_user: sche
         raise HTTPException(
             status_code=401, detail=f"You must be an admin to access this endpoint")
     try:
-        delete_user = crud.delete_user(db, username=username)
+        delete_user = db.query(model.User).filter(username=username).first()
         if not delete_user:
             raise HTTPException(
                 status_code=404, detail=f"user with user_id : {username} does not exist")
+        db.delete(delete_user)
+        db.commit()
+        db.refresh(delete_user)
         return {"success": True, "data": "User has been deleted successfully"}
     except:
         return {"error": "Unable to delete user"}

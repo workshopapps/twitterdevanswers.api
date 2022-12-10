@@ -9,7 +9,6 @@ class AdminPayments(BaseModel):
     question_id: int
     amount: int
     commission: int
-    admin_id: int
 
     class Config:
         schema_extra = {
@@ -17,9 +16,9 @@ class AdminPayments(BaseModel):
                 "amount": "50",
                 "question_id": "20",
                 "commission": "10",
-                "admin_id": "2"
             }
         }
+
 
 class TransactionRequest(BaseModel):
     amount: int
@@ -40,7 +39,7 @@ class User(BaseModel):
     first_name: str
     last_name: str
     email: EmailStr
-    date_of_birth :str
+    date_of_birth: str
     gender: str
     description: str
     image_url: str
@@ -202,6 +201,7 @@ class Email(BaseModel):
 
 
 class Token(BaseModel):
+    data: dict
     access_token: str
     token_type: str
 
@@ -269,6 +269,17 @@ class AnswerVoteBase(BaseModel):
 
 class AnswerVote(AnswerVoteBase):
     """ Answer Vote BaseModel for Add Answer Vote endpoint """
+    pass
+
+
+class UpdateCorrectAnswerBase(BaseModel):
+    """ Answer BaseModel for Update Answer endpoint """
+
+    question_id: int
+
+
+class UpdateCorrectAnswer(UpdateCorrectAnswerBase):
+    """ Answer BaseModel for Update Answer endpoint """
     pass
 
 

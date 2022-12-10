@@ -1,18 +1,38 @@
-from app.database import engine, get_db
-from app.schema import AdminPayments
-from app import model, schema, oauth
-from app.oauth import get_current_user
-from fastapi import FastAPI, Depends, HTTPException, APIRouter, status, Request, Path
-from sqlalchemy.orm import Session
-from typing import List
-from app.model import *
-from sqlalchemy import desc
 from app import schema, crud
+from sqlalchemy import desc
+from app.model import *
+from typing import List
+from sqlalchemy.orm import Session
+from fastapi import FastAPI, Depends, HTTPException, APIRouter, status, Request, Path
+from app.oauth import get_current_user
+from app import model, schema, oauth
+from app.schema import AdminPayments
+from app.database import engine, get_db
+from sqlalchemy.sql import functions
+from app.routers.answer import get_correct_answer
+from app.routers import admin
+from app.oauth import get_current_user
+
 
 router = APIRouter(
     prefix='/admin',
     tags=['Admin']
 )
+
+
+def get_devask_wallet(db: Session = Depends(get_db)):
+
+    devask_account = db.query(Wallet).filter(
+        Wallet.is_devask_wallet == True).first()
+    if not devask_account:
+        wallet_id = uuid4()
+        devask_wallet_obj = Wallet(is_devask_wallet=True, id=wallet_id)
+        db.add(devask_wallet_obj)
+        db.commit()
+        db.refresh(devask_wallet_obj)
+        return devask_wallet_obj
+
+    return devask_account
 
 
 def get_question(question_id: int, amount: int, db: Session = Depends(get_db)):
@@ -27,6 +47,7 @@ def get_question(question_id: int, amount: int, db: Session = Depends(get_db)):
     question_obj = db.query(model.Question).filter(
         model.Question.question_id == question_id).first()
 
+    # sets payment amount
     question_obj.payment_amount = amount
     db.add(question_obj)
     db.commit()
@@ -35,7 +56,8 @@ def get_question(question_id: int, amount: int, db: Session = Depends(get_db)):
     return question_obj
 
 
-def admin_deduction(question_owner_balance: int, amount: int, admin_id: int, db: Session = Depends(get_db)):
+def admin_deduction(question_owner_id: int, amount: int, db: Session = Depends(get_db),
+                    devask_account=Depends(get_devask_wallet)):
     """
             deducts question allocated payment amount from question owner account
             params:
@@ -44,78 +66,125 @@ def admin_deduction(question_owner_balance: int, amount: int, admin_id: int, db:
                     admin_id
             Return: admin obj
     """
-    if question_owner_balance >= amount:
+    question_owner_account = db.query(Wallet).filter(
+        Wallet.user_id == question_owner_id).first()
 
-        admin_obj = db.query(model.User).filter(
-            admin_id == model.User.user_id).first()
+    if question_owner_account.balance >= amount:
 
-        if not admin_obj.is_admin:
-
-            raise HTTPException(status_code=401, detail="Authorization needed")
-        question_owner_balance -= amount
-        admin_obj.account_balance += amount
-        db.add(admin_obj)
+        # deduct payment amount
+        question_owner_account.balance -= amount
+        question_owner_account.spendings += 1
+        question_owner_account.total_spent += amount
+        db.add(question_owner_account)
         db.commit()
-        db.refresh(admin_obj)
-        return admin_obj
+
+        # adds deducted amount to devask wallet
+        devask_account.balance += amount
+        devask_account.earnings += 1
+        devask_account.total_earned += amount
+        db.add(devask_account)
+        db.add(question_owner_account)
+        db.commit()
+
+        # initialize transactions history instance for the  asker
+        question_transaction = Transaction(transacion_type='spent',
+                                           amount=amount,
+                                           user_id=question_owner_id,
+                                           description=f"{amount} tokens has been deducted for question payments")
+        db.add(question_transaction)
+        db.commit()
+
+        db.refresh(devask_account)
+        db.refresh(question_owner_account)
+
+        return {"devask_account": devask_account,
+                "question_owner": question_owner_account}
     else:
         return {"code": "error", "balance": question_owner_account.balance,
                 "message": "Wallet Balance Insufficience"}
 
 
-@router.post('/payments')
-def admin_transactions(item: AdminPayments,  db: Session = Depends(get_db)):
+@router.post('/transactions')
+def admin_transactions(item: AdminPayments,  db: Session = Depends(get_db),
+                       devask_account=Depends(get_devask_wallet),
+                       current_user: schema.User = Depends(get_current_user)):
+    if not admin.check_admin(current_user):
+        raise HTTPException(
+            status_code=401, detail=f"You must be an admin to access this endpoint")
 
     question_id = item.question_id
     amount = item.amount
-    admin_id = item.admin_id
     commission = item.commission
-
-    admin_obj = db.query(model.User).filter(
-        admin_id == model.User.user_id).first()
-    if not admin_obj.is_admin:
-        raise HTTPException(status_code=401, detail="Authorization needed")
 
     try:
         question_obj = get_question(question_id, amount, db)
     except:
         raise HTTPException(status_code=404, detail="question not found")
-
-    # verfying account owner account balance
     question_owner_id = question_obj.owner_id
-    question_owner_account = db.query(Wallet).filter(
-        Wallet.user_id == question_owner_id).first()
-    try:
-        admin_obj = admin_deduction(
-            question_owner_account.balance, amount, admin_id, db)
-    except:
-        raise HTTPException(status_code=401, detail="Authorization needed")
 
-    if admin_obj.account_balance:
-        # checks if answer exists
-        answer_exists = db.query(model.Answer).filter(model.Answer.question_id == question_id).order_by(
-            desc(model.Answer.vote)).first()
+    res_obj = admin_deduction(question_owner_id=question_owner_id,
+                              amount=amount, db=db, devask_account=devask_account)
 
-        if not answer_exists:
-            raise HTTPException(
-                status_code=404, detail=f"No answer available for question {question_obj}")
+    admin_obj = res_obj['devask_account']
+    question_owner = res_obj['question_owner']
 
-        # Admins remits earnings
-        answer_owner_id = answer_exists.owner_id
+    # checks for  correct selected answer
+    correct_answer = get_correct_answer(question_id=question_id, db=db)
+
+    if not correct_answer:
+        raise HTTPException(status_code=404,
+                            detail=f"No answer available for question {question_obj.content}")
+
+    if admin_obj.balance >= amount:
+
+        # Admins subtracts commision and remits earnings
+        answer_owner_id = correct_answer.owner_id
         earned_value = amount - commission
         answerer_account = db.query(Wallet).filter(
             Wallet.user_id == answer_owner_id).first()
 
-        admin_obj.account_balance -= earned_value
-        answerer_account.balance += earned_value
-        admin_balance = admin_obj.account_balance
+        admin_obj.balance -= earned_value
+        admin_obj.spendings += 1
+        admin_obj.total_spent += earned_value
 
+        # Admins remits answerer earning
+        answerer_account.balance += earned_value
+        answerer_account.earnings += 1
+        answerer_account.total_earned += earned_value
         db.add(answerer_account)
         db.add(admin_obj)
         db.commit()
+
+        # initialize transactions history instance for answerer
+        answerer_transaction = Transaction(transacion_type='earned',
+                                           amount=earned_value, user_id=answerer_account.user_id,
+                                           description=f"{earned_value} Tokens has been added  for selected correct answer")
+        db.add(answerer_transaction)
+        db.commit()
+
+        db.refresh(question_owner)
         db.refresh(answerer_account)
 
-        return {"code": "success",
-                        "message": "extra tokens has been added for maximum voted answer",
-                        "earned": earned_value,
-                        "wallet": answerer_account}
+        return {
+            "amount earned": earned_value,
+            "Answer Owner Transaction History": answerer_account,
+            "amount deducted": amount,
+            "Question Owner History": question_owner
+        }
+
+# skip: int = 0, limit: int = 100,
+
+
+@router.get('/transactions/users/{user_id}')
+def get_transactions(user_id: int, skip: int = 0, limit: int = 30, db: Session = Depends(get_db),
+                     current_user: schema.User = Depends(get_current_user)):
+    if not admin.check_admin(current_user):
+        raise HTTPException(
+            status_code=401, detail=f"You must be an admin to access this endpoint")
+
+    transactions = db.query(model.Transaction)\
+        .filter(model.Transaction.user_id == user_id).offset(skip).limit(limit).all()
+
+    return {
+        "transaction_history": transactions
+    }
