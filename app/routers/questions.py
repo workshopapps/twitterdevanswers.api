@@ -24,14 +24,17 @@ def add_question(request: schema.Question, db: Session = Depends(get_db), curren
     db.refresh(ask_question)
     return {"success": True, "message": ask_question.content}
 
-@router.patch("/answers/{answer_id}", status_code=status.HTTP_200_OK)
-def select_answer(answer_id:int,question_id: int, db: Session = Depends(get_db)):
+
+#selects the correct answer
+@router.patch("/select_answer/{answer_id}", status_code=status.HTTP_200_OK)
+def select_answer(answer_id:int,question_id: int, db: Session = Depends(get_db),current_user: int = Depends(oauth.get_current_user)):
     get_answer = db.query(model.Answer).filter(model.Answer.question_id == question_id,model.Answer.answer_id == answer_id).first()
     if get_answer:
-        get_answer.is_answered = True
-        db.commit()
-        return {"success": True, "message": "correct answer selected"}
-
+        if get_answer.owner_id == current_user.user_id:
+            get_answer.is_answered = True
+            db.commit()
+            return {"success": True, "message": "correct answer selected"}
+      
 
 @router.get("/update_questions/{question_id}", status_code=status.HTTP_200_OK)
 def retrieve_question(question_id: int, db: Session = Depends(get_db), current_user: int = Depends(oauth.get_current_user)):
