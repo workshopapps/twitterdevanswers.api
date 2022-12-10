@@ -119,7 +119,8 @@ def admin_transactions(item: AdminPayments,  db: Session = Depends(get_db),
 			raise HTTPException(status_code=404, detail="question not found")
 	question_owner_id = question_obj.owner_id
 	
-	res_obj = admin_deduction(question_owner_id=question_owner_id, amount=amount, db=db, devask_account=devask_account)
+	res_obj = admin_deduction(question_owner_id=question_owner_id,\
+		 amount=amount, db=db, devask_account=devask_account)
 
 	
 	admin_obj = res_obj['devask_account']
@@ -173,10 +174,12 @@ def admin_transactions(item: AdminPayments,  db: Session = Depends(get_db),
 				"Question Owner History": question_owner
 				}
 
-
+#skip: int = 0, limit: int = 100, 
 @router.get('/transactions_history/users/{user_id}')
-def get_transactions(user_id: int, db: Session = Depends(get_db)):
-	transactions = db.query(model.Transaction).filter(model.Transaction.user_id==user_id).all()
+def get_transactions(user_id: int, skip: int = 0, limit: int = 30, db: Session = Depends(get_db)):
+
+	transactions = db.query(model.Transaction)\
+		.filter(model.Transaction.user_id==user_id).offset(skip).limit(limit).all()
 	
 	return {
 		"transaction_history": transactions
