@@ -94,4 +94,3 @@ yagmail==0.15.293
 yarl==1.8.1
 mysqlclient
 sentry_sdk
-atatus
