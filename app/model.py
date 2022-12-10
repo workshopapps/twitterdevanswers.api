@@ -19,7 +19,7 @@ class Wallet(Base):
     __tablename__ = 'walletaccount'
     __table_args__ = {'extend_existing': True}
 
-    id = Column(String(50), primary_key=True)
+    id = Column(Integer, primary_key=True)
     balance = Column(Integer, default=1000, nullable=False)
     deposits_made = Column(Integer, default=0, nullable=False)
     spendings = Column(Integer, default=0, nullable=False)
@@ -57,7 +57,7 @@ class User(Base):
     location = Column(String(100), nullable=True, default=" ")
     is_admin = Column(Boolean, default=False)
     account_balance = Column(Integer, ForeignKey(
-        'walletaccount.balance', ondelete="CASCADE"), nullable=True)
+        'walletaccount.id', ondelete="CASCADE"), nullable=True)
     created_at = Column(TIMESTAMP(timezone=True),
                         nullable=False, server_default=text('now()'))
     verification_code = Column(String(300), nullable=True, default=" ")
@@ -193,4 +193,4 @@ class Blog(Base):
 
 
 # create tables
-Base.metadata.create_all(bind=engine)
+# Base.metadata.create_all(bind=engine)
