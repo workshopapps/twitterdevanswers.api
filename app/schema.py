@@ -21,6 +21,7 @@ class AdminPayments(BaseModel):
             }
         }
 
+
 class TransactionRequest(BaseModel):
     amount: int
     user_id: str
@@ -40,7 +41,7 @@ class User(BaseModel):
     first_name: str
     last_name: str
     email: EmailStr
-    date_of_birth :str
+    date_of_birth: str
     gender: str
     description: str
     image_url: str
@@ -202,6 +203,7 @@ class Email(BaseModel):
 
 
 class Token(BaseModel):
+    data: dict
     access_token: str
     token_type: str
 
