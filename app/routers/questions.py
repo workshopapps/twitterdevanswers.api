@@ -33,7 +33,11 @@ def select_answer(answer_id:int,question_id: int, db: Session = Depends(get_db),
         if get_answer.owner_id == current_user.user_id:
             get_answer.is_answered = True
             db.commit()
-            return {"success": True, "message": "correct answer selected"}
+            if get_answer.is_answered == True:
+                get_question = db.query(model.Question).filter(model.Question.question_id == question_id).first()
+                get_question.answered = True
+                db.commit()
+                return {"success": True, "message": "correct answer selected","info":"question has been answered correctly"}
       
 
 @router.get("/update_questions/{question_id}", status_code=status.HTTP_200_OK)
