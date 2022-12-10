@@ -58,7 +58,7 @@ async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(
     return {"access_token": access_token,
             "data": {
                 "user_id": user.user_id,
-                "usename": user.username,
+                "username": user.username,
                 "email": user.email,
                 "name": user.first_name + user.last_name
             },
