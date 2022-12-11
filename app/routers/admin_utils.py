@@ -191,6 +191,8 @@ def admin_transactions(item: AdminPayments,  db: Session = Depends(get_db),
 				"Question Owner History": question_owner
 				}
 
+# Separated the endpoint here
+
 #skip: int = 0, limit: int = 100, 
 @router.get('/transactions/users/{user_id}')
 def get_transactions(user_id: int, skip: int = 0, limit: int = 30, db: Session = Depends(get_db),
@@ -207,4 +209,88 @@ def get_transactions(user_id: int, skip: int = 0, limit: int = 30, db: Session =
 		"transaction_history": transactions
 	}
 
+# deduct endpoint
+@router.post('/transactions/question/deduct')
+def admin_transactions(item: AdminPayments,  db: Session = Depends(get_db),
+	devask_account= Depends(get_devask_wallet)):
+	question_id=item.question_id
+	amount= item.amount
+	commission = item.commission
 
+	try:
+		question_obj = get_question(question_id, amount, db)
+	except:
+		raise HTTPException(status_code=404, detail="question not found")
+	question_owner_id = question_obj.owner_id
+
+	try:
+		res_obj = admin_deduction(question_owner_id=question_owner_id,\
+		 amount=amount, db=db, devask_account=devask_account)
+	except:
+		raise HTTPException(status_code=404, detail="Unable to perform deductions on account")
+	
+	question_owner_id = question_obj.owner_id
+
+	
+	admin_obj = res_obj['devask_account']
+	question_owner = res_obj['question_owner']
+
+
+	return {
+				"amount deducted": amount,
+				"Question Owner History": question_owner
+				}
+
+# pay endpoint
+@router.post('/transactions/answer/pay')
+def admin_transactions(item: AdminPayments,  db: Session = Depends(get_db),
+	devask_account= Depends(get_devask_wallet)):
+	
+	question_id=item.question_id
+	amount= item.amount
+	commission = item.commission
+
+
+	try:
+		correct_answer = get_correct_answer(question_id=question_id, db=db)
+	except:
+		raise HTTPException(status_code=404, detail="Unable to get  correct answer for question")
+	
+	if not correct_answer:
+		raise HTTPException(status_code=404,
+		detail=f"No answer available for question {question_obj.content}")
+
+	if devask_account.balance >= amount:
+
+		# Admins subtracts commision and remits earnings
+		answer_owner_id = correct_answer.owner_id
+		earned_value = amount - commission		
+		answerer_account = db.query(Wallet).filter(Wallet.user_id == answer_owner_id).first()
+		
+		devask_account.balance  -= earned_value
+		devask_account.spendings += 1
+		devask_account.total_spent += earned_value
+
+		# Admins remits answerer earning
+		answerer_account.balance += earned_value
+		answerer_account.earnings += 1
+		answerer_account.total_earned += earned_value
+		db.add(answerer_account)
+		db.add(devask_account)
+		db.commit()
+		
+		
+
+		# initialize transactions history instance for answerer
+		answerer_transaction = Transaction(transacion_type='earned',
+		amount=earned_value,user_id=answerer_account.user_id,
+		description=f"{earned_value} Tokens has been added  for selected correct answer")
+		db.add(answerer_transaction)
+		db.commit()
+		db.refresh(answerer_account)
+
+
+		return {
+				"amount earned": earned_value,
+				"Answer Owner Transaction History": answerer_account,
+				}
