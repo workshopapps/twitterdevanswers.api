@@ -182,6 +182,8 @@ def get_transactions(user_id: int, skip: int = 0, limit: int = 30, db: Session =
 
     transactions = db.query(model.Transaction)\
         .filter(model.Transaction.user_id == user_id).offset(skip).limit(limit).all()
+    if not transactions:
+        return HTTPException(status_code=404, detail="No transaction history available for this user")
 
     return {
         "transaction_history": transactions
