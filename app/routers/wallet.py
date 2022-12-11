@@ -30,3 +30,4 @@ def view_wallet(user_id, db: Session = Depends(get_db)):
 
     return user_account
 
+

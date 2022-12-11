@@ -28,7 +28,7 @@ def get_correct_answer(question_id: int, db: Session):
 
     # check if question exists
     db_question = get_question(db=db, question_id=question_id)
-
+    
     if db_question is None:
         raise HTTPException(status_code=404, detail="Invalid Question ID")
 
@@ -39,7 +39,7 @@ def get_correct_answer(question_id: int, db: Session):
     ).first()
 
     if check_answer is None:
-        return {"status": False}
+        return {"status": False, "msg": "No anser found"}
     elif check_answer.is_answered is True:
         return {
             "status": True,
