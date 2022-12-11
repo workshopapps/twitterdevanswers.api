@@ -10,9 +10,8 @@ from app.schema import AdminPayments
 from app.database import engine, get_db
 from sqlalchemy.sql import functions
 from app.routers.answer import get_correct_answer
-from app.routers.admin import check_admin
+from app.routers import admin
 from app.oauth import get_current_user
-
 
 
 router = APIRouter(
@@ -23,90 +22,86 @@ router = APIRouter(
 
 def get_devask_wallet(db: Session = Depends(get_db)):
 
-	devask_account = db.query(Wallet).filter(Wallet.is_devask_wallet == True).first()
-	if not devask_account:
-		wallet_id = uuid4()
-		devask_wallet_obj = Wallet(is_devask_wallet=True, id=wallet_id)
-		db.add(devask_wallet_obj)
-		db.commit()
-		db.refresh(devask_wallet_obj)
-		return devask_wallet_obj
-	
-	return devask_account
+    devask_account = db.query(Wallet).filter(
+        Wallet.is_devask_wallet == True).first()
+    if not devask_account:
+        wallet_id = uuid4()
+        devask_wallet_obj = Wallet(is_devask_wallet=True, id=wallet_id)
+        db.add(devask_wallet_obj)
+        db.commit()
+        db.refresh(devask_wallet_obj)
+        return devask_wallet_obj
+
+    return devask_account
+
 
 def get_question(question_id: int, amount: int, db: Session = Depends(get_db)):
-	"""
-		gets question with given question id and amount
-		params:
-			question_id
-			amount
-		Return: Question obj
-	"""
+    """
+            gets question with given question id and amount
+            params:
+                    question_id
+                    amount
+            Return: Question obj
+    """
 
-	question_obj = db.query(model.Question).filter(
+    question_obj = db.query(model.Question).filter(
         model.Question.question_id == question_id).first()
-	
-	# sets payment amount
-	question_obj.payment_amount = amount
-	db.add(question_obj)
-	db.commit()
-	db.refresh(question_obj)
-	
-	return question_obj
 
-def admin_deduction(question_owner_id: int, amount:int, db: Session = Depends(get_db),
-	devask_account =  Depends(get_devask_wallet)):
-	
-	"""
-		deducts question allocated payment amount from question owner account
-		params:
-			question_owner_balance
-			amount
-			admin_id
-		Return: admin obj
-	"""
-	question_owner_account = db.query(Wallet).filter(Wallet.user_id == question_owner_id).first()
-	
+    # sets payment amount
+    question_obj.payment_amount = amount
+    db.add(question_obj)
+    db.commit()
+    db.refresh(question_obj)
 
-	if question_owner_account.balance >= amount:
-		
-		# deduct payment amount
-		question_owner_account.balance -= amount
-		question_owner_account.spendings += 1
-		question_owner_account.total_spent += amount
-		db.add(question_owner_account)
-		db.commit()
-
-		
-		# adds deducted amount to devask wallet
-		devask_account.balance += amount
-		devask_account.earnings += 1
-		devask_account.total_earned += amount
-		db.add(devask_account)
-		db.add(question_owner_account)
-		db.commit()
-		
-
-		# initialize transactions history instance for the  asker
-		question_transaction = Transaction(transacion_type='spent',
-		amount=amount,
-		user_id=question_owner_id,
-		description=f"{amount} tokens has been deducted for question payments")
-		db.add(question_transaction)
-		db.commit()
+    return question_obj
 
 
-		db.refresh(devask_account)
-		db.refresh(question_owner_account)
+def admin_deduction(question_owner_id: int, amount: int, db: Session = Depends(get_db),
+                    devask_account=Depends(get_devask_wallet)):
+    """
+            deducts question allocated payment amount from question owner account
+            params:
+                    question_owner_balance
+                    amount
+                    admin_id
+            Return: admin obj
+    """
+    question_owner_account = db.query(Wallet).filter(
+        Wallet.user_id == question_owner_id).first()
 
+    if question_owner_account.balance >= amount:
 
+        # deduct payment amount
+        question_owner_account.balance -= amount
+        question_owner_account.spendings += 1
+        question_owner_account.total_spent += amount
+        db.add(question_owner_account)
+        db.commit()
 
-		return {"devask_account": devask_account, 
-		"question_owner": question_owner_account}
-	else:
-		return {"code": "error", "balance": question_owner_account.balance,
-			"message": "Wallet Balance Insufficience"}
+        # adds deducted amount to devask wallet
+        devask_account.balance += amount
+        devask_account.earnings += 1
+        devask_account.total_earned += amount
+        db.add(devask_account)
+        db.add(question_owner_account)
+        db.commit()
 
+        # initialize transactions history instance for the  asker
+        question_transaction = Transaction(transacion_type='spent',
+                                           amount=amount,
+                                           user_id=question_owner_id,
+                                           description=f"{amount} tokens has been deducted for question payments")
+        db.add(question_transaction)
+        db.commit()
+
+        db.refresh(devask_account)
+        db.refresh(question_owner_account)
+
+        return {"devask_account": devask_account,
+                "question_owner": question_owner_account}
+    else:
+        return {"code": "error", "balance": question_owner_account.balance,
+                "message": "Wallet Balance Insufficience"}
 
 
 @router.post('/transactions')
