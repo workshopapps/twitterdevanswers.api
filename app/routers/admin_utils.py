@@ -111,11 +111,11 @@ def admin_deduction(question_owner_id: int, amount:int, db: Session = Depends(ge
 
 @router.post('/transactions')
 def admin_transactions(item: AdminPayments,  db: Session = Depends(get_db),
-	devask_account= Depends(get_devask_wallet),
-		 current_user: schema.User = Depends(get_current_user)):
-	if not check_admin(current_user):
-		raise HTTPException(
-            status_code=401, detail=f"You must be an admin to access this endpoint")
+	devask_account= Depends(get_devask_wallet)
+		 ): # current_user: schema.User = Depends(get_current_user)
+	# if not check_admin(current_user):
+	# 	raise HTTPException(
+    #         status_code=401, detail=f"You must be an admin to access this endpoint")
 
 
 	question_id=item.question_id
