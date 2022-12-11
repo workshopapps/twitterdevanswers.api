@@ -175,11 +175,10 @@ def admin_transactions(item: AdminPayments,  db: Session = Depends(get_db),
 
 
 @router.get('/transactions/users/{user_id}')
-def get_transactions(user_id: int, skip: int = 0, limit: int = 30, db: Session = Depends(get_db),
-                     current_user: schema.User = Depends(get_current_user)):
-    if not admin.check_admin(current_user):
-        raise HTTPException(
-            status_code=401, detail=f"You must be an admin to access this endpoint")
+def get_transactions(user_id: int, skip: int = 0, limit: int = 30, db: Session = Depends(get_db)):
+    #if not admin.check_admin(current_user):
+     #   raise HTTPException(
+      #      status_code=401, detail=f"You must be an admin to access this endpoint")
 
     transactions = db.query(model.Transaction)\
         .filter(model.Transaction.user_id == user_id).offset(skip).limit(limit).all()
