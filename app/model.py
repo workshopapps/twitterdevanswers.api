@@ -28,7 +28,7 @@ class Transaction(Base):
     __table_args__ = {'extend_existing': True}
 
     transaction_id = Column(Integer, primary_key=True, nullable=False)
-    user_id = Column(Integer, ForeignKey("user.user_id", ondelete="CASCADE"), nullable=True)
+    user_id = Column(Integer, ForeignKey("user.user_id", ondelete="CASCADE"), nullable=False)
     transacion_type = Column(ChoiceType(TYPES))
     amount = Column(Integer, default=0, nullable=False)
     description = Column(String(1024), nullable=True)
@@ -77,10 +77,10 @@ class User(Base):
     image_url = Column(String(300), nullable=True, default=" ")
     location = Column(String(100), nullable=True, default=" ")
     is_admin = Column(Boolean, default=False)
-    account_balance = Column(Integer, ForeignKey(
-        'walletaccount.balance', ondelete="CASCADE"), nullable=False)
-    created_at = Column(TIMESTAMP(timezone=True),
-                        nullable=False, server_default=text('now()'))
+    # account_balance = Column(Integer, ForeignKey(
+    #     'walletaccount.balance', ondelete="CASCADE"), nullable=False)
+    # created_at = Column(TIMESTAMP(timezone=True),
+    #                     nullable=False, server_default=text('now()'))
     verification_code = Column(String(300), nullable=True, default=" ")
     is_verified = Column(Boolean, nullable=True, default=False)
     mfa_hash = Column(String(300))

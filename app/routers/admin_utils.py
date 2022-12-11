@@ -125,11 +125,16 @@ def admin_transactions(item: AdminPayments,  db: Session = Depends(get_db),
 	try:
 		question_obj = get_question(question_id, amount, db)
 	except:
-			raise HTTPException(status_code=404, detail="question not found")
+		raise HTTPException(status_code=404, detail="question not found")
 	question_owner_id = question_obj.owner_id
 	
-	res_obj = admin_deduction(question_owner_id=question_owner_id,\
+	try:
+		res_obj = admin_deduction(question_owner_id=question_owner_id,\
 		 amount=amount, db=db, devask_account=devask_account)
+	except:
+		raise HTTPException(status_code=404, detail="Unable to perform deductions on account")
+	
+	question_owner_id = question_obj.owner_id
 
 	
 	admin_obj = res_obj['devask_account']
@@ -137,7 +142,10 @@ def admin_transactions(item: AdminPayments,  db: Session = Depends(get_db),
 
 	
 	# checks for  correct selected answer
-	correct_answer = get_correct_answer(question_id=question_id, db=db)
+	try:
+		correct_answer = get_correct_answer(question_id=question_id, db=db)
+	except:
+		raise HTTPException(status_code=404, detail="Unable to get  correct answer for question")
 	
 	if not correct_answer:
 		raise HTTPException(status_code=404,
@@ -186,13 +194,14 @@ def admin_transactions(item: AdminPayments,  db: Session = Depends(get_db),
 #skip: int = 0, limit: int = 100, 
 @router.get('/transactions/users/{user_id}')
 def get_transactions(user_id: int, skip: int = 0, limit: int = 30, db: Session = Depends(get_db),
-	 current_user: schema.User = Depends(get_current_user)):
-	if not check_admin(current_user):
-		raise HTTPException(
-            status_code=401, detail=f"You must be an admin to access this endpoint")
+	 ):
 
 	transactions = db.query(model.Transaction)\
 		.filter(model.Transaction.user_id==user_id).offset(skip).limit(limit).all()
+	
+	if not transactions:
+		raise HTTPException(status_code=404,
+		detail=f"No transaction history available for this user")
 	
 	return {
 		"transaction_history": transactions
