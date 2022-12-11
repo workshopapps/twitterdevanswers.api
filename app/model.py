@@ -11,7 +11,6 @@ from uuid import uuid4
 import uuid as uuid_pkg
 import sqlalchemy
 import datetime
-import enum
 from sqlalchemy import types
 from sqlalchemy_utils.types.choice import ChoiceType
 
@@ -49,7 +48,7 @@ class Wallet(Base):
     total_earned = Column(Integer, default=0, nullable=False)
     is_devask_wallet = Column(Boolean, default=False)
     user_id = Column(Integer, ForeignKey(
-        "user.user_id", ondelete="CASCADE"), nullable=False)
+        "user.user_id", ondelete="CASCADE"), nullable=True)
     created_at = Column(
         DateTime, default=datetime.datetime.utcnow, nullable=False)
 
