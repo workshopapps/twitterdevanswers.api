@@ -24,11 +24,11 @@ def get_answer(answer_id: int, db: Session):
 
 
 def get_correct_answer(question_id: int, db: Session):
-    """ Get correct answer  function """
+    """ Get correct answer function """
 
     # check if question exists
     db_question = get_question(db=db, question_id=question_id)
-
+    
     if db_question is None:
         raise HTTPException(status_code=404, detail="Invalid Question ID")
 
@@ -38,7 +38,20 @@ def get_correct_answer(question_id: int, db: Session):
         model.Answer.is_answered == True
     ).first()
 
-    return check_answer
+    if check_answer is None:
+        return {"status": False, "msg": "No anser found"}
+    elif check_answer.is_answered is True:
+        return {
+            "status": True,
+            "answer_id": check_answer.answer_id,
+            "owner_id": check_answer.owner_id,
+            "question_id": check_answer.question_id,
+            "is_answered": check_answer.is_answered,
+            "payment_amount": db_question.payment_amount,
+            "question_owner_id": db_question.owner_id
+        }
+    else:
+        return {"status": False}
 
 
 @router.get("/{question_id}")
@@ -73,9 +86,8 @@ def create_answer(answer: schema.CreateAnswer, background_task: BackgroundTasks,
         owner_id=current_user.user_id,
         content=answer.content,
         question_id=answer.question_id,
-        is_answered=True
+        is_answered=False
     )
-
 
     db.add(db_answer)
     db.commit()
@@ -113,7 +125,43 @@ def update_answer(answer_id: int, answer: schema.UpdateAnswer, db: Session = Dep
     return db_answer
 
 
+@router.patch("/select-correct-answer/{answer_id}")
+def select_correct_answer(answer_id, answer: schema.UpdateCorrectAnswer, db: Session = Depends(get_db),
+                          current_user: int = Depends(oauth.get_current_user)):
+    """ Add correct answer endpoint """
 
+    db_answer = get_answer(db=db, answer_id=answer_id)
+    db_question = get_question(db=db, question_id=answer.question_id)
+
+    if db_answer is None:
+        raise HTTPException(status_code=404, detail="Invalid answer id")
+
+    if db_question is None:
+        raise HTTPException(status_code=404, detail="Invalid Question ID")
+
+    if db_question.owner_id != current_user.user_id:
+        raise HTTPException(
+            status_code=400, detail="Not Authorized to perform this action")
+
+    if db_answer.question_id != answer.question_id:
+        raise HTTPException(
+            status_code=400, detail="Cannot perform this action")
+
+    check_answer = db.query(model.Answer).filter(
+        model.Answer.answer_id == answer_id,
+        model.Answer.is_answered == True
+    ).first()
+
+    if check_answer is None:
+        db_question.answered = True
+        db_answer.is_answered = True
+        db.commit()
+        db.refresh(db_question)
+        db.refresh(db_answer)
+        return {"detail": "success"}
+    else:
+        raise HTTPException(
+            status_code=400, detail="Already added correct answer")
 
 
 @router.delete("/{answer_id}")

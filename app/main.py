@@ -1,10 +1,11 @@
 from fastapi import FastAPI, status
 from fastapi.middleware.cors import CORSMiddleware
-#import sys
-# sys.path.append('..')
+
+import sys
+sys.path.append('..')
 # from app.routers import googleauth
 
-from routers import user, notification, questions, auth, like, answer, following, tag, blog, wallet, admin, admin_utils
+from app.routers import user, notification, questions, auth, like, answer, following, tag, blog, wallet, admin, admin_utils
 import sentry_sdk
 
 # DO NOT COMMENT OUT SENTRY PACKAGE, IF YOUR CODE DOESNT WORK, pip install --upgrade 'sentry-sdk[fastapi]' WOULD INSTALL NECESSARY PACKAGES.

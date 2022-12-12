@@ -116,7 +116,6 @@ class UserUpdate(BaseModel):
     role: Optional[str] = None
     image_url: Optional[str] = None
     location: Optional[str] = None
-    is_admin: Optional[bool] = None
 
 
 class UserSignInResponse(BaseModel):
@@ -270,6 +269,17 @@ class AnswerVoteBase(BaseModel):
 
 class AnswerVote(AnswerVoteBase):
     """ Answer Vote BaseModel for Add Answer Vote endpoint """
+    pass
+
+
+class UpdateCorrectAnswerBase(BaseModel):
+    """ Answer BaseModel for Update Answer endpoint """
+
+    question_id: int
+
+
+class UpdateCorrectAnswer(UpdateCorrectAnswerBase):
+    """ Answer BaseModel for Update Answer endpoint """
     pass
 
 

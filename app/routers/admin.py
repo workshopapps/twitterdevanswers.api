@@ -5,9 +5,8 @@ from sqlalchemy.orm import Session
 from fastapi import Depends, HTTPException, APIRouter, status, Path
 from app.oauth import get_current_user
 from app.routers.answer import get_answer
-from app.routers.admin_utils import get_devask_wallet
+from app.routers import admin_utils 
 from app import oauth, model, schema
-
 
 router = APIRouter(
     prefix='/admin',
@@ -61,7 +60,7 @@ def get_escrow_wallet(db: Session = Depends(get_db),current_user: schema.User = 
     if not check_admin(current_user):
         raise HTTPException(
             status_code=401, detail=f"You must be an admin to access this endpoint")
-    devaskwallet = get_devask_wallet(db)
+    devaskwallet = admin_utils.get_devask_wallet(db)
     return {"success":True,"data":devaskwallet}
 
 

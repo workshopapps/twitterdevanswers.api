@@ -14,27 +14,34 @@ router = APIRouter(
 # get all posts paginated
 
 
-@router.get("/", status_code=status.HTTP_200_OK)
-def get_all_post(db: Session = Depends(get_db)):
-    get_all_posts = db.query(model.Blog).all()
-    return get_all_posts
+# @router.get("/", status_code=status.HTTP_200_OK)
+# def get_all_post(db: Session = Depends(get_db)):
+#     get_all_posts = db.query(model.Blog).all()
+#     return get_all_posts
 
 # get all posts not paginated
 
 
 @router.get("/", status_code=status.HTTP_200_OK)
 def get_post(db: Session = Depends(get_db)):
-    get_post = db.query(model.Blog).all()
+    get_post = db.query(model.Blog).filter(
+        model.Blog.is_approved == True).all()
+    return {"success": True, "data": get_post}
+
+
+@router.get("/unapproved", status_code=status.HTTP_200_OK)
+def get_unapproved_posts(db: Session = Depends(get_db)):
+    get_post = db.query(model.Blog).filter(
+        model.Blog.is_approved == False).all()
     return {"success": True, "data": get_post}
 
 
 # make posts by a user
 @router.post("/", status_code=status.HTTP_201_CREATED)
-def post_blog(user_id, request: schema.Blog, db: Session = Depends(get_db), current_user: int = Depends(oauth.get_current_user)):
-    new_post = model.Blog(title=request.title, body=request.body, blog_user_id=user_id,
+def post_blog(request: schema.Blog, db: Session = Depends(get_db), current_user: int = Depends(oauth.get_current_user)):
+    new_post = model.Blog(title=request.title, body=request.body, blog_user_id=current_user.user_id,
                           author=request.author, image_url=request.image_url, post_category=request.post_category)
-# make posts by a user
-
+    # make posts by a user
     if current_user.is_admin == True:
         db.add(new_post)
         db.commit()
@@ -43,7 +50,47 @@ def post_blog(user_id, request: schema.Blog, db: Session = Depends(get_db), curr
     else:
         return HTTPException(status_code=401, detail="Unauthorized, Only an admin can post blogs")
 
-# get post by blog_id
+# submit new blog
+
+
+@router.post("/submit", status_code=status.HTTP_200_OK)
+def submit_blog_post(request: schema.Blog, db: Session = Depends(get_db), current_user: int = Depends(oauth.get_current_user)):
+    new_post = model.Blog(title=request.title, body=request.body, blog_user_id=current_user.user_id,
+                          author=request.author, image_url=request.image_url, post_category=request.post_category)
+    # make posts by a user
+    try:
+        if current_user.is_admin == True:
+            new_post.is_approved = True
+            db.add(new_post)
+            db.commit()
+            db.refresh(new_post)
+            return {"success": True, "data": new_post}
+        else:
+            db.add(new_post)
+            db.commit()
+            db.refresh(new_post)
+            return {"status_code": 201, "detail": "Blog post is under review"}
+    except Exception as e:
+        return {"success": False, "error": e}
+
+
+@router.patch("/approve/{blog_id}", status_code=status.HTTP_201_CREATED)
+def approve_blog_post(blog_id: int, db: Session = Depends(get_db), current_user: int = Depends(oauth.get_current_user)):
+    blog_post = db.query(model.Blog).filter(
+        model.Blog.blog_id == blog_id).first()
+    if blog_post:
+        if current_user.is_admin == True:
+            if blog_post.is_approved == True:
+                return HTTPException(status_code=401, detail="Blog post has been reviewed")
+            else:
+                blog_post.is_approved == True
+                db.add(blog_post)
+                db.commit()
+                db.refresh(blog_post)
+        else:
+            return HTTPException(status_code=401, detail="Action can only be performed by an admin")
+    else:
+        return HTTPException(status_code=404, detail=f"Blog post with ID {blog_id} not found")
 
 
 @router.get("/{blog_id}", status_code=status.HTTP_200_OK)
