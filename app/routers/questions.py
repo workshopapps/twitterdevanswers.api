@@ -64,6 +64,8 @@ def get_question(question_id: int, db: Session = Depends(get_db), current_user: 
                 "createdAt": get_question_db.created_at,
                 "updatedAT": get_question_db.updated_at,
                 "owner": get_question_db.owner_id,
+                "total_unlike":  get_question_db.total_unlike,
+                "total_like":  get_question_db.total_like,
                 "answers": [],
                 }
                 }
