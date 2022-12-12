@@ -7,7 +7,8 @@ from sqlalchemy.orm import sessionmaker
 # SQLALCHEMY_DATABASE_URI = f'postgresql://postgres:123456@localhost:5432/devask'
 
 # production
-SQLALCHEMY_DATABASE_URI = "mysql+mysqldb://devask:HNG#9devask@localhost/devask"
+#SQLALCHEMY_DATABASE_URI = "mysql+mysqldb://devask:HNG#9devask@localhost/devask"
+SQLALCHEMY_DATABASE_URI = "mysql+mysqldb://root:410208olA$$$@localhost/devask"
 
 
 #SQLALCHEMY_DATABASE_URI = "mysql+mysqldb://sql8582000:YTyl3z4HAW@sql8.freemysqlhosting.net/sql8582000"

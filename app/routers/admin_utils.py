@@ -159,8 +159,8 @@ def admin_transactions(item: AdminPayments,  db: Session = Depends(get_db),
 
 
 	return {
-				"amount deducted": amount,
-				"Question Owner History": question_owner
+				"amount_deducted": amount,
+				"Question_Owner_History": question_owner
 				}
 
 # Pay answerer endpoint
@@ -215,7 +215,7 @@ def admin_transactions(item: AdminPayments,  db: Session = Depends(get_db),
 
 
 		return {
-				"amount earned": earned_value,
-				"Answer Owner Transaction History": answerer_account,
+				"amount_earned": earned_value,
+				"Answer_Owner_Transaction_History": answerer_account,
 				}
 
