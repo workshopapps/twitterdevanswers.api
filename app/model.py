@@ -48,7 +48,7 @@ class Wallet(Base):
     total_earned = Column(Integer, default=0, nullable=False)
     is_devask_wallet = Column(Boolean, default=False)
     user_id = Column(Integer, ForeignKey(
-        "user.user_id", ondelete="CASCADE"), nullable=False)
+        "user.user_id", ondelete="CASCADE"), nullable=True)
     created_at = Column(
         DateTime, default=datetime.datetime.utcnow, nullable=False)
 
@@ -56,7 +56,7 @@ class Wallet(Base):
 class User(Base):
     __tablename__ = "user"
     __table_args__ = {'extend_existing': True}
-    user_id = Column(Integer, primary_key=True, nullable=False)
+    user_id = Column(Integer, primary_key=True, nullable=True)
     username = Column(String(100), nullable=False, unique=True)
     first_name = Column(String(30), nullable=True, default=" ")
     last_name = Column(String(30), nullable=True, default=" ")
