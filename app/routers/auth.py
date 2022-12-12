@@ -19,7 +19,6 @@ router = APIRouter(
 )
 
 
-
 # send reset email
 def send_reset_mail(email, token):
     msg = f'''
@@ -66,44 +65,46 @@ async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(
             "token_type": "bearer"}
 
 
-totp=''
+def auth_otp(secret, code):
+    totp = pyotp.TOTP(secret, interval=600)
+    verified = totp.verify(code)
+    if verified:
+        return True
 
+
+def generate_secret():
+    secret = pyotp.random_base32()
+    return secret
 
 
 @router.post('/send_email_code', status_code=status.HTTP_200_OK)
 def user_signnup(request: schema.Email):
-    global totp
-    secret_key = pyotp.random_base32()
-    totp = pyotp.TOTP(secret_key,interval=600)
-    send_signup_mail(request.email, totp.now())
+    global secret
+    secret = generate_secret()
+    send_signup_mail(request.email, secret)
     return {"msg": "email sent"}
 
-
-def auth_otp(code):
-
-    return totp.verify(code)
 
 @router.post('/signup', status_code=status.HTTP_201_CREATED)
 def user_signnup(user_credentials: schema.UserSignInRequest, db: Session = Depends(database.get_db)):
     user_credentials.password = utils.hash(user_credentials.password)
     user = db.query(model.User).filter(
         model.User.email == user_credentials.email).first()
-    
     if user:
         return HTTPException(status_code=400, detail={"msg": "User already exists"})
 
-    if auth_otp(code=user_credentials.email_verification_code):
+    #  if auth_otp(secret, user_credentials.email_verification_code):
 
-        new_user = model.User(username=user_credentials.username,
-                            email=user_credentials.email,
-                            password=user_credentials.password,
-                            )
-        db.add(new_user)
-        db.commit()
-        db.refresh(new_user)
-    else:
-         raise HTTPException(status_code=status.HTTP_412_PRECONDITION_FAILED,
-                              detail="OTP is either a wrong one or has expired ")
+    new_user = model.User(username=user_credentials.username,
+                          email=user_credentials.email,
+                          password=user_credentials.password,
+                          )
+    db.add(new_user)
+    db.commit()
+    db.refresh(new_user)
+#     else:
+#         raise HTTPException(status_code=status.HTTP_412_PRECONDITION_FAILED,
+#                              detail="OTP is either a wrong one or has expired ")
 
     # creating User Wallet
     wallet_id = uuid4()
@@ -137,19 +138,19 @@ def admin_signnup(user_credentials: schema.UserSignInAdminRequest, db: Session =
     if user:
         return HTTPException(status_code=400, detail={"msg": "User already exists"})
 
-    if auth_otp(user_credentials.email_verification_code):
+    #  if auth_otp(secret, user_credentials.email_verification_code):
 
-        new_user = model.User(username=user_credentials.username,
-                            email=user_credentials.email,
-                            password=user_credentials.password,
-                            is_admin=True
-                            )
-        db.add(new_user)
-        db.commit()
-        db.refresh(new_user)
-    else:
-         raise HTTPException(status_code=status.HTTP_412_PRECONDITION_FAILED,
-                              detail="OTP is either a wrong one or has expired ")
+    new_user = model.User(username=user_credentials.username,
+                          email=user_credentials.email,
+                          password=user_credentials.password,
+                          is_admin=True
+                          )
+    db.add(new_user)
+    db.commit()
+    db.refresh(new_user)
+#     else:
+#         raise HTTPException(status_code=status.HTTP_412_PRECONDITION_FAILED,
+#                              detail="OTP is either a wrong one or has expired ")
 
     # creating User Wallet
     wallet_id = uuid4()
@@ -234,7 +235,7 @@ def two_factor_auth(two_factor: schema.Email, db: Session = Depends(database.get
         model.User.email == two_factor.email)
     mfa_hash = pyotp.random_base32()
     enable_2fa = user_query.update(
-        {'mfa_hash': mfa_hash}, synchronize_session=False)
+        {'mfa_hashed': mfa_hash}, synchronize_session=False)
     user = user_query.first()
     uri = pyotp.totp.TOTP(user.mfa_hash).provisioning_uri(
         user.email, issuer_name="Dev Ask")
