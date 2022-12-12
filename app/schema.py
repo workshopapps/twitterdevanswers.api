@@ -53,6 +53,7 @@ class User(BaseModel):
     followers: str
     location: str
     account_balance: int
+    created_at : str
     is_admin: Optional[bool]
 
     class Config:

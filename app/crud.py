@@ -29,9 +29,10 @@ def get_user(db: Session, username: str):
         "is_admin": user.is_admin,
         "account_balance": user.account_balance,
         "followers": user.followers,
-        "following": user.following
+        "following": user.following,
+        "date_joined": user.created_at,
     }
-
+ 
 
 def get_users(db: Session, skip: int = 0, limit: int = 100):
     """ Get all users in the database  """
@@ -59,6 +60,7 @@ def get_users(db: Session, skip: int = 0, limit: int = 100):
             "is_admin": user.is_admin,
             "account_balance": user.account_balance,
             "followers": user.followers,
-            "following": user.following
+            "following": user.following,
+            "date_joined": user.created_at,
         })
     return {"success": True, 'data': users_list}
