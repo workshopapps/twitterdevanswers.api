@@ -11,7 +11,6 @@ from uuid import uuid4
 import uuid as uuid_pkg
 import sqlalchemy
 import datetime
-import enum
 from sqlalchemy import types
 from sqlalchemy_utils.types.choice import ChoiceType
 
