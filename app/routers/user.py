@@ -22,6 +22,16 @@ def fetch_users(skip: int = 0, limit: int = 100, db: Session = Depends(get_db), 
 
     return crud.get_users(db, skip=skip, limit=limit)
 
+@router.get('/{user_id}')
+def fetch_user_id(user_id: int, db: Session = Depends(get_db), current_user=Depends(get_current_user)):
+    """ Fetch a user by Id  """
+
+    user = crud.get_user_id(db, user_id=user_id)
+    if not user:
+        raise HTTPException(
+            status_code=404, detail=f" User {user_id} not found")
+    return {"success": True, 'data': user}
+
 
 @router.get('/{username}')
 def fetch_user(username: str, db: Session = Depends(get_db), current_user=Depends(get_current_user)):
@@ -60,3 +70,13 @@ def update_user(user: schema.UserUpdate, username: str, db: Session = Depends(ge
         return {"success": True, "message": "Profile Updated", "data": update_data}
     else:
         return {"success": False, "message":  "You're not authorized to perform this update "}
+
+
+@router.delete('/delete/{username}')
+def delete_user(username: str, db: Session = Depends(get_db), current_user: int = Depends(get_current_user)):
+    """ Delete a user by username  """
+    delete_user = crud.delete_user(db, username=username,current_user=current_user)
+    if not delete_user:
+        raise HTTPException(
+            status=404, detail=f" User {username} does not exist")
+    return delete_user

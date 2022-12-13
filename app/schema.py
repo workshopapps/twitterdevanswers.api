@@ -53,7 +53,10 @@ class User(BaseModel):
     followers: str
     location: str
     account_balance: int
+    tokens_earned: int
+    total_likes: int
     created_at : str
+    updated_at :str
     is_admin: Optional[bool]
 
     class Config:
@@ -92,7 +95,7 @@ class UserSignInAdminRequest(BaseModel):
     password: str
     confirmPassword: str
     email_verification_code: Optional[str]
-    is_admin: Optional[str]
+    is_admin: Optional[bool]
 
     @validator('confirmPassword')
     def passwords_match(cls, v, values, **kwargs):
