@@ -19,7 +19,7 @@ router = APIRouter(
 )
 
 
-
+wallet_otp = ''
 # send reset email
 def send_reset_mail(email, token):
     msg = f'''
@@ -229,24 +229,35 @@ def verify_password_token(token: str,  password: schema.ForgotPassword, db: Sess
 
 
 @router.put('/setup-mfa')
-def two_factor_auth(two_factor: schema.Email, db: Session = Depends(database.get_db)):
+def two_factor_auth(two_factor: schema.Email, db: Session = Depends(database.get_db), current_user = Depends(get_current_user)):
     user_query = db.query(model.User).filter(
         model.User.email == two_factor.email)
     mfa_hash = pyotp.random_base32()
     enable_2fa = user_query.update(
         {'mfa_hash': mfa_hash}, synchronize_session=False)
-    user = user_query.first()
-    uri = pyotp.totp.TOTP(user.mfa_hash).provisioning_uri(
-        user.email, issuer_name="Dev Ask")
-    #qrcode_uri = "https://www.google.com/chart?chs=200x200&chld=M|0&cht=qr&chl={}".format(uri)
-    return {'message': 'MFA Setup Successfully',
-            'code': uri}
+    
+    return {'message': 'MFA Setup Successfully'}
+
+@router.post('send-mfa')
+def send_mfa(email :schema.Email, db: Session = Depends(database.get_db),current_user = Depends(get_current_user)):
+    global wallet_otp
+    user = db.query(model.User).filter(model.User.email == email.email).first()
+    uri = pyotp.totp.TOTP(user.mfa_hash).provisioning_uri(user.email, issuer_name="Dev Ask")
+    qrcode_uri = "https://www.google.com/chart?chs=200x200&chld=M|0&cht=qr&chl={}".format(uri)
+    wallet_otp = pyotp.TOTP(user.mfa_hash)
+    return {'qr_code': qrcode_uri}
+
 
 
 @router.post('/validate-mfa')
-def validate_otp(otp: schema.two_factor, db: Session = Depends(database.get_db)):
+def validate_otp(otp: schema.two_factor, db: Session = Depends(database.get_db), current_user = Depends(get_current_user)):
     user = db.query(model.User).filter(model.User.email == otp.email).first()
-    if otp.mfa_hash == user.mfa_hash:
+    if not user.mfa_hash:
+        return {'message': 'User has not enabled 2FA'}
+    if user != current_user: 
+        return {'Messaage' : ' This user is not the right '}
+    
+    if wallet_otp.verify(otp.mfa_hash):
         return {'Success': True, }
     else:
         raise HTTPException(
