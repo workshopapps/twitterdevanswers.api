@@ -66,6 +66,18 @@ def list_answer(question_id: int, db: Session = Depends(get_db)):
     # return db.query(model.Answer).filter(model.Answer.question_id == question_id).all()
 
 
+@router.get("/{user_id}/user/", status_code=status.HTTP_200_OK)
+def get_all_answers_by_a_user(user_id: int, db: Session = Depends(get_db)):
+    """ List all answers by a user """
+
+    get_user_answers = db.query(model.Answer).filter(
+        model.Answer.owner_id == user_id).all()
+    if not get_user_answers:
+        raise HTTPException(status_code=404, detail="User not found")
+    return {"success": True, "data": get_user_answers}
+
+
+
 @router.post("/")
 def create_answer(answer: schema.CreateAnswer, background_task: BackgroundTasks, db: Session = Depends(get_db),
                   current_user: int = Depends(oauth.get_current_user)):
