@@ -53,6 +53,7 @@ class User(BaseModel):
     followers: str
     location: str
     account_balance: int
+    created_at : str
     is_admin: Optional[bool]
 
     class Config:
@@ -115,7 +116,6 @@ class UserUpdate(BaseModel):
     role: Optional[str] = None
     image_url: Optional[str] = None
     location: Optional[str] = None
-    is_admin: Optional[bool] = None
 
 
 class UserSignInResponse(BaseModel):
