@@ -78,13 +78,12 @@ class User(Base):
     is_admin = Column(Boolean, default=False)
     account_balance = Column(Integer, ForeignKey(
         'walletaccount.balance', ondelete="CASCADE"), default=100, nullable=True)
-    tokens_earned = Column(Integer,ForeignKey(
-        'walletaccount.total_earned', ondelete="CASCADE"),default=0, nullable=True)
-    total_likes = Column(Integer,ForeignKey(
-        'likes.like_id', ondelete="CASCADE"),default=0, nullable=True)    
+    tokens_earned = Column(Integer, ForeignKey(
+        'walletaccount.total_earned', ondelete="CASCADE"), default=0, nullable=True)
+    total_likes = Column(Integer, ForeignKey(
+        'likes.like_id', ondelete="CASCADE"), default=0, nullable=True)
     created_at = Column(TIMESTAMP(timezone=True),
                         nullable=False, server_default=text('now()'))
-    updated_at = Column(DateTime(timezone=True), onupdate=func.now())                    
     verification_code = Column(String(300), nullable=True, default=" ")
     is_verified = Column(Boolean, nullable=True, default=False)
     mfa_hash = Column(String(300))

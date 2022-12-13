@@ -55,8 +55,7 @@ class User(BaseModel):
     account_balance: int
     tokens_earned: int
     total_likes: int
-    created_at : str
-    updated_at :str
+    created_at: str
     is_admin: Optional[bool]
 
     class Config:
