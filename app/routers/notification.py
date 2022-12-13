@@ -29,12 +29,20 @@ def create_notification(notification: schema.NotificationCreate, db: Session):
     This is a background function that should be run after a post request has been made to answer a user's question.
     A NotificationCreate schema should be passed with filled data.
     """
-    db_notification = model.Notification(
-        owner_id=notification.owner_id,
-        content_id=notification.content_id,
-        type=notification.type,
-        title=notification.title
-    )
+    if notification.type == "Transaction":
+        db_notification = model.NotificationTransaction(
+            owner_id=notification.owner_id,
+            content_id=notification.content_id,
+            type=notification.type,
+            title=notification.title
+        )
+    else:
+        db_notification = model.Notification(
+            owner_id=notification.owner_id,
+            content_id=notification.content_id,
+            type=notification.type,
+            title=notification.title
+        )
     db.add(db_notification)
     db.commit()
     db.refresh(db_notification)
@@ -46,21 +54,32 @@ async def get_notifications(id: int, db: Session):
     This function is responsible for querying the database for the users notifications
     """
     db.commit()
-    notifications = db.query(model.Notification).filter(
+    notifications = []
+    answerNotifications = db.query(model.Notification).filter(
         model.Notification.owner_id == id).order_by(desc(model.Notification.notification_id)).all()
+    transactionNotifications = db.query(model.NotificationTransaction).filter(
+        model.NotificationTransaction.owner_id == id).order_by(desc(model.NotificationTransaction.notification_id)).all()
+    for anotification in answerNotifications:
+        notifications.append(anotification)
+    for tnotification in transactionNotifications:
+        notifications.append(tnotification)
     number_of_unread = len(
         [notification for notification in notifications if notification.unread == True])
     return notifications, number_of_unread
 
 
-def set_unread_to_false(id: int, db: Session):
+def set_unread_to_false(id: int, db: Session, type: str):
     """
     This function sets the unread attribute of the specified notification item to False
     """
-    stored_notification = db.query(model.Notification).filter(
-        model.Notification.notification_id == id).first()
-    if stored_notification is None:
+    if type == "transaction":
+        stored_notification = db.query(model.NotificationTransaction).filter(
+            model.NotificationTransaction.notification_id == id).first()
+    elif stored_notification is None:
         return None
+    else:
+        stored_notification = db.query(model.Notification).filter(
+            model.Notification.notification_id == id).first()
     stored_notification.unread = False
     db.commit()
     db.refresh(stored_notification)
@@ -127,15 +146,15 @@ async def get_all_notifications(db: Session = Depends(get_db), user: schema.User
 
 
 @router.patch("/read/{notification_id}", status_code=status.HTTP_200_OK, response_model=schema.Notification)
-async def mark_read(
-    notification_id: int = Path(
+async def mark_read(type: str,
+                    notification_id: int = Path(
         default=..., description="The id of the notification to mark as read."
-    ),
-    db: Session = Depends(get_db),
-    user: schema.User = Depends(oauth.get_current_user)
-):
+                        ),
+                    db: Session = Depends(get_db),
+                    user: schema.User = Depends(oauth.get_current_user)
+                    ):
     """Sets the unread attribute of the specified notification to False."""
-    result = set_unread_to_false(id=notification_id, db=db)
+    result = set_unread_to_false(id=notification_id, db=db, type=type)
     if result is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                             detail="Notification Id is invalid."

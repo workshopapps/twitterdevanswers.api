@@ -56,7 +56,7 @@ class Wallet(Base):
 class User(Base):
     __tablename__ = "user"
     __table_args__ = {'extend_existing': True}
-    user_id = Column(Integer, primary_key=True, nullable=True)
+    user_id = Column(Integer, primary_key=True, nullable=False)
     username = Column(String(100), nullable=False, unique=True)
     first_name = Column(String(30), nullable=True, default=" ")
     last_name = Column(String(30), nullable=True, default=" ")
@@ -175,7 +175,22 @@ class Notification(Base):
     content_id = Column(Integer, ForeignKey(
         "answer.answer_id", ondelete="CASCADE"), nullable=False)
     owner = relationship('model.User')
-    content = relationship('model.Answer')
+    # content = relationship('model.Answer')
+    type = Column(String(200), nullable=False)
+    unread = Column(Boolean, default=True)
+    title = Column(String(200), nullable=False)
+
+
+class NotificationTransaction(Base):
+    __tablename__ = "notification"
+    __table_args__ = {'extend_existing': True}
+    notification_id = Column(Integer, primary_key=True, nullable=False)
+    owner_id = Column(Integer, ForeignKey(
+        "user.user_id", ondelete="CASCADE"), nullable=False)
+    content_id = Column(Integer, ForeignKey(
+        "transactions.transaction_id", ondelete="CASCADE"), nullable=False)
+    owner = relationship('model.User')
+    content = relationship('model.Transaction')
     type = Column(String(200), nullable=False)
     unread = Column(Boolean, default=True)
     title = Column(String(200), nullable=False)
