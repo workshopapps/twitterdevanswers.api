@@ -1,4 +1,4 @@
-from fastapi import Depends, HTTPException, APIRouter, BackgroundTasks
+from fastapi import Depends, HTTPException, APIRouter, BackgroundTasks, status
 from sqlalchemy import desc
 from sqlalchemy.orm import Session
 from app.database import get_db
@@ -28,7 +28,7 @@ def get_correct_answer(question_id: int, db: Session):
 
     # check if question exists
     db_question = get_question(db=db, question_id=question_id)
-    
+
     if db_question is None:
         raise HTTPException(status_code=404, detail="Invalid Question ID")
 
@@ -75,7 +75,6 @@ def get_all_answers_by_a_user(user_id: int, db: Session = Depends(get_db)):
     if not get_user_answers:
         raise HTTPException(status_code=404, detail="User not found")
     return {"success": True, "data": get_user_answers}
-
 
 
 @router.post("/")
