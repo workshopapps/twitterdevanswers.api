@@ -258,7 +258,7 @@ def validate_otp(otp: schema.two_factor, db: Session = Depends(database.get_db),
         return {'Messaage' : ' This user is not the right '}
     
     if wallet_otp.verify(otp.mfa_hash):
-        return {'Success': True, }
+        return {'Success': True}
     else:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN, detail='Wrong 2FA')
