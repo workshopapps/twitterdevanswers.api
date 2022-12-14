@@ -9,6 +9,18 @@ from app import schema
 router = APIRouter(prefix='/following', tags=['Follow'])
 
 
+@router.get('/followers/{user_id}', status_code=status.HTTP_200_OK)
+def followers(user_id: int, db: Session = Depends(get_db), current_user: int = Depends(get_current_user)):
+    """Get the list of followers a user has"""
+    user = db.query(User).filter(User.user_id == user_id).first()
+    if user:
+        followers = db.query(Following).filter(
+            Following.target_user == user_id)
+        return {"success": True, "followers": list(followers)}
+    else:
+        return HTTPException(status_code=200, detail="User not found")
+
+
 @router.post('/follow/', status_code=status.HTTP_201_CREATED)
 def follow_user(request: schema.Follow, db: Session = Depends(get_db),
                 current_user: int = Depends(get_current_user)):
@@ -60,15 +72,3 @@ def delete_user(user_id: int, db: Session = Depends(get_db), current_user: int =
             return {"success": True, "msg": f"unfollowed {target_user.username}", "status": status.HTTP_200_OK}
         else:
             return HTTPException(status_code=403, detail="unauthorized to make this request")
-
-
-@router.get('/followers/{user_id}', status_code=status.HTTP_200_OK)
-def followers(user_id: int, db: Session = Depends(get_db), current_user: int = Depends(get_current_user)):
-    """Get the list of followers a user has"""
-    user = db.query(User).filter(User.user_id == user_id).first()
-    if user:
-        followers = db.query(Following).filter(
-            Following.target_user == user_id)
-        return {"success": True, "followers": list(followers)}
-    else:
-        return HTTPException(status_code=200, detail="User not found")

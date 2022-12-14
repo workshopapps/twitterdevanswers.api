@@ -18,46 +18,26 @@ async def list_all_tags(db: Session = Depends(get_db), skip: int = 0, limit: int
     Lists all available tags
     """
     tags = db.query(model.Tag).offset(skip).limit(limit).all()
-    return [jsonable_encoder(tag) for tag in tags] 
+    return [jsonable_encoder(tag) for tag in tags]
 
 
-@router.post("/", status_code=status.HTTP_201_CREATED, response_model=schema.Tag)
-async def create_tag(tag: schema.TagCreate, db: Session = Depends(get_db), user: schema.User = Depends(oauth.get_current_user)):
-    """
-    Creates a tag
-    """
-    # db_question = db.query(model.Question).filter(
-    #     model.Question.question_id == tag.question_id).first()
-    # if db_question is None:
-    #     raise HTTPException(status_code=404, detail="Invalid Question ID")
-    db_tag = model.Tag(tag_name=tag.tag_name)
-
-    db.add(db_tag)
-    db.commit()
-    db.refresh(db_tag)
-    #return db_tag.__dict__
-    return jsonable_encoder(db_tag)
-
-
-@router.delete("/{tag_id}", status_code=status.HTTP_200_OK)
-async def delete_tag(
+@router.get("/{tag_id}/questions", )
+async def get_questions_under_tag(
     tag_id: int = Path(
         default=...,
-        description="The id of the tag to be deleted."
+        description="The id of the tag"
     ),
-    db: Session = Depends(get_db),
-    user: schema.User = Depends(oauth.get_current_user)
+    db: Session = Depends(get_db)
 ):
     """
-    Deletes the tag that matches the tag_id specified in the url
+    Lists all the questions attached to the tag with the specified id
     """
-    tag = db.query(model.Tag).filter(model.Tag.tag_id == tag_id).first()
+    tag = db.query(model.Tag).options(joinedload(model.Tag.questions)).where(
+        model.Tag.tag_id == tag_id).first()
     if tag is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="Tag not found.")
-    db.delete(tag)
-    db.commit()
-    return {"Successfully deleted"}
+    return jsonable_encoder(tag)
 
 
 @router.post("/add-question")
@@ -85,23 +65,44 @@ async def add_tag_to_question(
     return jsonable_encoder(tag)
 
 
-@router.get("/{tag_id}/questions", )
-async def get_questions_under_tag(
+@router.post("/", status_code=status.HTTP_201_CREATED, response_model=schema.Tag)
+async def create_tag(tag: schema.TagCreate, db: Session = Depends(get_db), user: schema.User = Depends(oauth.get_current_user)):
+    """
+    Creates a tag
+    """
+    # db_question = db.query(model.Question).filter(
+    #     model.Question.question_id == tag.question_id).first()
+    # if db_question is None:
+    #     raise HTTPException(status_code=404, detail="Invalid Question ID")
+    db_tag = model.Tag(tag_name=tag.tag_name)
+
+    db.add(db_tag)
+    db.commit()
+    db.refresh(db_tag)
+    # return db_tag.__dict__
+    return jsonable_encoder(db_tag)
+
+
+@router.delete("/{tag_id}", status_code=status.HTTP_200_OK)
+async def delete_tag(
     tag_id: int = Path(
         default=...,
-        description="The id of the tag"
+        description="The id of the tag to be deleted."
     ),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    user: schema.User = Depends(oauth.get_current_user)
 ):
     """
-    Lists all the questions attached to the tag with the specified id
+    Deletes the tag that matches the tag_id specified in the url
     """
-    tag = db.query(model.Tag).options(joinedload(model.Tag.questions)).where(
-        model.Tag.tag_id == tag_id).first()
+    tag = db.query(model.Tag).filter(model.Tag.tag_id == tag_id).first()
     if tag is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="Tag not found.")
-    return jsonable_encoder(tag)
+    db.delete(tag)
+    db.commit()
+    return {"Successfully deleted"}
+
 
 # @router.post("/", status_code=status.HTTP_201_CREATED)
 # def Tag(tag: schema.Tag, db: Session = Depends(get_db), current_user: int = Depends(oauth.get_current_user)):

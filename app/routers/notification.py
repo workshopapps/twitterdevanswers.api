@@ -145,6 +145,13 @@ async def get_all_notifications(db: Session = Depends(get_db), user: schema.User
     return jsonable_encoder(data)
 
 
+@router.post("/add/", status_code=status.HTTP_201_CREATED, response_model=schema.Notification)
+async def add_notification(notification: schema.NotificationCreate, db: Session = Depends(get_db), user: schema.User = Depends(oauth.get_current_user)):
+    notification.owner_id = user.user_id
+    result = create_notification(notification=notification, db=db)
+    return result
+
+
 @router.patch("/read/{notification_id}", status_code=status.HTTP_200_OK, response_model=schema.Notification)
 async def mark_read(type: str,
                     notification_id: int = Path(
@@ -159,11 +166,4 @@ async def mark_read(type: str,
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                             detail="Notification Id is invalid."
                             )
-    return result
-
-
-@router.post("/add/", status_code=status.HTTP_201_CREATED, response_model=schema.Notification)
-async def add_notification(notification: schema.NotificationCreate, db: Session = Depends(get_db), user: schema.User = Depends(oauth.get_current_user)):
-    notification.owner_id = user.user_id
-    result = create_notification(notification=notification, db=db)
     return result

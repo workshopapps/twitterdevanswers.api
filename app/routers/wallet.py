@@ -29,5 +29,3 @@ def view_wallet(user_id, db: Session = Depends(get_db)):
                             detail=f'account with the id {user_id} not available.')
 
     return user_account
-
-

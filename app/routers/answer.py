@@ -118,6 +118,78 @@ def create_answer(answer: schema.CreateAnswer, background_task: BackgroundTasks,
     return db_answer
 
 
+@router.post("/vote")
+def vote_answer(answer: schema.AnswerVote, db: Session = Depends(get_db),
+                current_user: int = Depends(oauth.get_current_user)):
+    """ Vote endpoint for a specific answer """
+
+    # checks if answer_id exists
+    db_answer = get_answer(db=db, answer_id=answer.answer_id)
+    if db_answer is None:
+        raise HTTPException(status_code=404, detail="Answer Not Found")
+
+    # check if user voted before
+    check_user_vote = db.query(model.AnswerVote).filter(
+        model.AnswerVote.answer_id == answer.answer_id).first()
+
+    if check_user_vote is not None:
+        if check_user_vote.owner_id == current_user.user_id:
+            # update vote
+            get_answer_detail = get_answer(db=db, answer_id=answer.answer_id)
+
+            # prevent user from voting up again
+            if check_user_vote.vote_type == "add" and answer.vote_type == "add":
+                raise HTTPException(status_code=400, detail="Already voted!")
+
+            # add vote if previous vote is not add
+            elif check_user_vote.vote_type != "add" and answer.vote_type == "add":
+                db_vote_answer = db.query(model.Answer).filter(
+                    model.Answer.answer_id == answer.answer_id).first()
+                db_vote_answer.vote = get_answer_detail.vote + 1
+                check_user_vote.vote_type = answer.vote_type
+                db.commit()
+                db.refresh(db_vote_answer)
+                db.refresh(check_user_vote)
+
+            # remove vote if previous vote is add
+            elif check_user_vote.vote_type == "add" and answer.vote_type != "add":
+                db_vote_answer = db.query(model.Answer).filter(
+                    model.Answer.answer_id == answer.answer_id).first()
+                db_vote_answer.vote = get_answer_detail.vote - 1
+                check_user_vote.vote_type = answer.vote_type
+                db.commit()
+                db.refresh(db_vote_answer)
+                db.refresh(check_user_vote)
+            else:
+                pass
+            return {"detail": "Success"}
+    else:
+        # add vote
+        db_answer_vote = model.AnswerVote(
+            owner_id=current_user.user_id,
+            answer_id=answer.answer_id,
+            vote_type=answer.vote_type
+        )
+
+        # update vote point
+        get_answer_detail = get_answer(db=db, answer_id=answer.answer_id)
+        db_vote_answer = db.query(model.Answer).filter(
+            model.Answer.answer_id == answer.answer_id).first()
+        try:
+            db_vote_answer.vote = get_answer_detail.vote + 1 if answer.vote_type == "add" \
+                else get_answer_detail.vote - 1
+        except Exception as e:
+            db_vote_answer.vote = 1 if answer.vote_type == "add" \
+                else - 1
+
+        db.add(db_answer_vote)
+        db.commit()
+        db.refresh(db_answer_vote)
+        db.refresh(db_vote_answer)
+
+    return {"detail": "Success"}
+
+
 @router.patch("/{answer_id}")
 def update_answer(answer_id: int, answer: schema.UpdateAnswer, db: Session = Depends(get_db),
                   current_user: int = Depends(oauth.get_current_user)):
@@ -191,75 +263,3 @@ def delete_answer(answer_id: int, db: Session = Depends(get_db),
     db.delete(del_answer)
     db.commit()
     return {"detail": "success"}
-
-
-@router.post("/vote")
-def vote_answer(answer: schema.AnswerVote, db: Session = Depends(get_db),
-                current_user: int = Depends(oauth.get_current_user)):
-    """ Vote endpoint for a specific answer """
-
-    # checks if answer_id exists
-    db_answer = get_answer(db=db, answer_id=answer.answer_id)
-    if db_answer is None:
-        raise HTTPException(status_code=404, detail="Answer Not Found")
-
-    # check if user voted before
-    check_user_vote = db.query(model.AnswerVote).filter(
-        model.AnswerVote.answer_id == answer.answer_id).first()
-
-    if check_user_vote is not None:
-        if check_user_vote.owner_id == current_user.user_id:
-            # update vote
-            get_answer_detail = get_answer(db=db, answer_id=answer.answer_id)
-
-            # prevent user from voting up again
-            if check_user_vote.vote_type == "add" and answer.vote_type == "add":
-                raise HTTPException(status_code=400, detail="Already voted!")
-
-            # add vote if previous vote is not add
-            elif check_user_vote.vote_type != "add" and answer.vote_type == "add":
-                db_vote_answer = db.query(model.Answer).filter(
-                    model.Answer.answer_id == answer.answer_id).first()
-                db_vote_answer.vote = get_answer_detail.vote + 1
-                check_user_vote.vote_type = answer.vote_type
-                db.commit()
-                db.refresh(db_vote_answer)
-                db.refresh(check_user_vote)
-
-            # remove vote if previous vote is add
-            elif check_user_vote.vote_type == "add" and answer.vote_type != "add":
-                db_vote_answer = db.query(model.Answer).filter(
-                    model.Answer.answer_id == answer.answer_id).first()
-                db_vote_answer.vote = get_answer_detail.vote - 1
-                check_user_vote.vote_type = answer.vote_type
-                db.commit()
-                db.refresh(db_vote_answer)
-                db.refresh(check_user_vote)
-            else:
-                pass
-            return {"detail": "Success"}
-    else:
-        # add vote
-        db_answer_vote = model.AnswerVote(
-            owner_id=current_user.user_id,
-            answer_id=answer.answer_id,
-            vote_type=answer.vote_type
-        )
-
-        # update vote point
-        get_answer_detail = get_answer(db=db, answer_id=answer.answer_id)
-        db_vote_answer = db.query(model.Answer).filter(
-            model.Answer.answer_id == answer.answer_id).first()
-        try:
-            db_vote_answer.vote = get_answer_detail.vote + 1 if answer.vote_type == "add" \
-                else get_answer_detail.vote - 1
-        except Exception as e:
-            db_vote_answer.vote = 1 if answer.vote_type == "add" \
-                else - 1
-
-        db.add(db_answer_vote)
-        db.commit()
-        db.refresh(db_answer_vote)
-        db.refresh(db_vote_answer)
-
-    return {"detail": "Success"}
