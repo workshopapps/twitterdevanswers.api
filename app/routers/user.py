@@ -24,7 +24,7 @@ def fetch_users(skip: int = 0, limit: int = 100, db: Session = Depends(get_db), 
 
 
 @router.get('/{user_id}')
-def fetch_user_id(user_id: int, db: Session = Depends(get_db), urrent_user: int = Depends(get_current_user)):
+def fetch_user_id(user_id: int, db: Session = Depends(get_db), current_user: int = Depends(get_current_user)):
     """ Fetch a user by Id  """
 
     user = crud.get_user_id(db, user_id=user_id)
@@ -33,6 +33,15 @@ def fetch_user_id(user_id: int, db: Session = Depends(get_db), urrent_user: int 
             status_code=404, detail=f" User {user_id} not found")
     return {"success": True, 'data': user}
 
+
+@router.get('/likes/{user_id}')
+def fetch_user_likes(user_id: int, db: Session = Depends(get_db), current_user: int = Depends(get_current_user)):
+    """Fetch user likes"""
+    likes = db.query(model.Like).filter(model.Like.user_id == user_id).all()
+    if likes:
+        return {"total_likes": len(likes)}
+    else:
+        return HTTPException(status_code=404, detail="User hasn't liked any post yet")
 
 # @router.get('/{username}')
 # def fetch_user(username: str, db: Session = Depends(get_db), current_user: int = Depends(get_current_user)):
