@@ -102,9 +102,9 @@ def delete_user(db: Session, username: str, current_user: int):
 
     delete_user = db.query(model.User).filter(
         model.User.username == username).first()
-    wallet = db.query(model.Wallet).filter(
-        model.Wallet.user_id == delete_user.user_id).first()
     if delete_user:
+        wallet = db.query(model.Wallet).filter(
+            model.Wallet.user_id == delete_user.user_id).first()
         if delete_user.user_id == current_user.user_id or current_user.is_admin == True:
             db.delete(wallet)
             db.commit()

@@ -29,7 +29,7 @@ def create_notification(notification: schema.NotificationCreate, db: Session):
     This is a background function that should be run after a post request has been made to answer a user's question.
     A NotificationCreate schema should be passed with filled data.
     """
-    if notification.type == "Transaction":
+    if notification.type == "transaction":
         db_notification = model.NotificationTransaction(
             owner_id=notification.owner_id,
             content_id=notification.content_id,
@@ -75,11 +75,11 @@ def set_unread_to_false(id: int, db: Session, type: str):
     if type == "transaction":
         stored_notification = db.query(model.NotificationTransaction).filter(
             model.NotificationTransaction.notification_id == id).first()
-    elif stored_notification is None:
-        return None
     else:
         stored_notification = db.query(model.Notification).filter(
             model.Notification.notification_id == id).first()
+    if stored_notification is None:
+        return None
     stored_notification.unread = False
     db.commit()
     db.refresh(stored_notification)

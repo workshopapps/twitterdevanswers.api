@@ -181,7 +181,7 @@ class Notification(Base):
 
 
 class NotificationTransaction(Base):
-    __tablename__ = "notification"
+    __tablename__ = "transaction_notification"
     __table_args__ = {'extend_existing': True}
     notification_id = Column(Integer, primary_key=True, nullable=False)
     owner_id = Column(Integer, ForeignKey(

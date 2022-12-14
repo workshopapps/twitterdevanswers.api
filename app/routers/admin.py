@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 from fastapi import Depends, HTTPException, APIRouter, status, Path
 from app.oauth import get_current_user
 from app.routers.answer import get_answer
-from app.routers import admin_utils 
+from app.routers import admin_utils
 from app import oauth, model, schema
 
 router = APIRouter(
@@ -25,9 +25,11 @@ def make_admin(username: str, db: Session = Depends(get_db), current_user: schem
         raise HTTPException(
             status_code=401, detail=f"You must be an admin to access this endpoint")
     user = db.query(model.User).filter(model.User.username == username).first()
-    if user is None:
-        raise HTTPException(
-            status_code=404, detial=f"No user found for this username: {username}")
+    if not user:
+        return HTTPException(
+            status_code=404, detail=f"No user found with this username: {username}")
+    if user.is_admin:
+        return HTTPException(status_code=401, detail=f"User {username} is an admin")
     user.is_admin = True
     db.add(user)
     db.commit()
@@ -45,23 +47,26 @@ def remove_admin(username: str, db: Session = Depends(get_db), current_user: sch
     user = db.query(model.User).filter(model.User.username == username).first()
     if user is None:
         raise HTTPException(
-            status_code=404, detial=f"No user found for this username: {username}")
-    user.is_admin = False
-    db.add(user)
-    db.commit()
-    db.refresh(user)
+            status_code=404, detail=f"No user found for this username: {username}")
+    try:
+        user.is_admin = False
+        db.add(user)
+        db.commit()
+        db.refresh(user)
 
-    return {"success": True, "message": f"User with username {username} has been stripped of Admin priviledges"}
+        return {"success": True, "message": f"User with username {username} has been stripped of Admin priviledges"}
+    except Exception as err:
+        raise HTTPException(status_code=502, detail=err)
 
 
 @router.get("/viewdevaskwallet")
-def get_escrow_wallet(db: Session = Depends(get_db),current_user: schema.User = Depends(get_current_user)):
+def get_escrow_wallet(db: Session = Depends(get_db), current_user: schema.User = Depends(get_current_user)):
     "View Admin Wallet"
     if not check_admin(current_user):
         raise HTTPException(
             status_code=401, detail=f"You must be an admin to access this endpoint")
     devaskwallet = admin_utils.get_devask_wallet(db)
-    return {"success":True,"data":devaskwallet}
+    return {"success": True, "data": devaskwallet}
 
 
 @router.get('/users')
@@ -92,12 +97,13 @@ def delete_user(username: str, db: Session = Depends(get_db), current_user: sche
     if not check_admin(current_user):
         raise HTTPException(
             status_code=401, detail=f"You must be an admin to access this endpoint")
-    delete_user = crud.delete_user(db, username=username, current_user=current_user)        
+    delete_user = crud.delete_user(
+        db, username=username, current_user=current_user)
     if not delete_user:
         raise HTTPException(
             status=404, detail=f" User {username} does not exist")
     return delete_user
-    
+
 
 @router.put("/user/{username}")
 def update_user(user_update: schema.UserUpdate, username: str, db: Session = Depends(get_db), current_user: schema.User = Depends(get_current_user)):

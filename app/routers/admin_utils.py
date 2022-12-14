@@ -106,7 +106,7 @@ def admin_deduction(question_owner_id: int, amount: int, background_task: Backgr
         notification = schema.NotificationCreate(
             owner_id=question_owner_id,
             content_id=question_transaction.transaction_id,
-            type="Transaction",
+            type="transaction",
             title=f"@Admin has deducted {amount} tokens from your account for the correct answer provided.",
         )
         background_task.add_task(
@@ -235,7 +235,7 @@ def admin_transactions(item: AdminPayments,  background_task: BackgroundTasks, d
         notification = schema.NotificationCreate(
             owner_id=answerer_account.user_id,
             content_id=answerer_transaction.transaction_id,
-            type="Transaction",
+            type="transaction",
             title=f"@Admin has payed {amount} tokens into your account for the correct answer provided.",
         )
         background_task.add_task(
