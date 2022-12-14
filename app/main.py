@@ -40,7 +40,7 @@ The following methods are used in this api :-
 app = FastAPI(
     title="DEV ASK",
     description=description,
-    swagger_ui_parameters={"operationsSorter": "method", "apiSorter": "alpha"}
+    swagger_ui_parameters={"operationsSorter": "method"}
 )
 
 origins = ['*', 'http://localhost:3000/']
