@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 from fastapi import Depends, HTTPException, APIRouter, status, Path
 from app.oauth import get_current_user
 from app.routers.answer import get_answer
-from app.routers import admin_utils 
+from app.routers import admin_utils
 from app import oauth, model, schema
 
 router = APIRouter(
@@ -18,50 +18,14 @@ def check_admin(user):
     return user.is_admin
 
 
-@router.post("/add/{username}")
-def make_admin(username: str, db: Session = Depends(get_db), current_user: schema.User = Depends(get_current_user)):
-    "Make a user an admin using his/her username"
-    if not check_admin(current_user):
-        raise HTTPException(
-            status_code=401, detail=f"You must be an admin to access this endpoint")
-    user = db.query(model.User).filter(model.User.username == username).first()
-    if user is None:
-        raise HTTPException(
-            status_code=404, detial=f"No user found for this username: {username}")
-    user.is_admin = True
-    db.add(user)
-    db.commit()
-    db.refresh(user)
-
-    return {"success": True, "message": f"User with username {username} is now an admin"}
-
-
-@router.post("/remove/{username}")
-def remove_admin(username: str, db: Session = Depends(get_db), current_user: schema.User = Depends(get_current_user)):
-    "Remove an admin user using his/her username"
-    if not check_admin(current_user):
-        raise HTTPException(
-            status_code=401, detail=f"You must be an admin to access this endpoint")
-    user = db.query(model.User).filter(model.User.username == username).first()
-    if user is None:
-        raise HTTPException(
-            status_code=404, detial=f"No user found for this username: {username}")
-    user.is_admin = False
-    db.add(user)
-    db.commit()
-    db.refresh(user)
-
-    return {"success": True, "message": f"User with username {username} has been stripped of Admin priviledges"}
-
-
 @router.get("/viewdevaskwallet")
-def get_escrow_wallet(db: Session = Depends(get_db),current_user: schema.User = Depends(get_current_user)):
+def get_escrow_wallet(db: Session = Depends(get_db), current_user: schema.User = Depends(get_current_user)):
     "View Admin Wallet"
     if not check_admin(current_user):
         raise HTTPException(
             status_code=401, detail=f"You must be an admin to access this endpoint")
     devaskwallet = admin_utils.get_devask_wallet(db)
-    return {"success":True,"data":devaskwallet}
+    return {"success": True, "data": devaskwallet}
 
 
 @router.get('/users')
@@ -86,18 +50,63 @@ def fetch_user(username: str, db: Session = Depends(get_db), current_user: schem
     return {"success": True, 'data': user}
 
 
-@router.delete('/user/{username}')
-def delete_user(username: str, db: Session = Depends(get_db), current_user: schema.User = Depends(get_current_user)):
-    """ Delete a user by it's username  """
+@router.post("/add/{username}")
+# , current_user: schema.User = Depends(get_current_user)):
+def make_admin(username: str, db: Session = Depends(get_db)):
+    "Make a user an admin using his/her username"
+    # if current_user.is_admin:
+    #     raise HTTPException(
+    #         status_code=401, detail=f"You must be an admin to access this endpoint")
+    user = db.query(model.User).filter(model.User.username == username).first()
+    if not user:
+        return HTTPException(
+            status_code=404, detail=f"No user found with this username: {username}")
+    if user.is_admin:
+        return HTTPException(status_code=401, detail=f"User {username} is an admin")
+    user.is_admin = True
+    db.add(user)
+    db.commit()
+    db.refresh(user)
+
+    return {"success": True, "message": f"User with username {username} is now an admin"}
+
+
+@router.post("/remove/{username}")
+# , current_user: schema.User = Depends(get_current_user)):
+def remove_admin(username: str, db: Session = Depends(get_db)):
+    "Remove an admin user using his/her username"
+    # if not check_admin(current_user):
+    #     raise HTTPException(
+    #         status_code=401, detail=f"You must be an admin to access this endpoint")
+    user = db.query(model.User).filter(model.User.username == username).first()
+    if user is None:
+        raise HTTPException(
+            status_code=404, detail=f"No user found for this username: {username}")
+    try:
+        user.is_admin = False
+        db.add(user)
+        db.commit()
+        db.refresh(user)
+
+        return {"success": True, "message": f"User with username {username} has been stripped of Admin priviledges"}
+    except Exception as err:
+        raise HTTPException(status_code=502, detail=err)
+
+
+@router.post("/create_tags", status_code=status.HTTP_201_CREATED)
+async def create_tag(tag: schema.TagCreate, db: Session = Depends(get_db), current_user: schema.User = Depends(get_current_user)):
+    """
+    Creates a tag
+    """
     if not check_admin(current_user):
         raise HTTPException(
             status_code=401, detail=f"You must be an admin to access this endpoint")
-    delete_user = crud.delete_user(db, username=username, current_user=current_user)        
-    if not delete_user:
-        raise HTTPException(
-            status=404, detail=f" User {username} does not exist")
-    return delete_user
-    
+    db_tag = model.Tag(tag_name=tag.tag_name)
+    db.add(db_tag)
+    db.commit()
+    db.refresh(db_tag)
+    return db_tag
+
 
 @router.put("/user/{username}")
 def update_user(user_update: schema.UserUpdate, username: str, db: Session = Depends(get_db), current_user: schema.User = Depends(get_current_user)):
@@ -117,6 +126,20 @@ def update_user(user_update: schema.UserUpdate, username: str, db: Session = Dep
     db.commit()
     db.refresh(user)
     return {"success": True, "message": "Profile Updated", "data": user}
+
+
+@router.delete('/user/{username}')
+def delete_user(username: str, db: Session = Depends(get_db), current_user: schema.User = Depends(get_current_user)):
+    """ Delete a user by it's username  """
+    if not check_admin(current_user):
+        raise HTTPException(
+            status_code=401, detail=f"You must be an admin to access this endpoint")
+    delete_user = crud.delete_user(
+        db, username=username, current_user=current_user)
+    if not delete_user:
+        raise HTTPException(
+            status=404, detail=f" User {username} does not exist")
+    return delete_user
 
 
 @router.delete("/question/{question_id}", status_code=status.HTTP_200_OK)
@@ -148,21 +171,6 @@ def delete_answer(answer_id: int, db: Session = Depends(get_db),
     db.delete(answer)
     db.commit()
     return {"success": True, "message": "Answer deleted successfully"}
-
-
-@router.post("/create_tags", status_code=status.HTTP_201_CREATED)
-async def create_tag(tag: schema.TagCreate, db: Session = Depends(get_db), current_user: schema.User = Depends(get_current_user)):
-    """
-    Creates a tag
-    """
-    if not check_admin(current_user):
-        raise HTTPException(
-            status_code=401, detail=f"You must be an admin to access this endpoint")
-    db_tag = model.Tag(tag_name=tag.tag_name)
-    db.add(db_tag)
-    db.commit()
-    db.refresh(db_tag)
-    return db_tag
 
 
 @router.delete("/tag/{tag_id}", status_code=status.HTTP_200_OK)

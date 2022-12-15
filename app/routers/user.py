@@ -22,8 +22,9 @@ def fetch_users(skip: int = 0, limit: int = 100, db: Session = Depends(get_db), 
 
     return crud.get_users(db, skip=skip, limit=limit)
 
+
 @router.get('/{user_id}')
-def fetch_user_id(user_id: int, db: Session = Depends(get_db), current_user=Depends(get_current_user)):
+def fetch_user_id(user_id: int, db: Session = Depends(get_db), current_user: int = Depends(get_current_user)):
     """ Fetch a user by Id  """
 
     user = crud.get_user_id(db, user_id=user_id)
@@ -33,15 +34,47 @@ def fetch_user_id(user_id: int, db: Session = Depends(get_db), current_user=Depe
     return {"success": True, 'data': user}
 
 
-@router.get('/{username}')
-def fetch_user(username: str, db: Session = Depends(get_db), current_user=Depends(get_current_user)):
-    """ Fetch a user by username  """
+@router.get('/likes/{user_id}')
+def fetch_user_likes(user_id: int, db: Session = Depends(get_db), current_user: int = Depends(get_current_user)):
+    """Fetch user likes"""
+    likes = db.query(model.Like).filter(model.Like.user_id == user_id).all()
+    if likes:
+        return {"total_likes": len(likes)}
+    else:
+        return HTTPException(status_code=404, detail="User hasn't liked any post yet")
 
-    user = crud.get_user(db, username=username)
-    if not user:
-        raise HTTPException(
-            status_code=404, detail=f" User {username} not found")
-    return {"success": True, 'data': user}
+# @router.get('/{username}')
+# def fetch_user(username: str, db: Session = Depends(get_db), current_user: int = Depends(get_current_user)):
+#     """ Fetch a user by username  """
+
+#     user = db.query(model.User).filter(model.User.username == username).first()
+#     if not user:
+#         raise HTTPException(
+#             status_code=404, detail=f" User {username} not found")
+#     user_data = {
+#         "user_id": user.user_id,
+#         "username": user.username,
+#         "first_name": user.first_name,
+#         "last_name": user.last_name,
+#         "email": user.email,
+#         "date_of_birth": user.date_of_birth,
+#         "gender": user.gender,
+#         "description": user.description,
+#         "phone_number": user.phone_number,
+#         "work_experience": user.work_experience,
+#         "position": user.position,
+#         "stack": user.stack,
+#         "links": [user.links],
+#         "role": user.role,
+#         "image_url": user.image_url,
+#         "location": user.location,
+#         "is_admin": user.is_admin,
+#         "account_balance": user.account_balance,
+#         "followers": user.followers,
+#         "following": user.following,
+#         "date_joined": user.created_at
+#     }
+#     return {"success": True, 'data': user_data}
 
 
 @router.patch('/edit/{username}')
@@ -75,8 +108,42 @@ def update_user(user: schema.UserUpdate, username: str, db: Session = Depends(ge
 @router.delete('/delete/{username}')
 def delete_user(username: str, db: Session = Depends(get_db), current_user: int = Depends(get_current_user)):
     """ Delete a user by username  """
-    delete_user = crud.delete_user(db, username=username,current_user=current_user)
+    delete_user = crud.delete_user(
+        db, username=username, current_user=current_user)
     if not delete_user:
         raise HTTPException(
             status=404, detail=f" User {username} does not exist")
     return delete_user
+
+
+@router.get('/get/{username}')
+def fetch_by_username(username: str, db: Session = Depends(get_db), current_user: int = Depends(get_current_user)):
+    """Fetches user by username"""
+    user = db.query(model.User).filter(
+        model.User.username == username).first()
+    if user:
+        user_data = {
+            "user_id": user.user_id,
+            "username": user.username,
+            "first_name": user.first_name,
+            "last_name": user.last_name,
+            "email": user.email,
+            "date_of_birth": user.date_of_birth,
+            "gender": user.gender,
+            "description": user.description,
+            "phone_number": user.phone_number,
+            "work_experience": user.work_experience,
+            "position": user.position,
+            "stack": user.stack,
+            "links": [user.links],
+            "role": user.role,
+            "image_url": user.image_url,
+            "location": user.location,
+            "is_admin": user.is_admin,
+            "account_balance": user.account_balance,
+            "followers": user.followers,
+            "following": user.following,
+            "date_joined": user.created_at
+        }
+        return {"success": True, 'data': user_data}
+    return HTTPException(status_code=404, detail="Username doesn't exist.")

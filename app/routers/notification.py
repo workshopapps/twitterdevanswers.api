@@ -29,7 +29,7 @@ def create_notification(notification: schema.NotificationCreate, db: Session):
     This is a background function that should be run after a post request has been made to answer a user's question.
     A NotificationCreate schema should be passed with filled data.
     """
-    if notification.type == "Transaction":
+    if notification.type == "transaction":
         db_notification = model.NotificationTransaction(
             owner_id=notification.owner_id,
             content_id=notification.content_id,
@@ -75,11 +75,11 @@ def set_unread_to_false(id: int, db: Session, type: str):
     if type == "transaction":
         stored_notification = db.query(model.NotificationTransaction).filter(
             model.NotificationTransaction.notification_id == id).first()
-    elif stored_notification is None:
-        return None
     else:
         stored_notification = db.query(model.Notification).filter(
             model.Notification.notification_id == id).first()
+    if stored_notification is None:
+        return None
     stored_notification.unread = False
     db.commit()
     db.refresh(stored_notification)
@@ -145,6 +145,13 @@ async def get_all_notifications(db: Session = Depends(get_db), user: schema.User
     return jsonable_encoder(data)
 
 
+@router.post("/add/", status_code=status.HTTP_201_CREATED, response_model=schema.Notification)
+async def add_notification(notification: schema.NotificationCreate, db: Session = Depends(get_db), user: schema.User = Depends(oauth.get_current_user)):
+    notification.owner_id = user.user_id
+    result = create_notification(notification=notification, db=db)
+    return result
+
+
 @router.patch("/read/{notification_id}", status_code=status.HTTP_200_OK, response_model=schema.Notification)
 async def mark_read(type: str,
                     notification_id: int = Path(
@@ -159,11 +166,4 @@ async def mark_read(type: str,
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                             detail="Notification Id is invalid."
                             )
-    return result
-
-
-@router.post("/add/", status_code=status.HTTP_201_CREATED, response_model=schema.Notification)
-async def add_notification(notification: schema.NotificationCreate, db: Session = Depends(get_db), user: schema.User = Depends(oauth.get_current_user)):
-    notification.owner_id = user.user_id
-    result = create_notification(notification=notification, db=db)
     return result
