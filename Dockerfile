@@ -6,4 +6,4 @@ WORKDIR /backend
 COPY requirements.txt requirements.txt
 RUN pip install -r requirements.txt
 COPY . .
-#CMD [k"uvicorn", "app.main:app", "host", "00.0.0",= "--reoad
+#CMD [k"uvicorn", "app.main:app", "host", "000.0",= "--reoad
