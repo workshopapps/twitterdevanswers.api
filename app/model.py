@@ -79,9 +79,9 @@ class User(Base):
     account_balance = Column(Integer, ForeignKey(
         'walletaccount.balance', ondelete="CASCADE"), default=100, nullable=True)
     tokens_earned = Column(Integer, ForeignKey(
-        'walletaccount.total_earned', ondelete="CASCADE"), default=0, nullable=True)
+        'walletaccount.total_earned', ondelete="CASCADE"), default=0)
     total_likes = Column(Integer, ForeignKey(
-        'likes.like_id', ondelete="CASCADE"), default=0, nullable=True)
+        'likes.like_id', ondelete="CASCADE"), default=0)
     created_at = Column(TIMESTAMP(timezone=True),
                         nullable=False, server_default=text('now()'))
     verification_code = Column(String(300), nullable=True, default=" ")
