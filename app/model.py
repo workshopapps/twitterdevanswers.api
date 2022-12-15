@@ -77,7 +77,7 @@ class User(Base):
     location = Column(String(100), nullable=True, default=" ")
     is_admin = Column(Boolean, default=False)
     account_balance = Column(Integer, ForeignKey(
-        'walletaccount.balance', ondelete="CASCADE"), default=100)
+        'walletaccount.balance', ondelete="CASCADE"), default=100, nullable=True)
     tokens_earned = Column(Integer, ForeignKey(
         'walletaccount.total_earned', ondelete="CASCADE"), default=0, nullable=True)
     total_likes = Column(Integer, ForeignKey(
