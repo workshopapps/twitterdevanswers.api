@@ -51,11 +51,12 @@ def fetch_user(username: str, db: Session = Depends(get_db), current_user: schem
 
 
 @router.post("/add/{username}")
-def make_admin(username: str, db: Session = Depends(get_db), current_user: schema.User = Depends(get_current_user)):
+# , current_user: schema.User = Depends(get_current_user)):
+def make_admin(username: str, db: Session = Depends(get_db)):
     "Make a user an admin using his/her username"
-    if not check_admin(current_user):
-        raise HTTPException(
-            status_code=401, detail=f"You must be an admin to access this endpoint")
+    # if current_user.is_admin:
+    #     raise HTTPException(
+    #         status_code=401, detail=f"You must be an admin to access this endpoint")
     user = db.query(model.User).filter(model.User.username == username).first()
     if not user:
         return HTTPException(
@@ -71,11 +72,12 @@ def make_admin(username: str, db: Session = Depends(get_db), current_user: schem
 
 
 @router.post("/remove/{username}")
-def remove_admin(username: str, db: Session = Depends(get_db), current_user: schema.User = Depends(get_current_user)):
+# , current_user: schema.User = Depends(get_current_user)):
+def remove_admin(username: str, db: Session = Depends(get_db)):
     "Remove an admin user using his/her username"
-    if not check_admin(current_user):
-        raise HTTPException(
-            status_code=401, detail=f"You must be an admin to access this endpoint")
+    # if not check_admin(current_user):
+    #     raise HTTPException(
+    #         status_code=401, detail=f"You must be an admin to access this endpoint")
     user = db.query(model.User).filter(model.User.username == username).first()
     if user is None:
         raise HTTPException(

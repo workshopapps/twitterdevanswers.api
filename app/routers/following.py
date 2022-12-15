@@ -28,6 +28,11 @@ def follow_user(request: schema.Follow, db: Session = Depends(get_db),
     target_user = db.query(User).filter(
         User.user_id == request.target_user).first()
     if target_user:
+        following = db.query(Following).filter(
+            Following.target_user == target_user.user_id).first()
+        if following:
+            if following.user_from == current_user.user_id:
+                return HTTPException(status_code=401, detail="You already follow this user")
         if current_user.user_id != target_user.user_id:
             following = Following(target_user=target_user.user_id,
                                   user_from=current_user.user_id)
