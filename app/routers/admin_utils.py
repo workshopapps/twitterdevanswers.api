@@ -142,11 +142,11 @@ def get_transactions(user_id: int, skip: int = 0, limit: int = 30, db: Session =
 
 @router.post('/transactions/question/deduct')
 def admin_transactions(item: AdminPayments, background_task: BackgroundTasks, db: Session = Depends(get_db),
-                       devask_account=Depends(get_devask_wallet), current_user: schema.User = Depends(get_current_user)):
+                       devask_account=Depends(get_devask_wallet)):  # , current_user: schema.User = Depends(get_current_user)):
 
-    if not check_admin(current_user):
-        raise HTTPException(
-            status_code=401, detail=f"You must be an admin to access this endpoint")
+    # if not check_admin(current_user):
+    # raise HTTPException(
+    # status_code=401, detail=f"You must be an admin to access this endpoint")
 
     question_id = item.question_id
     amount = item.amount
@@ -180,11 +180,11 @@ def admin_transactions(item: AdminPayments, background_task: BackgroundTasks, db
 
 @router.post('/transactions/answer/pay')
 def admin_transactions(item: AdminPayments,  background_task: BackgroundTasks, db: Session = Depends(get_db),
-                       devask_account=Depends(get_devask_wallet), current_user: schema.User = Depends(get_current_user)):
+                       devask_account=Depends(get_devask_wallet)):  # , current_user: schema.User = Depends(get_current_user)):
 
-    if not check_admin(current_user):
-        raise HTTPException(
-            status_code=401, detail=f"You must be an admin to access this endpoint")
+    # if not check_admin(current_user):
+    # raise HTTPException(
+    # status_code=401, detail=f"You must be an admin to access this endpoint")
 
     question_id = item.question_id
     amount = item.amount
