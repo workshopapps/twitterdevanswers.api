@@ -34,10 +34,11 @@ def send_signup_mail(email, token):
     msg = f''' 
            To Sign up on DevAsk, use this code to verify your email :
             {token}   
-            If you did not make this request then simply ignore this email) '''
+            
+            If you did not make this request, Simply ignore this email '''
 
     with yagmail.SMTP(app_email, app_passwd) as yag:
-        yag.send(to=email, subject='Email Signup Request', contents=msg)
+        yag.send(to=email, subject='DevAsk Email Verification', contents=msg)
 
 
 @router.post('/signin', response_model=schema.Token)
