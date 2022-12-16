@@ -66,7 +66,7 @@ def admin_deduction(question_owner_id: int, amount: int, background_task: Backgr
             deducts question allocated payment amount from question owner account
             params:
                     question_owner_balance
-                    amount
+                    amount in int
                     admin_id
             Return: admin obj
     """
