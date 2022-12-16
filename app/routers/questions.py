@@ -81,7 +81,7 @@ def add_question(request: schema.Question, db: Session = Depends(get_db), curren
     db.add(ask_question)
     db.commit()
     db.refresh(ask_question)
-    return {"success": True, "message": ask_question.content}
+    return {"success": True, "message": ask_question.content, "id": ask_question.question_id}
 
 
 # selects the correct answer
