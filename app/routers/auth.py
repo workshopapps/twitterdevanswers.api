@@ -36,7 +36,7 @@ def send_reset_mail(email, token):
 
 def send_signup_mail(email, token):
     msg = f''' 
-           To Sign up on DevAsk, visit the following link:
+           To Sign up on DevAsk, use this code to verify your email :
             {token}   
             If you did not make this request then simply ignore this email) '''
 
@@ -208,7 +208,7 @@ def forget_password(email: schema.Email, request: Request, db: Session = Depends
                             detail=f"User with email: {email.email} does not exit")
 
     token = oauth.create_access_token({'user_id': user.user_id})
-    url = "devask.com/change/" + token
+    url = "https://devask.hng.tech/password-recovery/" + token
 
     send_reset_mail(user.email, url)
 
