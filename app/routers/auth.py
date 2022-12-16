@@ -208,7 +208,7 @@ def forget_password(email: schema.Email, request: Request, db: Session = Depends
                             detail=f"User with email: {email.email} does not exit")
 
     token = oauth.create_access_token({'user_id': user.user_id})
-    url = "https://devask.hng.tech/password-recovery/" + token
+    url = "https://devask.hng.tech/#/password-recovery/" + token
 
     send_reset_mail(user.email, url)
 
