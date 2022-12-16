@@ -19,10 +19,6 @@ router = APIRouter(
 )
 
 
-
-
-
-
 # send reset email
 def send_reset_mail(email, token):
     msg = f'''
@@ -118,8 +114,10 @@ def user_signnup(user_credentials: schema.UserSignInRequest, db: Session = Depen
 
     user = db.query(model.User).filter(
         model.User.email == user_credentials.email).first()
-    access_token = oauth.create_access_token(
-        data={'user_id': user.user_id})
+    access_token_expires = timedelta(
+        minutes=settings.access_token_expire_minutes)
+    access_token = create_access_token(
+        data={"sub": user.email}, expires_delta=access_token_expires)
     return {
         'Success': True,
         'Message': 'user added successfully',
@@ -130,7 +128,8 @@ def user_signnup(user_credentials: schema.UserSignInRequest, db: Session = Depen
                 'email': user.email,
                 'wallet': wallet_obj
             },
-        'Token': access_token}
+        'Token': access_token,
+        'Token_type': 'Bearer'}
 
 
 @router.post('/admin-signup', status_code=status.HTTP_201_CREATED)
@@ -187,7 +186,7 @@ def change_password(update_password: schema.ChangePasswordRequest, db: Session =
 
     user = user_query.first()
     if not utils.verify_password(update_password.oldPassword, user.password):
-         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
                             detail=f"Wrong Old Password ")
     if user.user_id != current_user.user_id:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
@@ -235,44 +234,47 @@ def verify_password_token(token: str,  password: schema.ForgotPassword, db: Sess
 
 
 @router.put('/setup-mfa')
-def two_factor_auth(two_factor: schema.Email, db: Session = Depends(database.get_db), current_user = Depends(get_current_user)):
+def two_factor_auth(two_factor: schema.Email, db: Session = Depends(database.get_db), current_user=Depends(get_current_user)):
     user_query = db.query(model.User).filter(
         model.User.email == two_factor.email)
     user = user_query.first()
     if user.mfa_hash:
-        raise HTTPException(status_code=status.HTTP_208_ALREADY_REPORTED, detail='MFA already setup')
+        raise HTTPException(
+            status_code=status.HTTP_208_ALREADY_REPORTED, detail='MFA already setup')
     mfa_hash = pyotp.random_base32()
     enable_2fa = user_query.update(
         {'mfa_hash': mfa_hash}, synchronize_session=False)
     db.commit()
-    
+
     return {'message': 'MFA Setup Successfully'}
 
-@router.post('/send-mfa')
-def send_mfa(email :schema.Email, db: Session = Depends(database.get_db),current_user = Depends(get_current_user)):
-   
-    user = db.query(model.User).filter(model.User.email == email.email).first()
-    uri = pyotp.totp.TOTP(user.mfa_hash).provisioning_uri(user.email, issuer_name="Dev Ask")
-    qrcode_uri = "https://www.google.com/chart?chs=200x200&chld=M|0&cht=qr&chl={}".format(uri)
-    
 
-   
+@router.post('/send-mfa')
+def send_mfa(email: schema.Email, db: Session = Depends(database.get_db), current_user=Depends(get_current_user)):
+
+    user = db.query(model.User).filter(model.User.email == email.email).first()
+    uri = pyotp.totp.TOTP(user.mfa_hash).provisioning_uri(
+        user.email, issuer_name="Dev Ask")
+    qrcode_uri = "https://www.google.com/chart?chs=200x200&chld=M|0&cht=qr&chl={}".format(
+        uri)
+
     return {'qr_code': qrcode_uri}
 
 
 def verify_wallet_otp(user_mfa, code):
     walletOtp = pyotp.TOTP(user_mfa)
     return walletOtp.verify(code)
+
+
 @router.post('/validate-mfa')
-def validate_otp(otp: schema.two_factor, db: Session = Depends(database.get_db), current_user = Depends(get_current_user)):
+def validate_otp(otp: schema.two_factor, db: Session = Depends(database.get_db), current_user=Depends(get_current_user)):
     user = db.query(model.User).filter(model.User.email == otp.email).first()
     user_mfa = user.mfa_hash
     if not user.mfa_hash:
         return {'message': 'User has not enabled 2FA'}
-    if user != current_user: 
-        return {'Messaage' : ' This user is not the right '}
-        
-    
+    if user != current_user:
+        return {'Messaage': ' This user is not the right '}
+
     if verify_wallet_otp(user_mfa, otp.mfa_hash):
         return {'Success': True}
     else:
