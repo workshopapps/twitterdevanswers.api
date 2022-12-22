@@ -76,6 +76,8 @@ class UserOut(BaseModel):
 
 class UserSignInRequest(BaseModel):
     username: str
+    firstname: str
+    lastname:str
     email: EmailStr
     password: str
     confirmPassword: str
@@ -89,6 +91,8 @@ class UserSignInRequest(BaseModel):
 
 class UserSignInAdminRequest(BaseModel):
     username: str
+    firstname: str
+    lastname:str
     email: EmailStr
     password: str
     confirmPassword: str
