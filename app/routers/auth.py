@@ -59,7 +59,7 @@ async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(
         return {
             "data": {
                 "user_id": user.user_id,
-                "usename": user.username,
+                "username": user.username,
                 "email": user.email,
                 "name": user.first_name + user.last_name
             },
@@ -95,8 +95,11 @@ def user_signnup(user_credentials: schema.UserSignInRequest, db: Session = Depen
         return HTTPException(status_code=400, detail={"msg": "User already exists"})
 
     new_user = model.User(username=user_credentials.username,
+                          firstname = user_credentials.firstname,
+                          lastname = user_credentials.lastname,
                           email=user_credentials.email,
                           password=user_credentials.password,
+
                           )
     db.add(new_user)
     db.commit()
@@ -122,6 +125,8 @@ def user_signnup(user_credentials: schema.UserSignInRequest, db: Session = Depen
             {
                 'user_id': user.user_id,
                 'userName': user.username,
+                'firstname': user.first_name,
+                'lastname': user.last_name,
                 'email': user.email,
                 'wallet': wallet_obj
             },
@@ -154,6 +159,8 @@ def admin_signnup(user_credentials: schema.UserSignInAdminRequest, db: Session =
         return HTTPException(status_code=400, detail={"msg": "User already exists"})
 
     new_user = model.User(username=user_credentials.username,
+                          firstname = user_credentials.firstname,
+                          lastname = user_credentials.lastname,  
                           email=user_credentials.email,
                           password=user_credentials.password,
                           is_admin=True
@@ -180,6 +187,8 @@ def admin_signnup(user_credentials: schema.UserSignInAdminRequest, db: Session =
             {
                 'user_id': user.user_id,
                 'userName': user.username,
+                'firstname': user.first_name,
+                'lastname': user.last_name,
                 'email': user.email,
                 'wallet': wallet_obj
             },
