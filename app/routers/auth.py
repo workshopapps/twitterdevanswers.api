@@ -41,7 +41,7 @@ def send_signup_mail(email, token):
         yag.send(to=email, subject='DevAsk Email Verification', contents=msg)
 
 
-@router.post('/signin', response_model=schema.Token)
+@router.post('/signin')
 async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(database.get_db)):
     user = authenticate_user(db, form_data.username, form_data.password)
     if not user:
@@ -50,21 +50,22 @@ async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(
             detail="Incorrect username or password",
             headers={"WWW-Authenticate": "Bearer"},
         )
+    if user.is_verified == True:
+        access_token_expires = timedelta(
+            minutes=settings.access_token_expire_minutes)
+        access_token = create_access_token(
+            data={"sub": user.email}, expires_delta=access_token_expires)
 
-    access_token_expires = timedelta(
-        minutes=settings.access_token_expire_minutes)
-    access_token = create_access_token(
-        data={"sub": user.email}, expires_delta=access_token_expires)
-
-    return {
-        "data": {
-            "user_id": user.user_id,
-            "usename": user.username,
-            "email": user.email,
-            "name": user.first_name + user.last_name
-        },
-        "access_token": access_token,
-        "token_type": "bearer"}
+        return {
+            "data": {
+                "user_id": user.user_id,
+                "usename": user.username,
+                "email": user.email,
+                "name": user.first_name + user.last_name
+            },
+            "access_token": access_token,
+            "token_type": "bearer"}
+    return HTTPException(status_code=401, detail="Verify your email to login")
 
 
 totp = ''
@@ -93,18 +94,13 @@ def user_signnup(user_credentials: schema.UserSignInRequest, db: Session = Depen
     if user:
         return HTTPException(status_code=400, detail={"msg": "User already exists"})
 
-    if auth_otp(code=user_credentials.email_verification_code):
-
-        new_user = model.User(username=user_credentials.username,
-                              email=user_credentials.email,
-                              password=user_credentials.password,
-                              )
-        db.add(new_user)
-        db.commit()
-        db.refresh(new_user)
-    else:
-        raise HTTPException(status_code=status.HTTP_412_PRECONDITION_FAILED,
-                            detail="OTP is either a wrong one or has expired ")
+    new_user = model.User(username=user_credentials.username,
+                          email=user_credentials.email,
+                          password=user_credentials.password,
+                          )
+    db.add(new_user)
+    db.commit()
+    db.refresh(new_user)
 
     # creating User Wallet
     wallet_id = uuid4()
@@ -133,6 +129,22 @@ def user_signnup(user_credentials: schema.UserSignInRequest, db: Session = Depen
         'Token_type': 'Bearer'}
 
 
+@router.post('/verify-email', status_code=status.HTTP_202_ACCEPTED)
+def verify_email(credentials: schema.UserVerification, db: Session = Depends(database.get_db)):
+    if auth_otp(code=credentials.verification_code):
+        user = db.query(model.User).filter(
+            model.User.email == credentials.email)
+        if user:
+            user.update({'is_verified': True})
+            db.commit()
+            return {"success": True, "msg": "Email verified"}
+        else:
+            return HTTPException(status_code=404, detail="User with the current email doesn't exists")
+    else:
+        raise HTTPException(status_code=status.HTTP_412_PRECONDITION_FAILED,
+                            detail="OTP is either a wrong one or has expired ")
+
+
 @router.post('/admin-signup', status_code=status.HTTP_201_CREATED)
 def admin_signnup(user_credentials: schema.UserSignInAdminRequest, db: Session = Depends(database.get_db)):
     user_credentials.password = utils.hash(user_credentials.password)
@@ -141,19 +153,14 @@ def admin_signnup(user_credentials: schema.UserSignInAdminRequest, db: Session =
     if user:
         return HTTPException(status_code=400, detail={"msg": "User already exists"})
 
-    if auth_otp(user_credentials.email_verification_code):
-
-        new_user = model.User(username=user_credentials.username,
-                              email=user_credentials.email,
-                              password=user_credentials.password,
-                              is_admin=True
-                              )
-        db.add(new_user)
-        db.commit()
-        db.refresh(new_user)
-    else:
-        raise HTTPException(status_code=status.HTTP_412_PRECONDITION_FAILED,
-                            detail="OTP is either a wrong one or has expired ")
+    new_user = model.User(username=user_credentials.username,
+                          email=user_credentials.email,
+                          password=user_credentials.password,
+                          is_admin=True
+                          )
+    db.add(new_user)
+    db.commit()
+    db.refresh(new_user)
 
     # creating User Wallet
     wallet_id = uuid4()
