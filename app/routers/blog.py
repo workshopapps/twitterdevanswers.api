@@ -152,7 +152,7 @@ def delete_post_by_user_id(blog_id, db: Session = Depends(get_db),
         model.Blog.blog_id == blog_id).first()
     if db_blog is None:
         raise HTTPException(status_code=404, detail="Invalid blog id")
-    if current_user.is_admin != True or db_blog.blog_user_id != current_user.user_id:
+    if current_user.is_admin != True:
         return HTTPException(
             status_code=400, detail="Only owner and Admins can delete this blog")
     db.delete(db_blog)

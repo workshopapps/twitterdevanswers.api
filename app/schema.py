@@ -79,7 +79,6 @@ class UserSignInRequest(BaseModel):
     email: EmailStr
     password: str
     confirmPassword: str
-    email_verification_code: Optional[str]
 
     @validator('confirmPassword')
     def passwords_match(cls, v, values, **kwargs):
@@ -93,7 +92,6 @@ class UserSignInAdminRequest(BaseModel):
     email: EmailStr
     password: str
     confirmPassword: str
-    email_verification_code: Optional[str]
     is_admin: Optional[bool]
 
     @validator('confirmPassword')
@@ -101,6 +99,11 @@ class UserSignInAdminRequest(BaseModel):
         if 'password' in values and v != values['password']:
             raise ValueError('passwords do not match')
         return v
+
+
+class UserVerification(BaseModel):
+    email: EmailStr
+    verification_code: int
 
 
 class UserUpdate(BaseModel):

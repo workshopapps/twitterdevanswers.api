@@ -66,7 +66,7 @@ def admin_deduction(question_owner_id: int, amount: int, background_task: Backgr
             deducts question allocated payment amount from question owner account
             params:
                     question_owner_balance
-                    amount
+                    amount in int
                     admin_id
             Return: admin obj
     """
@@ -83,12 +83,12 @@ def admin_deduction(question_owner_id: int, amount: int, background_task: Backgr
         db.commit()
 
         # adds deducted amount to devask wallet
-        devask_account.balance += amount
-        devask_account.earnings += 1
-        devask_account.total_earned += amount
-        db.add(devask_account)
-        db.add(question_owner_account)
-        db.commit()
+        # devask_account.balance += amount
+        # devask_account.earnings += 1
+        # devask_account.total_earned += amount
+        # db.add(devask_account)
+        # db.add(question_owner_account)
+        # db.commit()
 
         # initialize transactions history instance for the  asker
         question_transaction = Transaction(transacion_type='spent',
@@ -98,7 +98,7 @@ def admin_deduction(question_owner_id: int, amount: int, background_task: Backgr
         db.add(question_transaction)
         db.commit()
 
-        db.refresh(devask_account)
+        # db.refresh(devask_account)
         db.refresh(question_owner_account)
 
         # This automatically creates a notification by calling create_notification as a background function which
@@ -112,8 +112,9 @@ def admin_deduction(question_owner_id: int, amount: int, background_task: Backgr
         background_task.add_task(
             create_notification, notification=notification, db=db)
 
-        return {"devask_account": devask_account,
-                "question_owner": question_owner_account}
+        return {
+            # "devask_account": devask_account,
+            "question_owner": question_owner_account}
     else:
         return {"code": "error", "balance": question_owner_account.balance,
                 "message": "Wallet Balance Insufficience"}
@@ -142,11 +143,11 @@ def get_transactions(user_id: int, skip: int = 0, limit: int = 30, db: Session =
 
 @router.post('/transactions/question/deduct')
 def admin_transactions(item: AdminPayments, background_task: BackgroundTasks, db: Session = Depends(get_db),
-                       devask_account=Depends(get_devask_wallet), current_user: schema.User = Depends(get_current_user)):
+                       devask_account=Depends(get_devask_wallet)):  # , current_user: schema.User = Depends(get_current_user)):
 
-    if not check_admin(current_user):
-        raise HTTPException(
-            status_code=401, detail=f"You must be an admin to access this endpoint")
+    # if not check_admin(current_user):
+    # raise HTTPException(
+    # status_code=401, detail=f"You must be an admin to access this endpoint")
 
     question_id = item.question_id
     amount = item.amount
@@ -167,7 +168,7 @@ def admin_transactions(item: AdminPayments, background_task: BackgroundTasks, db
 
     question_owner_id = question_obj.owner_id
 
-    admin_obj = res_obj['devask_account']
+    # admin_obj = res_obj['devask_account']
     question_owner = res_obj['question_owner']
 
     return {
@@ -180,11 +181,11 @@ def admin_transactions(item: AdminPayments, background_task: BackgroundTasks, db
 
 @router.post('/transactions/answer/pay')
 def admin_transactions(item: AdminPayments,  background_task: BackgroundTasks, db: Session = Depends(get_db),
-                       devask_account=Depends(get_devask_wallet), current_user: schema.User = Depends(get_current_user)):
+                       devask_account=Depends(get_devask_wallet)):  # , current_user: schema.User = Depends(get_current_user)):
 
-    if not check_admin(current_user):
-        raise HTTPException(
-            status_code=401, detail=f"You must be an admin to access this endpoint")
+    # if not check_admin(current_user):
+    # raise HTTPException(
+    # status_code=401, detail=f"You must be an admin to access this endpoint")
 
     question_id = item.question_id
     amount = item.amount
