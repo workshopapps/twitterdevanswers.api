@@ -96,7 +96,7 @@ def create_like(like_base: schema.Like, background_task: BackgroundTasks, db: Se
         # runs after returning a response
         notification = schema.NotificationCreate(
             owner_id=db_question.owner_id,
-            content_id=db_like.like_id,
+            content_id=db_question.question_id,
             type="Like",
             title=f"@{current_user.username} like your question.",
         )

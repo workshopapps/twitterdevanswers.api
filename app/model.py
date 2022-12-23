@@ -112,7 +112,7 @@ class Question(Base):
     tag = Column(String(200), default=" ")
     total_like = Column(Integer, default=0)
     total_unlike = Column(Integer, default=0)
-    created_at = Column(TIMESTAMP(timezone=True),
+    created_at = Column(DateTime(timezone=True),
                         nullable=False, server_default=text('now()'))
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
     owner = relationship('model.User')

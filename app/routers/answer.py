@@ -108,9 +108,9 @@ def create_answer(answer: schema.CreateAnswer, background_task: BackgroundTasks,
     # runs after returning a response
     notification = schema.NotificationCreate(
         owner_id=db_question.owner_id,
-        content_id=db_answer.answer_id,
+        content_id=db_answer.question_id,
         type="Answer",
-        title=f"@{current_user.username} provided an answer to your question.",
+        title=f"@{current_user.username} replied to your question.",
     )
     background_task.add_task(
         create_notification, notification=notification, db=db)
