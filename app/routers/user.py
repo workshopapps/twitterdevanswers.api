@@ -43,38 +43,16 @@ def fetch_user_likes(user_id: int, db: Session = Depends(get_db), current_user: 
     else:
         return HTTPException(status_code=404, detail="User hasn't liked any post yet")
 
-# @router.get('/{username}')
-# def fetch_user(username: str, db: Session = Depends(get_db), current_user: int = Depends(get_current_user)):
-#     """ Fetch a user by username  """
 
-#     user = db.query(model.User).filter(model.User.username == username).first()
-#     if not user:
-#         raise HTTPException(
-#             status_code=404, detail=f" User {username} not found")
-#     user_data = {
-#         "user_id": user.user_id,
-#         "username": user.username,
-#         "first_name": user.first_name,
-#         "last_name": user.last_name,
-#         "email": user.email,
-#         "date_of_birth": user.date_of_birth,
-#         "gender": user.gender,
-#         "description": user.description,
-#         "phone_number": user.phone_number,
-#         "work_experience": user.work_experience,
-#         "position": user.position,
-#         "stack": user.stack,
-#         "links": [user.links],
-#         "role": user.role,
-#         "image_url": user.image_url,
-#         "location": user.location,
-#         "is_admin": user.is_admin,
-#         "account_balance": user.account_balance,
-#         "followers": user.followers,
-#         "following": user.following,
-#         "date_joined": user.created_at
-#     }
-#     return {"success": True, 'data': user_data}
+@router.get('/rewards/{user_id}')
+def fetch_user_rewards(user_id: int, db: Session = Depends(get_db), current_user: int = Depends(get_current_user)):
+    """Fetch user total earned rewards"""
+    reward = db.query(model.Wallet).filter(model.Wallet.user_id == user_id).all()
+    if reward:
+        return {"total_rewards": len(reward)}
+    else:
+        return HTTPException(status_code=404, detail="User hasn't earned any tokens yet")
+
 
 
 @router.patch('/edit/{username}')
