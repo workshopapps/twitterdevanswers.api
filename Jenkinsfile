@@ -14,6 +14,7 @@ pipeline {
 			    //sh "pip install -r requirements.txt"
 			    //sh "pip install --upgrade 'sentry-sdk[fastapi]'"
 			    sh "sudo bash /home/judgejudy/start_twitterdev.api.sh"
+			    sh "sudo systemctl restart devask-backend.service"
 		    }
 		}
 	    }
