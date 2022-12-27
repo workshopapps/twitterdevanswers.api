@@ -152,7 +152,7 @@ async def add_notification(notification: schema.NotificationCreate, db: Session 
     return result
 
 
-@router.patch("/read/{notification_id}", status_code=status.HTTP_200_OK, response_model=schema.Notification)
+@router.put("/read/{notification_id}", status_code=status.HTTP_200_OK, response_model=schema.Notification)
 async def mark_read(type: str,
                     notification_id: int = Path(
         default=..., description="The id of the notification to mark as read."
