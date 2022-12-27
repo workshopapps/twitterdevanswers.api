@@ -159,8 +159,8 @@ def admin_signnup(user_credentials: schema.UserSignInAdminRequest, db: Session =
         return HTTPException(status_code=400, detail={"msg": "User already exists"})
 
     new_user = model.User(username=user_credentials.username,
-                          firstname=user_credentials.firstname,
-                          lastname=user_credentials.lastname,
+                          first_name=user_credentials.firstname,
+                          last_name=user_credentials.lastname,
                           email=user_credentials.email,
                           password=user_credentials.password,
                           is_admin=True
