@@ -76,7 +76,9 @@ def add_question(request: schema.Question, db: Session = Depends(get_db), curren
         content=request.content, owner_id=current_user.user_id,
         expected_result=request.expected_result, payment_amount=request.payment_amount,
         title=request.title,
-        tag=request.tag
+        tag=request.tag,
+        created_at=request.created_at,
+        updated_at=request.updated_at
     )
     db.add(ask_question)
     db.commit()

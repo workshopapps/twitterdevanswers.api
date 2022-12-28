@@ -17,7 +17,7 @@ router = APIRouter(
 
 
 @router.get('/')
-def fetch_users(skip: int = 0, limit: int = 100, db: Session = Depends(get_db), current_user=Depends(get_current_user)):
+def fetch_users(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
     """ List to get all users """
 
     return crud.get_users(db, skip=skip, limit=limit)
@@ -47,12 +47,12 @@ def fetch_user_likes(user_id: int, db: Session = Depends(get_db), current_user: 
 @router.get('/rewards/{user_id}')
 def fetch_user_rewards(user_id: int, db: Session = Depends(get_db), current_user: int = Depends(get_current_user)):
     """Fetch user total earned rewards"""
-    reward = db.query(model.Wallet).filter(model.Wallet.user_id == user_id).all()
+    reward = db.query(model.Wallet).filter(
+        model.Wallet.user_id == user_id).all()
     if reward:
         return {"total_rewards": len(reward)}
     else:
         return HTTPException(status_code=404, detail="User hasn't earned any tokens yet")
-
 
 
 @router.patch('/edit/{username}')
