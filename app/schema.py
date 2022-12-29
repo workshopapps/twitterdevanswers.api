@@ -166,15 +166,15 @@ class Question(BaseModel):
     payment_amount: int
     answered: bool
     tag: Optional[str]
-    created_at: datetime = datetime.now()
-    updated_at: datetime = datetime.now()
+    # created_at: datetime = datetime.now()
+    # updated_at: datetime = datetime.now()
 
 
 class QuestionUpdate(BaseModel):
     title: str
     content: str
     expected_result: str
-    updated_at: datetime = datetime.now()
+    # updated_at: datetime = datetime.now()
 
 
 class Answer(BaseModel):

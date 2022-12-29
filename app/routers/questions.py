@@ -76,9 +76,9 @@ def add_question(request: schema.Question, db: Session = Depends(get_db), curren
         content=request.content, owner_id=current_user.user_id,
         expected_result=request.expected_result, payment_amount=request.payment_amount,
         title=request.title,
-        tag=request.tag,
-        created_at=request.created_at,
-        updated_at=request.updated_at
+        tag=request.tag
+        # created_at=request.created_at,
+        # updated_at=request.updated_at
     )
     db.add(ask_question)
     db.commit()
@@ -113,12 +113,11 @@ def update_question(question_id, request: schema.QuestionUpdate, db: Session = D
         update_question.title = request.title
         update_question.content = request.content
         update_question.expected_result = request.expected_result
-        update_question.updated_at = request.updated_at
+        # update_question.updated_at = request.updated_at
         db.commit()
         return {"success": True, "message": {update_question.title,
                                              update_question.content,
-                                             update_question.expected_result,
-                                             update_question.updated_at}}
+                                             update_question.expected_result}}
 
 
 @router.delete("/{question_id}", status_code=status.HTTP_204_NO_CONTENT)
