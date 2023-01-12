@@ -17,7 +17,7 @@ router = APIRouter(
 
 
 @router.get('/')
-def fetch_users(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
+def fetch_users( skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
     """ List to get all users """
 
     return crud.get_users(db, skip=skip, limit=limit)
@@ -65,6 +65,33 @@ def update_user(user: schema.UserUpdate, username: str, db: Session = Depends(ge
     if user_db.username == current_user.username:
         update_user = db.query(model.User).filter(
             model.User.username == username).first()
+        if update_user is None:
+            raise HTTPException(status_code=404, detail="User not found")
+
+        if isinstance(user, dict):
+            update_data = user
+        else:
+            update_data = user.dict(exclude_unset=True)
+        for field in update_data:
+            setattr(update_user, field, update_data[field])
+
+        db.add(update_user)
+        db.commit()
+        db.refresh(update_user)
+        return {"success": True, "message": "Profile Updated", "data": update_data}
+    else:
+        return {"success": False, "message":  "You're not authorized to perform this update "}
+
+@router.patch('/update/{user_id}')
+def update_user_id(user: schema.UserUpdate, user_id: int, db: Session = Depends(get_db), current_user=Depends(get_current_user)):
+    """ Update a User profile by user_id  """
+
+    user_db = db.query(User).filter(User.user_id == user_id).first()
+    if user_db is None:
+        raise HTTPException(status_code=404, detail="User not found")
+    if user_db.user_id == current_user.user_id:
+        update_user = db.query(model.User).filter(
+            model.User.user_id == user_id).first()
         if update_user is None:
             raise HTTPException(status_code=404, detail="User not found")
 
