@@ -2,6 +2,7 @@ from sqlalchemy.orm import Session
 from app import model, schema
 from fastapi.exceptions import HTTPException
 
+#  User Functions
 
 def get_user(db: Session, username: str):
     """ Get a user from the database based on their Username  """
@@ -115,3 +116,58 @@ def delete_user(db: Session, username: str, current_user: int):
             return {"success": False, "message": "You're not authorized to perform this operation"}
     else:
         return {"success": False, "message": "User does not exist"}
+
+
+# Question Functions
+
+def get_a_question(question_id:int,db:Session):
+    """ Get a Question from the database  """
+    get_question_db = db.query(model.Question).filter(
+        model.Question.question_id == question_id).first()
+    if get_question_db:
+        db.commit()
+        return {
+            "questionid": get_question_db.question_id,
+            "title": get_question_db.title,
+            "content": get_question_db.content,
+            "expected_result": get_question_db.expected_result,
+            "payment_amount": get_question_db.payment_amount,
+            "answered": True,
+            "createdAt": get_question_db.created_at,
+            "updatedAT": get_question_db.updated_at,
+            "owner": get_question_db.owner_id,
+            "total_unlike":  get_question_db.total_unlike,
+            "total_like":  get_question_db.total_like
+            } 
+    return {"success": True, "message": "user have not asked any questions"}
+
+def get_questions_and_answers(question_id:int,db:Session):
+    get_question_db = db.query(model.Question).filter(
+        model.Question.question_id == question_id).first()
+    get_answer_db = db.query(model.Answer).filter(model.Answer.question_id == question_id).first()
+
+    if get_question_db:
+        db.commit()
+        return {
+                "questionid": get_question_db.question_id,
+                "title": get_question_db.title,
+                "content": get_question_db.content,
+                "expected_result": get_question_db.expected_result,
+                "payment_amount": get_question_db.payment_amount,
+                "answered": True,
+                "createdAt": get_question_db.created_at,
+                "updatedAT": get_question_db.updated_at,
+                "owner": get_question_db.owner_id,
+                "total_unlike":  get_question_db.total_unlike,
+                "total_like":  get_question_db.total_like,
+                "answers": [{
+                    "answer_id":get_answer_db.answer_id,
+                    "question_id":get_answer_db.question_id,
+                    "owner":get_answer_db.owner_id,
+                    "content":get_answer_db.content,
+                    "is_answered" : get_answer_db.is_answered,
+                    "vote": get_answer_db.vote,
+                    "created_at": get_answer_db.created_at
+                }],
+                }
+    return {"success": True, "message": "user have not asked any questions"}            
