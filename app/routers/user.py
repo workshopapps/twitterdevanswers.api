@@ -34,6 +34,17 @@ def fetch_user_id(user_id: int, db: Session = Depends(get_db), current_user: int
     return {"success": True, 'data': user}
 
 
+@router.get('/get/{username}',status_code=status.HTTP_200_OK)
+def fetch_by_username(username: str, db: Session = Depends(get_db), current_user: int = Depends(get_current_user)):
+    """Fetches user by username"""
+    user = db.query(model.User).filter(
+        model.User.username == username).first()
+    if user:
+        user_data = crud.get_user(db, username)
+        return {"success": True, 'data': user_data}
+    return HTTPException(status_code=404, detail="Username doesn't exist.")
+
+
 @router.get('/likes/{user_id}',status_code=status.HTTP_200_OK)
 def fetch_user_likes(user_id: int, db: Session = Depends(get_db), current_user: int = Depends(get_current_user)):
     """Fetch user likes"""
@@ -82,6 +93,7 @@ def update_user(user: schema.UserUpdate, username: str, db: Session = Depends(ge
     else:
         return {"success": False, "message":  "You're not authorized to perform this update "}
 
+
 @router.patch('/update/{user_id}',status_code=status.HTTP_200_OK)
 def update_user_id(user: schema.UserUpdate, user_id: int, db: Session = Depends(get_db), current_user=Depends(get_current_user)):
     """ Update a User profile by user_id  """
@@ -121,34 +133,3 @@ def delete_user(username: str, db: Session = Depends(get_db), current_user: int 
     return delete_user
 
 
-@router.get('/get/{username}',status_code=status.HTTP_200_OK)
-def fetch_by_username(username: str, db: Session = Depends(get_db), current_user: int = Depends(get_current_user)):
-    """Fetches user by username"""
-    user = db.query(model.User).filter(
-        model.User.username == username).first()
-    if user:
-        user_data = {
-            "user_id": user.user_id,
-            "username": user.username,
-            "first_name": user.first_name,
-            "last_name": user.last_name,
-            "email": user.email,
-            "date_of_birth": user.date_of_birth,
-            "gender": user.gender,
-            "description": user.description,
-            "phone_number": user.phone_number,
-            "work_experience": user.work_experience,
-            "position": user.position,
-            "stack": user.stack,
-            "links": [user.links],
-            "role": user.role,
-            "image_url": user.image_url,
-            "location": user.location,
-            "is_admin": user.is_admin,
-            "account_balance": user.account_balance,
-            "followers": user.followers,
-            "following": user.following,
-            "date_joined": user.created_at
-        }
-        return {"success": True, 'data': user_data}
-    return HTTPException(status_code=404, detail="Username doesn't exist.")
