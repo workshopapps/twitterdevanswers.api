@@ -41,7 +41,7 @@ def get_all_questions(db: Session = Depends(get_db)):
 
 
 # get all questions and their respective answers
-@router.get("/questionandanswers/",status_code=status.HTTP_200_OK)
+@router.get("/allquestions/",status_code=status.HTTP_200_OK)
 def get_all_questions_and_answers(db: Session = Depends(get_db)):
     """Get all questions and their respective answers"""
     get_all_questions_db = db.query(model.Question).all()
