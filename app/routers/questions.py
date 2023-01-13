@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, status, HTTPException
 from sqlalchemy.orm import Session
-from app import model, schema, oauth
+from app import model, crud, schema, oauth
 from app.database import engine, get_db
 
 
@@ -23,30 +23,36 @@ def retrieve_question(question_id: int, db: Session = Depends(get_db), current_u
 def get_question(question_id: int, db: Session = Depends(get_db)):
     get_question_db = db.query(model.Question).filter(
         model.Question.question_id == question_id).first()
+    get_answer_db = db.query(model.Answer).filter(model.Answer.question_id == question_id).first()
     if get_question_db:
         db.commit()
-        return {"success": True, "data": {
-                "questionid": get_question_db.question_id,
-                "title": get_question_db.title,
-                "content": get_question_db.content,
-                "expected_result": get_question_db.expected_result,
-                "payment_amount": get_question_db.payment_amount,
-                "answered": True,
-                "createdAt": get_question_db.created_at,
-                "updatedAT": get_question_db.updated_at,
-                "owner": get_question_db.owner_id,
-                "total_unlike":  get_question_db.total_unlike,
-                "total_like":  get_question_db.total_like,
-                "answers": [],
-                }
-                }
+        if not get_answer_db:
+            return {"success": True, "message": "Questions doesnt have answers yet","data":crud.get_a_question(question_id, db) } 
+        return {"success": True, "data":crud.get_questions_and_answers(question_id, db) }          
     return {"success": True, "message": "user have not asked any questions"}
 
 
+#  get all questions 
 @router.get("/", status_code=status.HTTP_200_OK)
 def get_all_questions(db: Session = Depends(get_db)):
     get_all_questions_db = db.query(model.Question).all()
+    
     return {"success": True, "data": get_all_questions_db}
+
+
+# get all questions and their respective answers
+@router.get("/questions",status_code=status.HTTP_200_OK)
+def get_all_questions_and_answers(db: Session = Depends(get_db)):
+    """Get all questions and their respective answers"""
+    get_all_questions_db = db.query(model.Question).all()
+    questions_list = []
+    for question in get_all_questions_db:
+        q_dict = {}
+        answers = db.query(model.Answer).filter(model.Answer.question_id == question.question_id).all()
+        q_dict["question"] = question
+        q_dict["answers"] = answers
+        questions_list.append(q_dict)
+    return {"success": True, "data":questions_list}
 
 
 # get all questions by a user
@@ -115,9 +121,10 @@ def update_question(question_id, request: schema.QuestionUpdate, db: Session = D
         update_question.expected_result = request.expected_result
         # update_question.updated_at = request.updated_at
         db.commit()
-        return {"success": True, "message": {update_question.title,
-                                             update_question.content,
-                                             update_question.expected_result}}
+        return {"success": True, "message": {
+        "title":update_question.title,
+        "content":update_question.content,
+        "expected_result":update_question.expected_result}}
 
 
 @router.delete("/{question_id}", status_code=status.HTTP_204_NO_CONTENT)
