@@ -21,14 +21,20 @@ def retrieve_question(question_id: int, db: Session = Depends(get_db), current_u
 
 @router.get("/{question_id}", status_code=status.HTTP_200_OK)
 def get_question(question_id: int, db: Session = Depends(get_db)):
+    get_all_questions_db = db.query(model.Question).all()
     get_question_db = db.query(model.Question).filter(
         model.Question.question_id == question_id).first()
     get_answer_db = db.query(model.Answer).filter(model.Answer.question_id == question_id).first()
+    get_likes_db = db.query(model.Like).filter(model.Like.question_id == question_id).first()
+
     if get_question_db:
-        db.commit()
-        if not get_answer_db:
-            return {"success": True, "message": "Questions doesnt have answers yet","data":crud.get_a_question(question_id, db) } 
-        return {"success": True, "data":crud.get_questions_and_answers(question_id, db) }          
+        if not get_answer_db and not get_likes_db:
+            return {"success": True, "message": "Questions doesn't have answers or likes yet","data":crud.get_a_question(question_id, db) } 
+        if not get_answer_db :
+            return {"success": True, "message": "Questions doesn't have answers yet","data":crud.get_questions_and_likes(question_id, db)} 
+        if not get_likes_db :
+            return {"success": True, "message": "Questions doesn't have likes yet","data":crud.get_questions_and_answers(question_id, db)} 
+        return {"success": True, "data":crud.get_all(question_id, db) }          
     return {"success": True, "message": "user have not asked any questions"}
 
 
@@ -40,17 +46,19 @@ def get_all_questions(db: Session = Depends(get_db)):
     return {"success": True, "data": get_all_questions_db}
 
 
-# get all questions and their respective answers
-@router.get("/questions",status_code=status.HTTP_200_OK)
+# get all questions and their respective answers and likes
+@router.get("/allquestions/",status_code=status.HTTP_200_OK)
 def get_all_questions_and_answers(db: Session = Depends(get_db)):
-    """Get all questions and their respective answers"""
+    """Get all questions and their respective answers and likes"""
     get_all_questions_db = db.query(model.Question).all()
     questions_list = []
     for question in get_all_questions_db:
         q_dict = {}
         answers = db.query(model.Answer).filter(model.Answer.question_id == question.question_id).all()
+        likes = db.query(model.Like).filter(model.Like.question_id == question.question_id).all()
         q_dict["question"] = question
         q_dict["answers"] = answers
+        q_dict["likes"] = likes
         questions_list.append(q_dict)
     return {"success": True, "data":questions_list}
 
