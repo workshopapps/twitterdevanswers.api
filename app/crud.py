@@ -23,7 +23,7 @@ def get_user(db: Session, username: str):
         "work_experience": user.work_experience,
         "position": user.position,
         "stack": user.stack,
-        "links": [user.links],
+        "links": user.links.split(','),
         "role": user.role,
         "image_url": user.image_url,
         "location": user.location,
@@ -54,7 +54,7 @@ def get_user_id(db: Session, user_id: int):
         "work_experience": user.work_experience,
         "position": user.position,
         "stack": user.stack,
-        "links": [user.links],
+        "links": user.links.split(','),
         "role": user.role,
         "image_url": user.image_url,
         "location": user.location,
@@ -85,7 +85,7 @@ def get_users(db: Session, skip: int = 0, limit: int = 100):
             "work_experience": user.work_experience,
             "position": user.position,
             "stack": user.stack,
-            "links": [user.links],
+            "links": user.links.split(','),
             "role": user.role,
             "image_url": user.image_url,
             "location": user.location,
@@ -210,6 +210,7 @@ def get_questions_and_answers(question_id:int,db:Session):
                 }]
                 }
     return {"success": True, "message": "user have not asked any questions"}            
+
 
 def get_questions_and_likes(question_id:int,db:Session):
     get_question_db = db.query(model.Question).filter(
