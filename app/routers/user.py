@@ -58,13 +58,14 @@ def fetch_user_likes(user_id: int, db: Session = Depends(get_db), current_user: 
 @router.get('/rewards/{user_id}',status_code=status.HTTP_200_OK)
 def fetch_user_rewards(user_id: int, db: Session = Depends(get_db), current_user: int = Depends(get_current_user)):
     """Fetch user total earned rewards"""
+    tokens_on_signup = 100
     reward = db.query(model.Wallet).filter(
-        model.Wallet.user_id == user_id).all()
+        model.Wallet.user_id == user_id).first()
     if reward:
-        return {"total_rewards": len(reward)}
+        return {"success":True,"data":{"reward_on_signup":tokens_on_signup,"earnings":reward.total_earned,"total_earnings": reward.total_earned + tokens_on_signup}}
     else:
-        return HTTPException(status_code=404, detail="User hasn't earned any tokens yet")
-
+        return HTTPException(status_code=404, detail="User not found")
+        
 
 @router.patch('/edit/{username}',status_code=status.HTTP_200_OK)
 def update_user(user: schema.UserUpdate, username: str, db: Session = Depends(get_db), current_user=Depends(get_current_user)):
