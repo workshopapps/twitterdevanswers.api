@@ -72,7 +72,8 @@ def admin_deduction(question_owner_id: int, amount: int, background_task: Backgr
     """
     question_owner_account = db.query(Wallet).filter(
         Wallet.user_id == question_owner_id).first()
-
+    user_account = db.query(User).filter( User.user_id == question_owner_account.user_id).first()
+    
     if question_owner_account.balance >= amount:
 
         # deduct payment amount
@@ -81,7 +82,9 @@ def admin_deduction(question_owner_id: int, amount: int, background_task: Backgr
         question_owner_account.total_spent += amount
         db.add(question_owner_account)
         db.commit()
-
+        # Equate Question's owner account balance to user account balance in the user model
+        user_account.account_balance = question_owner_account.balance
+        
         # adds deducted amount to devask wallet
         # devask_account.balance += amount
         # devask_account.earnings += 1
@@ -210,6 +213,7 @@ def admin_transactions(item: AdminPayments,  background_task: BackgroundTasks, d
         earned_value = amount - commission
         answerer_account = db.query(Wallet).filter(
             Wallet.user_id == answer_owner_id).first()
+        user_account = db.query(User).filter(User.user_id == answerer_account.user_id).first()
 
         devask_account.balance -= earned_value
         devask_account.spendings += 1
@@ -222,7 +226,11 @@ def admin_transactions(item: AdminPayments,  background_task: BackgroundTasks, d
         db.add(answerer_account)
         db.add(devask_account)
         db.commit()
-
+      
+         # Equate answerer_account balance to user's acct_balance in User model
+        user_account.account_balance = answerer_account.balance
+       
+    
         # initialize Transactions  instance for answerer
         answerer_transaction = Transaction(transacion_type='earned',
                                            amount=earned_value, user_id=answerer_account.user_id,

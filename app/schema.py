@@ -121,12 +121,12 @@ class UserUpdate(BaseModel):
     work_experience: Optional[str] = None
     position: Optional[str] = None
     stack: Optional[str] = None
-    links: List[str] = None
+    links: Optional[str] = None
     role: Optional[str] = None
     image_url: Optional[str] = None
     location: Optional[str] = None
 
-
+    
 class UserSignInResponse(BaseModel):
     pass
 
