@@ -1,4 +1,4 @@
-from fastapi import Depends, HTTPException, APIRouter, BackgroundTasks
+from fastapi import Depends, HTTPException, APIRouter, BackgroundTasks, status
 from sqlalchemy import desc
 from sqlalchemy.orm import Session
 from app.database import get_db
@@ -28,7 +28,7 @@ def get_correct_answer(question_id: int, db: Session):
 
     # check if question exists
     db_question = get_question(db=db, question_id=question_id)
-    
+
     if db_question is None:
         raise HTTPException(status_code=404, detail="Invalid Question ID")
 
@@ -66,6 +66,17 @@ def list_answer(question_id: int, db: Session = Depends(get_db)):
     # return db.query(model.Answer).filter(model.Answer.question_id == question_id).all()
 
 
+@router.get("/{user_id}/user/", status_code=status.HTTP_200_OK)
+def get_all_answers_by_a_user(user_id: int, db: Session = Depends(get_db)):
+    """ List all answers by a user """
+
+    get_user_answers = db.query(model.Answer).filter(
+        model.Answer.owner_id == user_id).all()
+    if not get_user_answers:
+        raise HTTPException(status_code=404, detail="User not found")
+    return {"success": True, "data": get_user_answers}
+
+
 @router.post("/")
 def create_answer(answer: schema.CreateAnswer, background_task: BackgroundTasks, db: Session = Depends(get_db),
                   current_user: int = Depends(oauth.get_current_user)):
@@ -97,14 +108,86 @@ def create_answer(answer: schema.CreateAnswer, background_task: BackgroundTasks,
     # runs after returning a response
     notification = schema.NotificationCreate(
         owner_id=db_question.owner_id,
-        content_id=db_answer.answer_id,
+        content_id=db_answer.question_id,
         type="Answer",
-        title=f"@{current_user.username} provided an answer to your question.",
+        title=f"@{current_user.username} replied to your question.",
     )
     background_task.add_task(
         create_notification, notification=notification, db=db)
 
     return db_answer
+
+
+@router.post("/vote")
+def vote_answer(answer: schema.AnswerVote, db: Session = Depends(get_db),
+                current_user: int = Depends(oauth.get_current_user)):
+    """ Vote endpoint for a specific answer """
+
+    # checks if answer_id exists
+    db_answer = get_answer(db=db, answer_id=answer.answer_id)
+    if db_answer is None:
+        raise HTTPException(status_code=404, detail="Answer Not Found")
+
+    # check if user voted before
+    check_user_vote = db.query(model.AnswerVote).filter(
+        model.AnswerVote.answer_id == answer.answer_id).first()
+
+    if check_user_vote is not None:
+        if check_user_vote.owner_id == current_user.user_id:
+            # update vote
+            get_answer_detail = get_answer(db=db, answer_id=answer.answer_id)
+
+            # prevent user from voting up again
+            if check_user_vote.vote_type == "add" and answer.vote_type == "add":
+                raise HTTPException(status_code=400, detail="Already voted!")
+
+            # add vote if previous vote is not add
+            elif check_user_vote.vote_type != "add" and answer.vote_type == "add":
+                db_vote_answer = db.query(model.Answer).filter(
+                    model.Answer.answer_id == answer.answer_id).first()
+                db_vote_answer.vote = get_answer_detail.vote + 1
+                check_user_vote.vote_type = answer.vote_type
+                db.commit()
+                db.refresh(db_vote_answer)
+                db.refresh(check_user_vote)
+
+            # remove vote if previous vote is add
+            elif check_user_vote.vote_type == "add" and answer.vote_type != "add":
+                db_vote_answer = db.query(model.Answer).filter(
+                    model.Answer.answer_id == answer.answer_id).first()
+                db_vote_answer.vote = get_answer_detail.vote - 1
+                check_user_vote.vote_type = answer.vote_type
+                db.commit()
+                db.refresh(db_vote_answer)
+                db.refresh(check_user_vote)
+            else:
+                pass
+            return {"detail": "Success"}
+    else:
+        # add vote
+        db_answer_vote = model.AnswerVote(
+            owner_id=current_user.user_id,
+            answer_id=answer.answer_id,
+            vote_type=answer.vote_type
+        )
+
+        # update vote point
+        get_answer_detail = get_answer(db=db, answer_id=answer.answer_id)
+        db_vote_answer = db.query(model.Answer).filter(
+            model.Answer.answer_id == answer.answer_id).first()
+        try:
+            db_vote_answer.vote = get_answer_detail.vote + 1 if answer.vote_type == "add" \
+                else get_answer_detail.vote - 1
+        except Exception as e:
+            db_vote_answer.vote = 1 if answer.vote_type == "add" \
+                else - 1
+
+        db.add(db_answer_vote)
+        db.commit()
+        db.refresh(db_answer_vote)
+        db.refresh(db_vote_answer)
+
+    return {"detail": "Success"}
 
 
 @router.patch("/{answer_id}")
@@ -180,75 +263,3 @@ def delete_answer(answer_id: int, db: Session = Depends(get_db),
     db.delete(del_answer)
     db.commit()
     return {"detail": "success"}
-
-
-@router.post("/vote")
-def vote_answer(answer: schema.AnswerVote, db: Session = Depends(get_db),
-                current_user: int = Depends(oauth.get_current_user)):
-    """ Vote endpoint for a specific answer """
-
-    # checks if answer_id exists
-    db_answer = get_answer(db=db, answer_id=answer.answer_id)
-    if db_answer is None:
-        raise HTTPException(status_code=404, detail="Answer Not Found")
-
-    # check if user voted before
-    check_user_vote = db.query(model.AnswerVote).filter(
-        model.AnswerVote.answer_id == answer.answer_id).first()
-
-    if check_user_vote is not None:
-        if check_user_vote.owner_id == current_user.user_id:
-            # update vote
-            get_answer_detail = get_answer(db=db, answer_id=answer.answer_id)
-
-            # prevent user from voting up again
-            if check_user_vote.vote_type == "add" and answer.vote_type == "add":
-                raise HTTPException(status_code=400, detail="Already voted!")
-
-            # add vote if previous vote is not add
-            elif check_user_vote.vote_type != "add" and answer.vote_type == "add":
-                db_vote_answer = db.query(model.Answer).filter(
-                    model.Answer.answer_id == answer.answer_id).first()
-                db_vote_answer.vote = get_answer_detail.vote + 1
-                check_user_vote.vote_type = answer.vote_type
-                db.commit()
-                db.refresh(db_vote_answer)
-                db.refresh(check_user_vote)
-
-            # remove vote if previous vote is add
-            elif check_user_vote.vote_type == "add" and answer.vote_type != "add":
-                db_vote_answer = db.query(model.Answer).filter(
-                    model.Answer.answer_id == answer.answer_id).first()
-                db_vote_answer.vote = get_answer_detail.vote - 1
-                check_user_vote.vote_type = answer.vote_type
-                db.commit()
-                db.refresh(db_vote_answer)
-                db.refresh(check_user_vote)
-            else:
-                pass
-            return {"detail": "Success"}
-    else:
-        # add vote
-        db_answer_vote = model.AnswerVote(
-            owner_id=current_user.user_id,
-            answer_id=answer.answer_id,
-            vote_type=answer.vote_type
-        )
-
-        # update vote point
-        get_answer_detail = get_answer(db=db, answer_id=answer.answer_id)
-        db_vote_answer = db.query(model.Answer).filter(
-            model.Answer.answer_id == answer.answer_id).first()
-        try:
-            db_vote_answer.vote = get_answer_detail.vote + 1 if answer.vote_type == "add" \
-                else get_answer_detail.vote - 1
-        except Exception as e:
-            db_vote_answer.vote = 1 if answer.vote_type == "add" \
-                else - 1
-
-        db.add(db_answer_vote)
-        db.commit()
-        db.refresh(db_answer_vote)
-        db.refresh(db_vote_answer)
-
-    return {"detail": "Success"}

@@ -42,7 +42,7 @@ class Wallet(Base):
     __table_args__ = {'extend_existing': True}
 
     id = Column(String(50), primary_key=True)
-    balance = Column(Integer, default=1000, nullable=True)
+    balance = Column(Integer, default=100, nullable=True)
     spendings = Column(Integer, default=0, nullable=False)
     earnings = Column(Integer, default=0, nullable=False)
     total_spent = Column(Integer, default=0, nullable=False)
@@ -57,7 +57,7 @@ class Wallet(Base):
 class User(Base):
     __tablename__ = "user"
     __table_args__ = {'extend_existing': True}
-    user_id = Column(Integer, primary_key=True, nullable=True)
+    user_id = Column(Integer, primary_key=True, nullable=False)
     username = Column(String(100), nullable=False, unique=True)
     first_name = Column(String(30), nullable=True, default=" ")
     last_name = Column(String(30), nullable=True, default=" ")
@@ -78,7 +78,7 @@ class User(Base):
     location = Column(String(100), nullable=True, default=" ")
     is_admin = Column(Boolean, default=False)
     account_balance = Column(Integer, ForeignKey(
-        'walletaccount.balance', ondelete="CASCADE"), nullable=True)
+        'walletaccount.balance', ondelete="CASCADE"), default=100)
     created_at = Column(TIMESTAMP(timezone=True),
                         nullable=False, server_default=text('now()'))
     #verification_code = Column(String(300), nullable=True, default=" ")
@@ -113,7 +113,7 @@ class Question(Base):
     tag = Column(String(200), default=" ")
     total_like = Column(Integer, default=0)
     total_unlike = Column(Integer, default=0)
-    created_at = Column(TIMESTAMP(timezone=True),
+    created_at = Column(DateTime(timezone=True),
                         nullable=False, server_default=text('now()'))
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
     owner = relationship('model.User')
@@ -148,7 +148,7 @@ class AnswerVote(Base):
         "answer.answer_id", ondelete="CASCADE"), nullable=False)
     vote_type = Column(String(100), nullable=False)
     owner = relationship('model.User')
-    answer = relationship('model.Answer', )
+    answer = relationship('model.Answer')
 
 
 class Like(Base):
@@ -171,7 +171,22 @@ class Notification(Base):
     content_id = Column(Integer, ForeignKey(
         "answer.answer_id", ondelete="CASCADE"), nullable=False)
     owner = relationship('model.User')
-    content = relationship('model.Answer')
+    # content = relationship('model.Answer')
+    type = Column(String(200), nullable=False)
+    unread = Column(Boolean, default=True)
+    title = Column(String(200), nullable=False)
+
+
+class NotificationTransaction(Base):
+    __tablename__ = "transaction_notification"
+    __table_args__ = {'extend_existing': True}
+    notification_id = Column(Integer, primary_key=True, nullable=False)
+    owner_id = Column(Integer, ForeignKey(
+        "user.user_id", ondelete="CASCADE"), nullable=False)
+    content_id = Column(Integer, ForeignKey(
+        "transactions.transaction_id", ondelete="CASCADE"), nullable=False)
+    owner = relationship('model.User')
+    content = relationship('model.Transaction')
     type = Column(String(200), nullable=False)
     unread = Column(Boolean, default=True)
     title = Column(String(200), nullable=False)

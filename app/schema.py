@@ -53,7 +53,9 @@ class User(BaseModel):
     followers: str
     location: str
     account_balance: int
-    created_at : str
+    tokens_earned: int
+    total_likes: int
+    created_at: str
     is_admin: Optional[bool]
 
     class Config:
@@ -74,10 +76,11 @@ class UserOut(BaseModel):
 
 class UserSignInRequest(BaseModel):
     username: str
+    firstname: str
+    lastname: str
     email: EmailStr
     password: str
     confirmPassword: str
-    email_verification_code: Optional[str]
 
     @validator('confirmPassword')
     def passwords_match(cls, v, values, **kwargs):
@@ -88,17 +91,23 @@ class UserSignInRequest(BaseModel):
 
 class UserSignInAdminRequest(BaseModel):
     username: str
+    firstname: str
+    lastname: str
     email: EmailStr
     password: str
     confirmPassword: str
-    email_verification_code: Optional[str]
-    is_admin: Optional[str]
+    is_admin: Optional[bool]
 
     @validator('confirmPassword')
     def passwords_match(cls, v, values, **kwargs):
         if 'password' in values and v != values['password']:
             raise ValueError('passwords do not match')
         return v
+
+
+class UserVerification(BaseModel):
+    email: EmailStr
+    verification_code: int
 
 
 class UserUpdate(BaseModel):
@@ -112,12 +121,12 @@ class UserUpdate(BaseModel):
     work_experience: Optional[str] = None
     position: Optional[str] = None
     stack: Optional[str] = None
-    links: List[str] = None
+    links: Optional[str] = None
     role: Optional[str] = None
     image_url: Optional[str] = None
     location: Optional[str] = None
 
-
+    
 class UserSignInResponse(BaseModel):
     pass
 
@@ -157,15 +166,15 @@ class Question(BaseModel):
     payment_amount: int
     answered: bool
     tag: Optional[str]
-    # created_at: datetime
-    # updated_at: datetime
+    # created_at: datetime = datetime.now()
+    # updated_at: datetime = datetime.now()
 
 
 class QuestionUpdate(BaseModel):
     title: str
     content: str
     expected_result: str
-    updated_at: datetime
+    # updated_at: datetime = datetime.now()
 
 
 class Answer(BaseModel):
@@ -175,6 +184,7 @@ class Answer(BaseModel):
     question_id: int
     owner: User
     question: Question
+    created_at: datetime = datetime.now()
 
 
 class NotificationBase(BaseModel):
