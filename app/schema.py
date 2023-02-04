@@ -6,7 +6,7 @@ from uuid import uuid4, UUID
 
 
 class AdminPayments(BaseModel):
-    question_id: int
+    question_id: str
     amount: int
     commission: int
 
@@ -34,7 +34,7 @@ class TransactionRequest(BaseModel):
 
 
 class User(BaseModel):
-    user_id:  int
+    user_id:  str
     username: str
     first_name: str
     last_name: str
@@ -44,6 +44,7 @@ class User(BaseModel):
     description: str
     image_url: str
     phone_number: str
+    organization: str
     work_experience: str
     position: str
     stack: str
@@ -63,7 +64,7 @@ class User(BaseModel):
 
 
 class UserOut(BaseModel):
-    user_id:  int
+    user_id:  str
     username: str
     first_name: str
     last_name: str
@@ -132,7 +133,7 @@ class UserSignInResponse(BaseModel):
 
 
 class UserBase(UserSignInRequest):
-    user_id: int
+    user_id: str
 
     class Config:
         orm_mode = True
@@ -179,17 +180,17 @@ class QuestionUpdate(BaseModel):
 
 class Answer(BaseModel):
 
-    id: int
-    owner_id: int
-    question_id: int
+    id: str
+    owner_id: str
+    question_id: str
     owner: User
     question: Question
     created_at: datetime = datetime.now()
 
 
 class NotificationBase(BaseModel):
-    owner_id: int
-    content_id: int
+    owner_id: str
+    content_id: str
     type: str
     title: str
 
@@ -199,7 +200,7 @@ class NotificationCreate(NotificationBase):
 
 
 class Notification(NotificationBase):
-    notification_id: int
+    notification_id: str
     unread: bool = True
 
     class Config:
@@ -238,8 +239,8 @@ class Tag(TagBase):
 
 
 class AddQuestionTag(BaseModel):
-    tag_id: int
-    question_id: int
+    tag_id: str
+    question_id: str
 
 
 # class AddTag(BaseModel):
@@ -250,7 +251,7 @@ class AddQuestionTag(BaseModel):
 class AnswerBase(BaseModel):
     """ Answer BaseModel for Add Answer endpoint """
 
-    question_id: int
+    question_id: str
     content: str
 
 
@@ -273,7 +274,7 @@ class UpdateAnswer(UpdateAnswerBase):
 class AnswerVoteBase(BaseModel):
     """ Answer Vote BaseModel for Add Answer Vote endpoint """
 
-    answer_id: int
+    answer_id: str
     vote_type: str
 
 
@@ -285,7 +286,7 @@ class AnswerVote(AnswerVoteBase):
 class UpdateCorrectAnswerBase(BaseModel):
     """ Answer BaseModel for Update Answer endpoint """
 
-    question_id: int
+    question_id: str
 
 
 class UpdateCorrectAnswer(UpdateCorrectAnswerBase):
@@ -296,7 +297,7 @@ class UpdateCorrectAnswer(UpdateCorrectAnswerBase):
 class LikeBase(BaseModel):
     """ Like BaseModel for Add Like endpoint """
 
-    question_id: int
+    question_id: str
     like_type: str
 
 
@@ -307,13 +308,13 @@ class Like(LikeBase):
 
 class Follow(BaseModel):
     """Schema for Follow endpoint"""
-    target_user: int
+    target_user: str
 
 
 class Blog(BaseModel):
     title: str
     body: str
-    blog_user_id: int
+    blog_user_id: str
     author: str
     image_url: str
     post_category: str
