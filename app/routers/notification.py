@@ -41,6 +41,7 @@ def create_notification(notification: schema.NotificationCreate, db: Session):
         )
     else:
         db_notification = model.Notification(
+            notification_id = uuid4(),
             owner_id=notification.owner_id,
             content_id=notification.content_id,
             type=notification.type,

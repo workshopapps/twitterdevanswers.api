@@ -13,7 +13,7 @@ from app.routers.answer import get_correct_answer
 from app.routers import admin
 from app.oauth import get_current_user
 from app.routers.notification import create_notification
-
+from uuid import uuid4
 
 router = APIRouter(
     prefix='/admin',
@@ -94,7 +94,8 @@ def admin_deduction(question_owner_id: str, amount: int, background_task: Backgr
         # db.commit()
 
         # initialize transactions history instance for the  asker
-        question_transaction = Transaction(transacion_type='spent',
+        question_transaction = Transaction(transaction_id = uuid4(),
+                                           transacion_type='spent',
                                            amount=amount,
                                            user_id=question_owner_id,
                                            description=f"{amount} tokens has been deducted for question payments")
@@ -232,7 +233,8 @@ def admin_transactions(item: AdminPayments,  background_task: BackgroundTasks, d
        
     
         # initialize Transactions  instance for answerer
-        answerer_transaction = Transaction(transacion_type='earned',
+        answerer_transaction = Transaction(transaction_id = uuid4(),
+                                           transacion_type='earned',
                                            amount=earned_value, user_id=answerer_account.user_id,
                                            description=f"{earned_value} Tokens has been added  for selected correct answer")
         db.add(answerer_transaction)
