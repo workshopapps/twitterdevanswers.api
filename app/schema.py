@@ -119,6 +119,7 @@ class UserUpdate(BaseModel):
     phone_number: Optional[str] = None
     date_of_birth: Optional[str] = None
     gender: Optional[str] = None
+    organization: Optional[str] = None
     work_experience: Optional[str] = None
     position: Optional[str] = None
     stack: Optional[str] = None
