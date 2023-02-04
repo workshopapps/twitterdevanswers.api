@@ -48,7 +48,7 @@ def follow_user(request: schema.Follow, db: Session = Depends(get_db),
             db.refresh(following)
             db.refresh(target_user)
             db.refresh(following_user)
-            return {"success": True, "msg": f"You successfully {target_user.username}", "status": status.HTTP_201_CREATED}
+            return {"success": True, "msg": f"You successfully followed {target_user.username}", "status": status.HTTP_201_CREATED}
         return {"success": False, "msg": "You can't follow yourself", "status": status.HTTP_403_FORBIDDEN}
     else:
         return HTTPException(status_code=404, detail="user not found")
