@@ -40,7 +40,7 @@ def get_devask_wallet(db: Session = Depends(get_db)):
     return devask_account
 
 
-def get_question(question_id: int, amount: int, db: Session = Depends(get_db)):
+def get_question(question_id: str, amount: int, db: Session = Depends(get_db)):
     """
             gets question with given question id and amount
             params:
@@ -61,7 +61,7 @@ def get_question(question_id: int, amount: int, db: Session = Depends(get_db)):
     return question_obj
 
 
-def admin_deduction(question_owner_id: int, amount: int, background_task: BackgroundTasks, db: Session = Depends(get_db), devask_account=Depends(get_devask_wallet)):
+def admin_deduction(question_owner_id: str, amount: int, background_task: BackgroundTasks, db: Session = Depends(get_db), devask_account=Depends(get_devask_wallet)):
     """
             deducts question allocated payment amount from question owner account
             params:
@@ -127,7 +127,7 @@ def admin_deduction(question_owner_id: int, amount: int, background_task: Backgr
 
 # skip: int = 0, limit: int = 100,
 @router.get('/transactions/users/{user_id}')
-def get_transactions(user_id: int, skip: int = 0, limit: int = 30, db: Session = Depends(get_db),
+def get_transactions(user_id: str, skip: int = 0, limit: int = 30, db: Session = Depends(get_db),
                      ):
 
     transactions = db.query(model.Transaction)\
