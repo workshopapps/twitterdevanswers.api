@@ -11,6 +11,8 @@ from app.database import get_db
 from app import model, schema, oauth
 
 from typing import List
+from uuid import uuid4
+
 
 router = APIRouter(
     prefix="/notification",
@@ -31,6 +33,7 @@ def create_notification(notification: schema.NotificationCreate, db: Session):
     """
     if notification.type == "transaction":
         db_notification = model.NotificationTransaction(
+            notification_id = uuid4(),
             owner_id=notification.owner_id,
             content_id=notification.content_id,
             type=notification.type,
@@ -49,7 +52,7 @@ def create_notification(notification: schema.NotificationCreate, db: Session):
     return db_notification
 
 
-async def get_notifications(id: int, db: Session):
+async def get_notifications(id:str, db: Session):
     """
     This function is responsible for querying the database for the users notifications
     """
@@ -68,7 +71,7 @@ async def get_notifications(id: int, db: Session):
     return notifications, number_of_unread
 
 
-def set_unread_to_false(id: int, db: Session, type: str):
+def set_unread_to_false(id: str, db: Session, type: str):
     """
     This function sets the unread attribute of the specified notification item to False
     """

@@ -143,7 +143,7 @@ def delete_user(username: str, db: Session = Depends(get_db), current_user: sche
 
 
 @router.delete("/question/{question_id}", status_code=status.HTTP_200_OK)
-def delete_question(question_id: int, db: Session = Depends(get_db), current_user: schema.User = Depends(oauth.get_current_user)):
+def delete_question(question_id: str, db: Session = Depends(get_db), current_user: schema.User = Depends(oauth.get_current_user)):
     """delete questions using the question_id"""
     if not check_admin(current_user):
         raise HTTPException(
@@ -159,7 +159,7 @@ def delete_question(question_id: int, db: Session = Depends(get_db), current_use
 
 
 @router.delete("/answer/{answer_id}")
-def delete_answer(answer_id: int, db: Session = Depends(get_db),
+def delete_answer(answer_id: str, db: Session = Depends(get_db),
                   current_user: schema.User = Depends(oauth.get_current_user)):
     """ Delete answer endpoint for a specific question """
     if not check_admin(current_user):
@@ -175,7 +175,7 @@ def delete_answer(answer_id: int, db: Session = Depends(get_db),
 
 @router.delete("/tag/{tag_id}", status_code=status.HTTP_200_OK)
 async def delete_tag(
-    tag_id: int = Path(
+    tag_id: str = Path(
         default=...,
         description="The id of the tag to be deleted."
     ),
