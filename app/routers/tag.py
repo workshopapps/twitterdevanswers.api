@@ -5,6 +5,8 @@ from app import schema, model, oauth
 from sqlalchemy.orm import Session, joinedload
 from app.database import get_db
 from typing import List
+from uuid import uuid4
+
 
 router = APIRouter(
     prefix="/tag",
@@ -23,7 +25,7 @@ async def list_all_tags(db: Session = Depends(get_db), skip: int = 0, limit: int
 
 @router.get("/{tag_id}/questions", )
 async def get_questions_under_tag(
-    tag_id: int = Path(
+    tag_id: str = Path(
         default=...,
         description="The id of the tag"
     ),
@@ -74,7 +76,7 @@ async def create_tag(tag: schema.TagCreate, db: Session = Depends(get_db), user:
     #     model.Question.question_id == tag.question_id).first()
     # if db_question is None:
     #     raise HTTPException(status_code=404, detail="Invalid Question ID")
-    db_tag = model.Tag(tag_name=tag.tag_name)
+    db_tag = model.Tag(tag_id=uuid4(),tag_name=tag.tag_name)
 
     db.add(db_tag)
     db.commit()
@@ -85,7 +87,7 @@ async def create_tag(tag: schema.TagCreate, db: Session = Depends(get_db), user:
 
 @router.delete("/{tag_id}", status_code=status.HTTP_200_OK)
 async def delete_tag(
-    tag_id: int = Path(
+    tag_id: str = Path(
         default=...,
         description="The id of the tag to be deleted."
     ),

@@ -14,7 +14,7 @@ router = APIRouter(
 
 
 @router.get("/{question_id}")
-def list_like(question_id: int, db: Session = Depends(get_db)):
+def list_like(question_id, db: Session = Depends(get_db)):
     """ List all likes for a specific question """
 
     return db.query(model.Like).filter(model.Like.question_id == question_id).all()

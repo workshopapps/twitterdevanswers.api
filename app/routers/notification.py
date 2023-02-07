@@ -11,6 +11,8 @@ from app.database import get_db
 from app import model, schema, oauth
 
 from typing import List
+from uuid import uuid4
+
 
 router = APIRouter(
     prefix="/notification",
@@ -31,6 +33,7 @@ def create_notification(notification: schema.NotificationCreate, db: Session):
     """
     if notification.type == "transaction":
         db_notification = model.NotificationTransaction(
+            notification_id = uuid4(),
             owner_id=notification.owner_id,
             content_id=notification.content_id,
             type=notification.type,
@@ -38,6 +41,7 @@ def create_notification(notification: schema.NotificationCreate, db: Session):
         )
     else:
         db_notification = model.Notification(
+            notification_id = uuid4(),
             owner_id=notification.owner_id,
             content_id=notification.content_id,
             type=notification.type,
@@ -49,7 +53,7 @@ def create_notification(notification: schema.NotificationCreate, db: Session):
     return db_notification
 
 
-async def get_notifications(id: int, db: Session):
+async def get_notifications(id:str, db: Session):
     """
     This function is responsible for querying the database for the users notifications
     """
@@ -68,7 +72,7 @@ async def get_notifications(id: int, db: Session):
     return notifications, number_of_unread
 
 
-def set_unread_to_false(id: int, db: Session, type: str):
+def set_unread_to_false(id: str, db: Session, type: str):
     """
     This function sets the unread attribute of the specified notification item to False
     """
@@ -87,13 +91,13 @@ def set_unread_to_false(id: int, db: Session, type: str):
 
 
 @router.get("/")
-async def notification_stream(request: Request, db: Session = Depends(get_db), current_user: int = Depends(get_current_user)):
+async def notification_stream(request: Request, db: Session = Depends(get_db), current_user: str = Depends(get_current_user)):
     """
     Periodically streams the user's notifications to the client using SSE.
     The client communicates with this endpoint using an EventSource object.
     E.g  const source = new EventSource("https://127.0.0.1:8000/notification?token=<user's jwt bearer token>");
     """
-    async def event_generator(user_id: int):
+    async def event_generator(user_id: str):
         PREVIOUS_NO_UNREAD, FIRST_STREAM = 0, True
 
         if await request.is_disconnected():
@@ -154,7 +158,7 @@ async def add_notification(notification: schema.NotificationCreate, db: Session 
 
 @router.put("/read/{notification_id}", status_code=status.HTTP_200_OK, response_model=schema.Notification)
 async def mark_read(type: str,
-                    notification_id: int = Path(
+                    notification_id: str = Path(
         default=..., description="The id of the notification to mark as read."
                         ),
                     db: Session = Depends(get_db),

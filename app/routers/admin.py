@@ -7,6 +7,7 @@ from app.oauth import get_current_user
 from app.routers.answer import get_answer
 from app.routers import admin_utils
 from app import oauth, model, schema
+from uuid import uuid4
 
 router = APIRouter(
     prefix='/admin',
@@ -101,7 +102,7 @@ async def create_tag(tag: schema.TagCreate, db: Session = Depends(get_db), curre
     if not check_admin(current_user):
         raise HTTPException(
             status_code=401, detail=f"You must be an admin to access this endpoint")
-    db_tag = model.Tag(tag_name=tag.tag_name)
+    db_tag = model.Tag(tag_id=uuid4(),tag_name=tag.tag_name)
     db.add(db_tag)
     db.commit()
     db.refresh(db_tag)
@@ -143,7 +144,7 @@ def delete_user(username: str, db: Session = Depends(get_db), current_user: sche
 
 
 @router.delete("/question/{question_id}", status_code=status.HTTP_200_OK)
-def delete_question(question_id: int, db: Session = Depends(get_db), current_user: schema.User = Depends(oauth.get_current_user)):
+def delete_question(question_id: str, db: Session = Depends(get_db), current_user: schema.User = Depends(oauth.get_current_user)):
     """delete questions using the question_id"""
     if not check_admin(current_user):
         raise HTTPException(
@@ -159,7 +160,7 @@ def delete_question(question_id: int, db: Session = Depends(get_db), current_use
 
 
 @router.delete("/answer/{answer_id}")
-def delete_answer(answer_id: int, db: Session = Depends(get_db),
+def delete_answer(answer_id: str, db: Session = Depends(get_db),
                   current_user: schema.User = Depends(oauth.get_current_user)):
     """ Delete answer endpoint for a specific question """
     if not check_admin(current_user):
@@ -175,7 +176,7 @@ def delete_answer(answer_id: int, db: Session = Depends(get_db),
 
 @router.delete("/tag/{tag_id}", status_code=status.HTTP_200_OK)
 async def delete_tag(
-    tag_id: int = Path(
+    tag_id: str = Path(
         default=...,
         description="The id of the tag to be deleted."
     ),

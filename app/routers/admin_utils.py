@@ -13,7 +13,7 @@ from app.routers.answer import get_correct_answer
 from app.routers import admin
 from app.oauth import get_current_user
 from app.routers.notification import create_notification
-
+from uuid import uuid4
 
 router = APIRouter(
     prefix='/admin',
@@ -40,7 +40,7 @@ def get_devask_wallet(db: Session = Depends(get_db)):
     return devask_account
 
 
-def get_question(question_id: int, amount: int, db: Session = Depends(get_db)):
+def get_question(question_id: str, amount: int, db: Session = Depends(get_db)):
     """
             gets question with given question id and amount
             params:
@@ -61,7 +61,7 @@ def get_question(question_id: int, amount: int, db: Session = Depends(get_db)):
     return question_obj
 
 
-def admin_deduction(question_owner_id: int, amount: int, background_task: BackgroundTasks, db: Session = Depends(get_db), devask_account=Depends(get_devask_wallet)):
+def admin_deduction(question_owner_id: str, amount: int, background_task: BackgroundTasks, db: Session = Depends(get_db), devask_account=Depends(get_devask_wallet)):
     """
             deducts question allocated payment amount from question owner account
             params:
@@ -94,7 +94,8 @@ def admin_deduction(question_owner_id: int, amount: int, background_task: Backgr
         # db.commit()
 
         # initialize transactions history instance for the  asker
-        question_transaction = Transaction(transacion_type='spent',
+        question_transaction = Transaction(transaction_id = uuid4(),
+                                           transacion_type='spent',
                                            amount=amount,
                                            user_id=question_owner_id,
                                            description=f"{amount} tokens has been deducted for question payments")
@@ -127,7 +128,7 @@ def admin_deduction(question_owner_id: int, amount: int, background_task: Backgr
 
 # skip: int = 0, limit: int = 100,
 @router.get('/transactions/users/{user_id}')
-def get_transactions(user_id: int, skip: int = 0, limit: int = 30, db: Session = Depends(get_db),
+def get_transactions(user_id: str, skip: int = 0, limit: int = 30, db: Session = Depends(get_db),
                      ):
 
     transactions = db.query(model.Transaction)\
@@ -232,7 +233,8 @@ def admin_transactions(item: AdminPayments,  background_task: BackgroundTasks, d
        
     
         # initialize Transactions  instance for answerer
-        answerer_transaction = Transaction(transacion_type='earned',
+        answerer_transaction = Transaction(transaction_id = uuid4(),
+                                           transacion_type='earned',
                                            amount=earned_value, user_id=answerer_account.user_id,
                                            description=f"{earned_value} Tokens has been added  for selected correct answer")
         db.add(answerer_transaction)
