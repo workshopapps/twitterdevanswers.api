@@ -7,6 +7,7 @@ from app.oauth import get_current_user
 from app.routers.answer import get_answer
 from app.routers import admin_utils
 from app import oauth, model, schema
+from uuid import uuid4
 
 router = APIRouter(
     prefix='/admin',
@@ -101,7 +102,7 @@ async def create_tag(tag: schema.TagCreate, db: Session = Depends(get_db), curre
     if not check_admin(current_user):
         raise HTTPException(
             status_code=401, detail=f"You must be an admin to access this endpoint")
-    db_tag = model.Tag(tag_name=tag.tag_name)
+    db_tag = model.Tag(tag_id=uuid4(),tag_name=tag.tag_name)
     db.add(db_tag)
     db.commit()
     db.refresh(db_tag)
