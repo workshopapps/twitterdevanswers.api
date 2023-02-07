@@ -3,6 +3,8 @@ from fastapi.exceptions import HTTPException
 from app import schema, model, oauth
 from sqlalchemy.orm import Session
 from app.database import get_db
+from uuid import uuid4
+
 # from fastapi_pagination import LimitOffsetPage, add_pagination, paginate
 
 
@@ -60,8 +62,8 @@ def get_post_by_user_id(user_id, db: Session = Depends(get_db)):
 
 # make posts by a user
 @router.post("/", status_code=status.HTTP_201_CREATED)
-def post_blog(request: schema.Blog, db: Session = Depends(get_db), current_user: int = Depends(oauth.get_current_user)):
-    new_post = model.Blog(title=request.title, body=request.body, blog_user_id=current_user.user_id,
+def post_blog(request: schema.Blog, db: Session = Depends(get_db), current_user: str = Depends(oauth.get_current_user)):
+    new_post = model.Blog(blog_id=uuid4(),title=request.title, body=request.body, blog_user_id=current_user.user_id,
                           author=request.author, image_url=request.image_url, post_category=request.post_category)
     # make posts by a user
     if current_user.is_admin == True:
@@ -74,9 +76,9 @@ def post_blog(request: schema.Blog, db: Session = Depends(get_db), current_user:
 
 
 @router.post("/submit", status_code=status.HTTP_200_OK)
-def submit_blog_post(request: schema.Blog, db: Session = Depends(get_db), current_user: int = Depends(oauth.get_current_user)):
+def submit_blog_post(request: schema.Blog, db: Session = Depends(get_db), current_user: str = Depends(oauth.get_current_user)):
     """submit new blog"""
-    new_post = model.Blog(title=request.title, body=request.body, blog_user_id=current_user.user_id,
+    new_post = model.Blog(blog_id=uuid4(),title=request.title, body=request.body, blog_user_id=current_user.user_id,
                           author=request.author, image_url=request.image_url, post_category=request.post_category)
     # make posts by a user
     try:
@@ -96,7 +98,7 @@ def submit_blog_post(request: schema.Blog, db: Session = Depends(get_db), curren
 
 
 @router.patch("/{blog_id}/admin", status_code=status.HTTP_202_ACCEPTED)
-def update_post_by_blog_id(blog_id, request: schema.Blog, db: Session = Depends(get_db), current_user: int = Depends(oauth.get_current_user)):
+def update_post_by_blog_id(blog_id, request: schema.Blog, db: Session = Depends(get_db), current_user: str = Depends(oauth.get_current_user)):
     post_update = db.query(model.Blog).filter(
         model.Blog.blog_id == blog_id).first()
 
@@ -118,9 +120,10 @@ def update_post_by_blog_id(blog_id, request: schema.Blog, db: Session = Depends(
 
 
 @router.patch("/approve/{blog_id}", status_code=status.HTTP_201_CREATED)
-def approve_blog_post(blog_id: int, db: Session = Depends(get_db), current_user: int = Depends(oauth.get_current_user)):
+def approve_blog_post(blog_id, db: Session = Depends(get_db), current_user: str = Depends(oauth.get_current_user)):
     blog_post = db.query(model.Blog).filter(
         model.Blog.blog_id == blog_id).first()
+
     if blog_post:
         if current_user.is_admin == True:
             if blog_post.is_approved == True:
@@ -147,7 +150,7 @@ def delete_post_by_user_id(user_id, db: Session = Depends(get_db)):
 
 @router.delete("/{blog_id}/admin")
 def delete_post_by_user_id(blog_id, db: Session = Depends(get_db),
-                           current_user: int = Depends(oauth.get_current_user)):
+                           current_user: str = Depends(oauth.get_current_user)):
     db_blog = db.query(model.Blog).filter(
         model.Blog.blog_id == blog_id).first()
     if db_blog is None:

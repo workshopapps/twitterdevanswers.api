@@ -20,6 +20,7 @@ def get_user(db: Session, username: str):
         "gender": user.gender,
         "description": user.description,
         "phone_number": user.phone_number,
+        "organization":user.organization,
         "work_experience": user.work_experience,
         "position": user.position,
         "stack": user.stack,
@@ -35,7 +36,7 @@ def get_user(db: Session, username: str):
     }
 
 
-def get_user_id(db: Session, user_id: int):
+def get_user_id(db: Session, user_id: str):
     """ Get a user from the database based on their id  """
 
     user = db.query(model.User).filter(model.User.user_id == user_id).first()
@@ -51,6 +52,7 @@ def get_user_id(db: Session, user_id: int):
         "gender": user.gender,
         "description": user.description,
         "phone_number": user.phone_number,
+        "organization":user.organization,
         "work_experience": user.work_experience,
         "position": user.position,
         "stack": user.stack,
@@ -82,6 +84,7 @@ def get_users(db: Session, skip: int = 0, limit: int = 100):
             "gender": user.gender,
             "description": user.description,
             "phone_number": user.phone_number,
+            "organization":user.organization,
             "work_experience": user.work_experience,
             "position": user.position,
             "stack": user.stack,
@@ -98,7 +101,7 @@ def get_users(db: Session, skip: int = 0, limit: int = 100):
     return {"success": True, 'data': users_list}
 
 
-def delete_user(db: Session, username: str, current_user: int):
+def delete_user(db: Session, username: str, current_user: str):
     """ Delete a user Profile  """
 
     delete_user = db.query(model.User).filter(
@@ -120,7 +123,7 @@ def delete_user(db: Session, username: str, current_user: int):
 
 # Question Functions
 
-def get_a_question(question_id:int,db:Session):
+def get_a_question(question_id:str,db:Session):
     """ Get a Question from the database  """
     get_question_db = db.query(model.Question).filter(
         model.Question.question_id == question_id).first()
@@ -141,7 +144,7 @@ def get_a_question(question_id:int,db:Session):
             } 
     return {"success": True, "message": "user have not asked any questions"}
 
-def get_all(question_id:int,db:Session):
+def get_all(question_id:str,db:Session):
     get_question_db = db.query(model.Question).filter(
         model.Question.question_id == question_id).first()
     get_answer_db = db.query(model.Answer).filter(model.Answer.question_id == question_id).first()
@@ -179,7 +182,7 @@ def get_all(question_id:int,db:Session):
                 }
     return {"success": True, "message": "user have not asked any questions"}            
 
-def get_questions_and_answers(question_id:int,db:Session):
+def get_questions_and_answers(question_id:str,db:Session):
     get_question_db = db.query(model.Question).filter(
         model.Question.question_id == question_id).first()
     get_answer_db = db.query(model.Answer).filter(model.Answer.question_id == question_id).first()
@@ -212,7 +215,7 @@ def get_questions_and_answers(question_id:int,db:Session):
     return {"success": True, "message": "user have not asked any questions"}            
 
 
-def get_questions_and_likes(question_id:int,db:Session):
+def get_questions_and_likes(question_id:str,db:Session):
     get_question_db = db.query(model.Question).filter(
         model.Question.question_id == question_id).first()
     get_answer_db = db.query(model.Answer).filter(model.Answer.question_id == question_id).first()

@@ -24,7 +24,7 @@ def fetch_users( skip: int = 0, limit: int = 100, db: Session = Depends(get_db))
 
 
 @router.get('/{user_id}',status_code=status.HTTP_200_OK)
-def fetch_user_id(user_id: int, db: Session = Depends(get_db), current_user: int = Depends(get_current_user)):
+def fetch_user_id(user_id: str, db: Session = Depends(get_db), current_user: str = Depends(get_current_user)):
     """ Fetch a user by Id  """
 
     user = crud.get_user_id(db, user_id=user_id)
@@ -35,7 +35,7 @@ def fetch_user_id(user_id: int, db: Session = Depends(get_db), current_user: int
 
 
 @router.get('/get/{username}',status_code=status.HTTP_200_OK)
-def fetch_by_username(username: str, db: Session = Depends(get_db), current_user: int = Depends(get_current_user)):
+def fetch_by_username(username: str, db: Session = Depends(get_db), current_user: str = Depends(get_current_user)):
     """Fetches user by username"""
     user = db.query(model.User).filter(
         model.User.username == username).first()
@@ -46,7 +46,7 @@ def fetch_by_username(username: str, db: Session = Depends(get_db), current_user
 
 
 @router.get('/likes/{user_id}',status_code=status.HTTP_200_OK)
-def fetch_user_likes(user_id: int, db: Session = Depends(get_db), current_user: int = Depends(get_current_user)):
+def fetch_user_likes(user_id: str, db: Session = Depends(get_db), current_user: str = Depends(get_current_user)):
     """Fetch user likes"""
     likes = db.query(model.Like).filter(model.Like.user_id == user_id).all()
     if likes:
@@ -56,7 +56,7 @@ def fetch_user_likes(user_id: int, db: Session = Depends(get_db), current_user: 
 
 
 @router.get('/rewards/{user_id}',status_code=status.HTTP_200_OK)
-def fetch_user_rewards(user_id: int, db: Session = Depends(get_db), current_user: int = Depends(get_current_user)):
+def fetch_user_rewards(user_id: str, db: Session = Depends(get_db), current_user: str = Depends(get_current_user)):
     """Fetch user total earned rewards"""
     tokens_on_signup = 100
     reward = db.query(model.Wallet).filter(
@@ -96,7 +96,7 @@ def update_user(user: schema.UserUpdate, username: str, db: Session = Depends(ge
 
 
 @router.patch('/update/{user_id}',status_code=status.HTTP_200_OK)
-def update_user_id(user: schema.UserUpdate, user_id: int, db: Session = Depends(get_db), current_user=Depends(get_current_user)):
+def update_user_id(user: schema.UserUpdate, user_id: str, db: Session = Depends(get_db), current_user=Depends(get_current_user)):
     """ Update a User profile by user_id  """
 
     user_db = db.query(User).filter(User.user_id == user_id).first()
@@ -124,7 +124,7 @@ def update_user_id(user: schema.UserUpdate, user_id: int, db: Session = Depends(
 
 
 @router.delete('/delete/{username}',status_code=status.HTTP_200_OK)
-def delete_user(username: str, db: Session = Depends(get_db), current_user: int = Depends(get_current_user)):
+def delete_user(username: str, db: Session = Depends(get_db), current_user: str = Depends(get_current_user)):
     """ Delete a user by username  """
     delete_user = crud.delete_user(
         db, username=username, current_user=current_user)

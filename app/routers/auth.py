@@ -90,11 +90,12 @@ def user_signnup(user_credentials: schema.UserSignInRequest, db: Session = Depen
     user_credentials.password = utils.hash(user_credentials.password)
     user = db.query(model.User).filter(
         model.User.email == user_credentials.email).first()
-
+        
     if user:
         return HTTPException(status_code=400, detail={"msg": "User already exists"})
 
-    new_user = model.User(username=user_credentials.username,
+    new_user = model.User(user_id = uuid4(),
+                          username=user_credentials.username,
                           first_name=user_credentials.firstname,
                           last_name=user_credentials.lastname,
                           email=user_credentials.email,
@@ -158,7 +159,8 @@ def admin_signnup(user_credentials: schema.UserSignInAdminRequest, db: Session =
     if user:
         return HTTPException(status_code=400, detail={"msg": "User already exists"})
 
-    new_user = model.User(username=user_credentials.username,
+    new_user = model.User(user_id = uuid4(),
+                          username=user_credentials.username,
                           first_name=user_credentials.firstname,
                           last_name=user_credentials.lastname,
                           email=user_credentials.email,
@@ -196,7 +198,7 @@ def admin_signnup(user_credentials: schema.UserSignInAdminRequest, db: Session =
 
 
 @router.put('/change-password', )
-def change_password(update_password: schema.ChangePasswordRequest, db: Session = Depends(database.get_db), current_user: int = Depends(get_current_user)):
+def change_password(update_password: schema.ChangePasswordRequest, db: Session = Depends(database.get_db), current_user: str = Depends(get_current_user)):
     print(current_user)
     user_query = db.query(model.User).filter(
         model.User.user_id == current_user.user_id)

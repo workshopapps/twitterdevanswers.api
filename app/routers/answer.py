@@ -4,6 +4,7 @@ from sqlalchemy.orm import Session
 from app.database import get_db
 from app import model, schema, oauth
 from app.routers.notification import create_notification
+from uuid import uuid4
 
 router = APIRouter(
     prefix='/answer',
@@ -11,19 +12,19 @@ router = APIRouter(
 )
 
 
-def get_question(question_id: int, db: Session):
+def get_question(question_id: str, db: Session):
     """ Get single answer  """
 
     return db.query(model.Question).filter(model.Question.question_id == question_id).first()
 
 
-def get_answer(answer_id: int, db: Session):
+def get_answer(answer_id: str, db: Session):
     """ Get single answer  """
 
     return db.query(model.Answer).filter(model.Answer.answer_id == answer_id).first()
 
 
-def get_correct_answer(question_id: int, db: Session):
+def get_correct_answer(question_id: str, db: Session):
     """ Get correct answer function """
 
     # check if question exists
@@ -55,7 +56,7 @@ def get_correct_answer(question_id: int, db: Session):
 
 
 @router.get("/{question_id}")
-def list_answer(question_id: int, db: Session = Depends(get_db)):
+def list_answer(question_id: str, db: Session = Depends(get_db)):
     """ List answers endpoint for a specific question """
 
     db_question = get_question(db=db, question_id=question_id)
@@ -67,7 +68,7 @@ def list_answer(question_id: int, db: Session = Depends(get_db)):
 
 
 @router.get("/{user_id}/user/", status_code=status.HTTP_200_OK)
-def get_all_answers_by_a_user(user_id: int, db: Session = Depends(get_db)):
+def get_all_answers_by_a_user(user_id: str, db: Session = Depends(get_db)):
     """ List all answers by a user """
 
     get_user_answers = db.query(model.Answer).filter(
@@ -79,7 +80,7 @@ def get_all_answers_by_a_user(user_id: int, db: Session = Depends(get_db)):
 
 @router.post("/")
 def create_answer(answer: schema.CreateAnswer, background_task: BackgroundTasks, db: Session = Depends(get_db),
-                  current_user: int = Depends(oauth.get_current_user)):
+                  current_user: str = Depends(oauth.get_current_user)):
     """ Add answer endpoint for a specific question """
 
     db_question = get_question(db=db, question_id=answer.question_id)
@@ -94,6 +95,7 @@ def create_answer(answer: schema.CreateAnswer, background_task: BackgroundTasks,
         raise HTTPException(status_code=400, detail="Already added answer")
 
     db_answer = model.Answer(
+        answer_id = uuid4(),
         owner_id=current_user.user_id,
         content=answer.content,
         question_id=answer.question_id,
@@ -120,7 +122,7 @@ def create_answer(answer: schema.CreateAnswer, background_task: BackgroundTasks,
 
 @router.post("/vote")
 def vote_answer(answer: schema.AnswerVote, db: Session = Depends(get_db),
-                current_user: int = Depends(oauth.get_current_user)):
+                current_user: str = Depends(oauth.get_current_user)):
     """ Vote endpoint for a specific answer """
 
     # checks if answer_id exists
@@ -191,8 +193,8 @@ def vote_answer(answer: schema.AnswerVote, db: Session = Depends(get_db),
 
 
 @router.patch("/{answer_id}")
-def update_answer(answer_id: int, answer: schema.UpdateAnswer, db: Session = Depends(get_db),
-                  current_user: int = Depends(oauth.get_current_user)):
+def update_answer(answer_id: str, answer: schema.UpdateAnswer, db: Session = Depends(get_db),
+                  current_user: str = Depends(oauth.get_current_user)):
     """ Update answer endpoint for a specific question """
 
     db_answer = db.query(model.Answer).filter(
@@ -210,7 +212,7 @@ def update_answer(answer_id: int, answer: schema.UpdateAnswer, db: Session = Dep
 
 @router.patch("/select-correct-answer/{answer_id}")
 def select_correct_answer(answer_id, answer: schema.UpdateCorrectAnswer, db: Session = Depends(get_db),
-                          current_user: int = Depends(oauth.get_current_user)):
+                          current_user: str = Depends(oauth.get_current_user)):
     """ Add correct answer endpoint """
 
     db_answer = get_answer(db=db, answer_id=answer_id)
@@ -248,8 +250,8 @@ def select_correct_answer(answer_id, answer: schema.UpdateCorrectAnswer, db: Ses
 
 
 @router.delete("/{answer_id}")
-def delete_answer(answer_id: int, db: Session = Depends(get_db),
-                  current_user: int = Depends(oauth.get_current_user)):
+def delete_answer(answer_id: str, db: Session = Depends(get_db),
+                  current_user: str = Depends(oauth.get_current_user)):
     """ Delete answer endpoint for a specific question """
 
     db_answer = get_answer(db=db, answer_id=answer_id)

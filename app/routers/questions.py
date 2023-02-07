@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, status, HTTPException
 from sqlalchemy.orm import Session
 from app import model, crud, schema, oauth
 from app.database import engine, get_db
+from uuid import uuid4
 
 
 router = APIRouter(
@@ -11,7 +12,7 @@ router = APIRouter(
 
 
 @router.get("/update_questions/{question_id}", status_code=status.HTTP_200_OK)
-def retrieve_question(question_id: int, db: Session = Depends(get_db), current_user: int = Depends(oauth.get_current_user)):
+def retrieve_question(question_id: str, db: Session = Depends(get_db), current_user: str = Depends(oauth.get_current_user)):
     retrieve = db.query(model.Question).filter(
         model.Question.question_id == question_id).first()
     if retrieve:
@@ -20,7 +21,7 @@ def retrieve_question(question_id: int, db: Session = Depends(get_db), current_u
 
 
 @router.get("/{question_id}", status_code=status.HTTP_200_OK)
-def get_question(question_id: int, db: Session = Depends(get_db)):
+def get_question(question_id: str, db: Session = Depends(get_db)):
     get_all_questions_db = db.query(model.Question).all()
     get_question_db = db.query(model.Question).filter(
         model.Question.question_id == question_id).first()
@@ -65,7 +66,7 @@ def get_all_questions_and_answers(db: Session = Depends(get_db)):
 
 # get all questions by a user
 @router.get("/{user_id}/user/", status_code=status.HTTP_200_OK)
-def get_all_questions_by_a_user(user_id: int, db: Session = Depends(get_db)):
+def get_all_questions_by_a_user(user_id: str, db: Session = Depends(get_db)):
     get_all_user_question = db.query(model.Question).filter(
         model.Question.owner_id == user_id).all()
     if not get_all_user_question:
@@ -75,7 +76,7 @@ def get_all_questions_by_a_user(user_id: int, db: Session = Depends(get_db)):
 
 # gets a particular question from a user using the question id
 @router.get("/{user_id}/user/{question_id}", status_code=status.HTTP_200_OK)
-def get_a_particular_user_question_by_a_question_id(user_id: int, question_id: int, db: Session = Depends(get_db)):
+def get_a_particular_user_question_by_a_question_id(user_id: str, question_id: str, db: Session = Depends(get_db)):
     get_a_particular_user_question = db.query(model.Question).filter(
         model.Question.owner_id == user_id, model.Question.question_id == question_id).first()
     if not get_a_particular_user_question:
@@ -84,9 +85,10 @@ def get_a_particular_user_question_by_a_question_id(user_id: int, question_id: i
 
 
 @router.post("/", status_code=status.HTTP_201_CREATED)
-def add_question(request: schema.Question, db: Session = Depends(get_db), current_user: int = Depends(oauth.get_current_user)):
+def add_question(request: schema.Question, db: Session = Depends(get_db), current_user: str = Depends(oauth.get_current_user)):
     # request.owner_id = current_user.user_id
     ask_question = model.Question(
+        question_id = uuid4(),
         content=request.content, owner_id=current_user.user_id,
         expected_result=request.expected_result, payment_amount=request.payment_amount,
         title=request.title,
@@ -102,7 +104,7 @@ def add_question(request: schema.Question, db: Session = Depends(get_db), curren
 
 # selects the correct answer
 @router.patch("/select_answer/{answer_id}", status_code=status.HTTP_200_OK)
-def select_answer(answer_id: int, question_id: int, db: Session = Depends(get_db), current_user: int = Depends(oauth.get_current_user)):
+def select_answer(answer_id: str, question_id: str, db: Session = Depends(get_db), current_user: str = Depends(oauth.get_current_user)):
     get_answer = db.query(model.Answer).filter(
         model.Answer.question_id == question_id, model.Answer.answer_id == answer_id).first()
     if get_answer:
@@ -118,7 +120,7 @@ def select_answer(answer_id: int, question_id: int, db: Session = Depends(get_db
 
 
 @router.patch("/{question_id}", status_code=status.HTTP_200_OK)
-def update_question(question_id, request: schema.QuestionUpdate, db: Session = Depends(get_db), current_user: int = Depends(oauth.get_current_user)):
+def update_question(question_id, request: schema.QuestionUpdate, db: Session = Depends(get_db), current_user: str = Depends(oauth.get_current_user)):
     update_question = db.query(model.Question).filter(
         model.Question.question_id == question_id).first()
     if update_question:
@@ -136,7 +138,7 @@ def update_question(question_id, request: schema.QuestionUpdate, db: Session = D
 
 
 @router.delete("/{question_id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_question(question_id: int, db: Session = Depends(get_db), current_user: int = Depends(oauth.get_current_user)):
+def delete_question(question_id: str, db: Session = Depends(get_db), current_user: str = Depends(oauth.get_current_user)):
     delete_question = db.query(model.Question).filter(
         model.Question.question_id == question_id).first()
 
