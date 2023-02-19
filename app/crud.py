@@ -243,3 +243,53 @@ def get_questions_and_likes(question_id:str,db:Session):
                 }]
                 }
     return {"success": True, "message": "user have not asked any questions"}            
+
+#  Community Endponts
+
+
+def get_communities(db: Session, skip: int = 0, limit: int = 100):
+    """ Get all communities in the database  """
+
+    communities = db.query(model.Community).offset(skip).limit(limit).all()
+    return {"success": True, 'data': communities}
+
+
+# def delete_community(db: Session, community_id: str, current_user: str):
+#     """ Delete a user Profile  """
+
+#     delete_community= db.query(model.Community).filter(
+#         model.Community.community_id == community_id).first()
+#     if delete_community:
+#         topic = db.query(model.Topic).filter(
+#             model.Topic.community_id == delete_user.community_id).first()
+#         # comment = db.query(model.Comment).filter(
+#         #                model.Topic.community_id == delete_user.community_id).first()
+
+#         if delete_user.community_id == current_user.community_id or current_user.is_admin == True:
+#             db.delete(topic)
+#             # db.delete(comment)
+#             db.commit()
+#             db.delete(delete_user)
+#             db.commit()
+#             return {"success": True, "message": "profile removed"}
+#         else:
+#             return {"success": False, "message": "You're not authorized to perform this operation"}
+#     else:
+#         return {"success": False, "message": "User does not exist"}
+
+
+#  TOPIC ENDPOINTS 
+
+def get_topics(db: Session, skip: int = 0, limit: int = 100):
+    """ Get all topics in the database  """
+
+    topics = db.query(model.Topic).offset(skip).limit(limit).all()
+    return {"success": True, 'data': topics}
+
+def get_topic_in_community(db: Session, community_id: str):
+    """ Get a user from the database based on their id  """
+    
+    topics = db.query(model.Topic).filter(model.Topic.community_id == community_id).all()
+    if topics is None:
+        return{"success":True,"message":"No topic under this Community"}
+    return {"success":True, "data" : topics}
