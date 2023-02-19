@@ -225,7 +225,67 @@ class Blog(Base):
                          nullable=False, server_default=text('now()'))
     blog_user_id = Column(String(50), ForeignKey(
         "user.user_id", ondelete="CASCADE"), nullable=False)
- 
+
+
+class Community(Base):
+    __tablename__ = 'community'
+    __table_args__ = {'extend_existing' : True}
+
+    community_id = Column(String(50),primary_key = True, nullable=False)
+    user_id = Column(String(50), ForeignKey(
+        "user.user_id", ondelete="CASCADE"), nullable=False)
+    name = Column(String(300), nullable=False)
+    description = Column(String(700), nullable=False)
+    image_url = Column(String(300), default="default.jpg")
+    total_members = Column(Integer, nullable=True)
+    created_at = Column(TIMESTAMP(timezone=True),
+                         nullable=False, server_default=text('now()'))
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+
+    user = relationship('model.User')
+
+
+class Topic(Base):
+    __tablename__ = 'topic'
+    __table_args__ = {'extend_existing' : True}
+
+    community_id = Column(String(50), ForeignKey(
+        "community.community_id", ondelete="CASCADE"), nullable=False)
+    user_id = Column(String(50), ForeignKey(
+        "user.user_id", ondelete="CASCADE"), nullable=False)
+    topic_id = Column(String(50),primary_key = True, nullable=False)
+    title = Column(String(300), nullable=False)
+    content = Column(String(10000), nullable=False)
+    image_url = Column(String(300), default="default.jpg")
+    is_approved = Column(Boolean, default=False, nullable=False)
+    total_comments = Column(Integer, nullable=True)
+    created_at = Column(TIMESTAMP(timezone=True),
+                         nullable=False, server_default=text('now()'))
+
+    user = relationship('model.User')
+    community = relationship('model.Community')
+
+
+class Comment(Base):
+    __tablename__ = 'comment'
+    __table_args__ = {'extend_existing' : True}
+
+    topic_id = Column(String(50), ForeignKey(
+        "topic.topic_id", ondelete="CASCADE"), nullable=False)
+    user_id = Column(String(50), ForeignKey(
+        "user.user_id", ondelete="CASCADE"), nullable=False)
+    comment_id = Column(String(50),primary_key = True, nullable=False)
+    content = Column(String(700), nullable=False)
+    image_url = Column(String(300), default="default.jpg")
+    created_at = Column(TIMESTAMP(timezone=True),
+                         nullable=False, server_default=text('now()'))
+
+    user = relationship('model.User')
+    topic = relationship('model.Topic')
+
+
+
+
 
 # create tables
 Base.metadata.create_all(bind=engine)
