@@ -261,21 +261,22 @@ def get_communities(db: Session, skip: int = 0, limit: int = 100):
 #         model.Community.community_id == community_id).first()
 #     if delete_community:
 #         topic = db.query(model.Topic).filter(
-#             model.Topic.community_id == delete_user.community_id).first()
-#         # comment = db.query(model.Comment).filter(
-#         #                model.Topic.community_id == delete_user.community_id).first()
+#             model.Topic.community_id == delete_community.community_id).all()
+#         comment = db.query(model.Comment).filter(
+#                        model.Topic.community_id == delete_community.community_id).all()
 
-#         if delete_user.community_id == current_user.community_id or current_user.is_admin == True:
+#         if delete_community.community_id == current_user.community_id or current_user.is_admin == True:
 #             db.delete(topic)
-#             # db.delete(comment)
+#             db.delete(comment)
 #             db.commit()
-#             db.delete(delete_user)
+#             db.delete(delete_community)
 #             db.commit()
-#             return {"success": True, "message": "profile removed"}
+#             return {"success": True, "message": "Community had been succesfully deleted"}
 #         else:
 #             return {"success": False, "message": "You're not authorized to perform this operation"}
 #     else:
-#         return {"success": False, "message": "User does not exist"}
+#         raise HTTPException(
+            # status_code=404, detail=f" Community {community_id} not found")
 
 
 #  TOPIC ENDPOINTS 
