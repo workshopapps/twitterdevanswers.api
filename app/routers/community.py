@@ -7,7 +7,6 @@ from sqlalchemy.orm import Session
 from app.oauth import get_current_user
 
 
-
 router = APIRouter(
     prefix='/community',
     tags=['Community']
@@ -43,52 +42,36 @@ def add_community(request: schema.AddCommunity, db: Session = Depends(get_db), c
     else:
         return{"success":False,"message":"You're not authorized to perform this operation"}
 
-# coming back for you 
-@router.post("/join_community/{community_id}")
-def join_community(request: schema.AddCommunity, community_id:str, db: Session = Depends(get_db), current_user: str = Depends(get_current_user)):
-    if current_user.is_admin == True:
 
-        add_community = model.Community(
-            community_id = uuid4(),
-            user_id=current_user.user_id,
-            name=request.name,
-            description=request.description, 
-            image_url=request.image_url,
-        )
-        db.add(add_community)
-        db.commit()
-        db.refresh(add_community)
-        return {"success": True, 
-        "community_id": add_community.community_id,
-        "name":add_community.name,
-        "description": add_community.description,
-        }
+# coming back for you (Logic Not written properly )
+@router.post("/join_community/{community_id}")
+def join_community( community_id:str, db: Session = Depends(get_db), current_user: str = Depends(get_current_user)):
+    community = db.query(model.Community).filter(model.Community.community_id == community_id).first()
+    if current_user.is_admin == True:
+        if community:
+            community.total_members +=1
+            
+            db.add(community)
+            db.commit()
+            db.refresh(community)
+            return {"success": True, 
+            "message":"community_joined"}
+        else:
+            raise HTTPException(
+            status_code=404, detail=f" Community not found")    
     else:
         return{"success":False,"message":"You're not authorized to perform this operation"}
 
 
-@router.get('/{community_id}',status_code=status.HTTP_200_OK)
+@router.get('/get/{community_id}',status_code=status.HTTP_200_OK)
 def fetch_a_community(community_id: str, db: Session = Depends(get_db), current_user: str = Depends(get_current_user)):
     """ Fetch a Community by Id  """
 
     community = db.query(model.Community).filter(model.Community.community_id==community_id).first()   
     if not community:
         raise HTTPException(
-            status_code=404, detail=f" Community {user_id} not found")
+            status_code=404, detail=f" Community not found")
     return {"success": True, 'data': community}
-
-
-# @router.get('/get/{username}',status_code=status.HTTP_200_OK)
-# def fetch_by_username(username: str, db: Session = Depends(get_db), current_user: str = Depends(get_current_user)):
-#     """Fetches user by username"""
-#     user = db.query(model.User).filter(
-#         model.User.username == username).first()
-#     if user:
-#         user_data = crud.get_user(db, username)
-#         return {"success": True, 'data': user_data}
-#     return HTTPException(status_code=404, detail="Username doesn't exist.")
-
-
 
 
 @router.patch('/edit/{community_id}',status_code=status.HTTP_200_OK)
@@ -102,7 +85,7 @@ def update_community(community: schema.UpdateCommunity, _id: str, db: Session = 
         update_community = db.query(model.Community).filter(
             model.Community.community_id == _id).first()
         if update_community is None:
-            raise HTTPException(status_code=404, detail="User not found")
+            raise HTTPException(status_code=404, detail="Community not found")
 
         if isinstance(community, dict):
             update_data = community
@@ -119,8 +102,6 @@ def update_community(community: schema.UpdateCommunity, _id: str, db: Session = 
         return {"success": False, "message":  "You're not authorized to perform this update "}
 
 
-
-
 # @router.delete('/delete/{community_id}',status_code=status.HTTP_200_OK)
 # def delete_community(community_id: str, db: Session = Depends(get_db), current_user: str = Depends(get_current_user)):
 #     """ Delete a user by username  """
@@ -128,13 +109,13 @@ def update_community(community: schema.UpdateCommunity, _id: str, db: Session = 
 #         db, community_id=community_id, current_user=current_user)
 #     if not delete_community:
 #         raise HTTPException(
-#             status=404, detail=f" Community {community_id} does not exist")
+#             status=404, detail=f" Community does not exist")
 #     return delete_user
 
 
 #  TOPICS
 
-@router.get('/topics',status_code=status.HTTP_200_OK)
+@router.get('/topics/',status_code=status.HTTP_200_OK)
 def fetch_topics( skip: int = 0, limit: int = 100, db: Session = Depends(get_db),current_user: str = Depends(get_current_user)):
     """ List to get all topics  """
 
@@ -144,10 +125,10 @@ def fetch_topics( skip: int = 0, limit: int = 100, db: Session = Depends(get_db)
 @router.get('/topics/{topic_id}',status_code=status.HTTP_200_OK)
 def fetch_a_topic( topic_id:str, db: Session = Depends(get_db),current_user: str = Depends(get_current_user)):
     """ Fetch a topic from the database """
-    topic = db.query(Model.Topic).filter(model.topic.topic_id==topic_id).first()
+    topic = db.query(model.Topic).filter(model.Topic.topic_id==topic_id).first()
     if topic is None:
         raise HTTPException(
-            status_code=404, detail=f" Topic with id {topic_id} not found")
+            status_code=404, detail=f" Topic not found")
     return {"success":True,"data":topic}
 
 
@@ -183,4 +164,4 @@ def post_topic(request: schema.PostTopic, community_id : str , db: Session = Dep
         }
     else:
         raise HTTPException(
-            status_code=404, detail=f"There is no community {community_id}")
+            status_code=404, detail=f"Community not found ")
