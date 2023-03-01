@@ -354,11 +354,20 @@ class Topic(BaseModel):
     is_approved: bool 
     total_comments: int
     created_at: str
+    updated_at:str
+
 
 class PostTopic(BaseModel):
     title : str
     content : str
     image_url : str
+
+
+class UpdateTopic(BaseModel):
+    title: Optional[str] = None
+    content: Optional[str] = None
+    image_url: Optional[str] = None
+
 
 class Comment(BaseModel):
     topic_id :str
@@ -367,3 +376,15 @@ class Comment(BaseModel):
     content: str
     image_url: str
     created_at: str
+    updated_at:str
+
+
+class AddComment(BaseModel):
+    content: str
+    image_url :str
+
+
+class UpdateComment(BaseModel):
+    content: Optional[str] = None
+    image_url: Optional[str] = None
+    
