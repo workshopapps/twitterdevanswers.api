@@ -34,11 +34,11 @@ def add_community(request: schema.AddCommunity, db: Session = Depends(get_db), c
         db.add(add_community)
         db.commit()
         db.refresh(add_community)
-        return {"success": True, 
-        "community_id": add_community.community_id,
-        "name":add_community.name,
-        "description": add_community.description,
-        }
+        return {"success": True, "data":{
+            "community_id": add_community.community_id,
+            "name":add_community.name,
+            "description": add_community.description,
+        }}
     else:
         return{"success":False,"message":"You're not authorized to perform this operation"}
 
@@ -132,7 +132,7 @@ def fetch_a_topic( topic_id:str, db: Session = Depends(get_db),current_user: str
     return {"success":True,"data":topic}
 
 
-@router.get('/topics/{community_id}',status_code=status.HTTP_200_OK)
+@router.get('/alltopics/{community_id}',status_code=status.HTTP_200_OK)
 def fetch_topics_by_community(community_id :str , db: Session = Depends(get_db),current_user: str = Depends(get_current_user)):
     """ List to get all topics in a community """
     return crud.get_topic_in_community(db, community_id = community_id)
@@ -156,15 +156,44 @@ def post_topic(request: schema.PostTopic, community_id : str , db: Session = Dep
         db.add(add_topic)
         db.commit()
         db.refresh(add_topic)
-        return {"success": True, 
+        return {"success": True, "data":{ 
         "topic_id": add_topic.topic_id,
         "title":add_topic.title,
         "content": add_topic.content,
         "image_url" : add_topic.image_url
-        }
+       }}
     else:
         raise HTTPException(
             status_code=404, detail=f"Community not found ")
+
+
+@router.patch('/topic/edit/{topic_id}',status_code=status.HTTP_200_OK)
+def update_topic(topic: schema.UpdateTopic, _id: str, db: Session = Depends(get_db), current_user=Depends(get_current_user)):
+    """ Update a Topic by it's id  """
+
+    topic_db = db.query(Topic).filter(Topic.topic_id == _id).first()
+    if topic_db is None:
+        raise HTTPException(status_code=404, detail="Topic not found")
+    if current_user.user_id == topic_db.user_id:
+        update_topic = db.query(model.Topic).filter(
+            model.Topic.topic_id == _id).first()
+        if update_topic is None:
+            raise HTTPException(status_code=404, detail="Topic not found")
+
+        if isinstance(topic, dict):
+            update_data = topic
+        else:
+            update_data = topic.dict(exclude_unset=True)
+        for field in update_data:
+            setattr(update_topic, field, update_data[field])
+
+        db.add(update_topic)
+        db.commit()
+        db.refresh(update_topic)
+        return {"success": True, "message": "Topic Updated", "data": update_data}
+    else:
+        return {"success": False, "message":  "You're not authorized to perform this update "}
+
 
 @router.get('/topics/user/{user_id}')
 def get_topic_user(user_id:str,db: Session = Depends(get_db), current_user: str = Depends(get_current_user)):
@@ -174,3 +203,97 @@ def get_topic_user(user_id:str,db: Session = Depends(get_db), current_user: str 
 
 
 # COMMENTS            
+
+@router.post('/comment/{topic_id}')
+def add_comment(request:schema.AddComment,topic_id:str,db: Session = Depends(get_db),current_user:str = Depends(get_current_user)):
+    """ Add a comment  """
+    topic = db.query(model.Topic).filter(model.Topic.topic_id==topic_id).first()
+
+    if topic :
+        add_comment = model.Comment(
+            comment_id = uuid4(),
+            topic_id = topic_id,
+            user_id = current_user.user_id,
+            content = request.content,
+            image_url = request.image_url
+        )
+
+        db.add(add_comment)
+        db.commit()
+        db.refresh(add_comment)
+
+        return{
+            "success" : True, "data":{
+            "comment_id" : add_comment.comment_id,
+            "content": add_comment.content,
+            "image_url" : add_comment.image_url
+        }}
+    else:
+        raise HTTPException(
+            status_code=404, detail=f"Topic not found , add a topic first")    
+
+
+@router.patch('/comment/edit/{comment_id}',status_code=status.HTTP_200_OK)
+def update_comment(comment: schema.UpdateComment, _id: str, db: Session = Depends(get_db), current_user=Depends(get_current_user)):
+    """ Update a comment by it's id  """
+
+    comment_db = db.query(Comment).filter(Comment.comment_id == _id).first()
+    if comment_db is None:
+        raise HTTPException(status_code=404, detail="Comment not found")
+    if current_user.user_id == comment_db.user_id:
+        update_comment = db.query(model.Comment).filter(
+            model.Comment.comment_id == _id).first()
+        if update_comment is None:
+            raise HTTPException(status_code=404, detail="Comment not found")
+
+        if isinstance(comment, dict):
+            update_data = comment
+        else:
+            update_data = comment.dict(exclude_unset=True)
+        for field in update_data:
+            setattr(update_comment, field, update_data[field])
+
+        db.add(update_comment)
+        db.commit()
+        db.refresh(update_comment)
+        return {"success": True, "message": "Community Updated", "data": update_data}
+    else:
+        return {"success": False, "message":  "You're not authorized to perform this update "}
+
+
+@router.get('/comments/',status_code=status.HTTP_200_OK)
+def fetch_comments( skip: int = 0, limit: int = 100, db: Session = Depends(get_db),current_user: str = Depends(get_current_user)):
+    """ List to get all comments  """
+
+    return crud.get_comments(db, skip=skip, limit=limit)
+
+
+@router.get('/comments/{comment_id}',status_code=status.HTTP_200_OK)
+def fetch_a_comment( comment_id:str, db: Session = Depends(get_db),current_user: str = Depends(get_current_user)):
+    """ Fetch a comment from the database """
+    comment = db.query(model.Comment).filter(model.Comment.comment_id==comment_id).first()
+    if comment is None:
+        raise HTTPException(
+            status_code=404, detail=f" Comment not found")
+    return {"success":True,"data":comment}
+
+
+@router.get('/comments/topic/{topic_id}',status_code=status.HTTP_200_OK)
+def fetch_comment_by_topic( topic_id:str, db: Session = Depends(get_db),current_user: str = Depends(get_current_user)):
+    """ Fetch comments by a topic"""
+    
+    return crud.get_comment_in_topic(db,topic_id=topic_id)    
+
+
+@router.get('/comments/user/{user_id}',status_code=status.HTTP_200_OK)
+def get_comment_user( user_id:str, db: Session = Depends(get_db),current_user: str = Depends(get_current_user)):
+    """ Fetch comments by a User"""
+    
+    return crud.get_comment_user(db,user_id=user_id)    
+
+
+@router.delete('/delete/comment/{comment_id}',status_code=status.HTTP_200_OK)
+def delete_comment(comment_id:str,db :Session = Depends(get_db),current_user : str = Depends(get_current_user)):
+    """ Delete a comment """
+
+    return crud.delete_comment(db,comment_id=comment_id,current_user=current_user)
