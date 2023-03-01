@@ -288,7 +288,7 @@ def get_topics(db: Session, skip: int = 0, limit: int = 100):
     return {"success": True, 'data': topics}
 
 def get_topic_in_community(db: Session, community_id: str):
-    """ Get a user from the database based on their id  """
+    """ Get a topic in a community """
     
     topics = db.query(model.Topic).filter(model.Topic.community_id == community_id).all()
     if topics is None:
@@ -304,8 +304,52 @@ def get_topic_user(db: Session, user_id: str):
     if not users:
         return{"success":True,"message":"User doesn't exist"}   
     if not topics:
-        return{"success":True,"message":"No topic created under this User"}        
+        return{"success":True,"message":"No topic created by this User"}        
     return {"success":True, "data" : topics}
 
 
 #  COMMENT ENDPOINTS 
+
+def get_comments(db: Session, skip: int = 0, limit: int = 100):
+    """ Get all comments in a database  """
+
+    comments = db.query(model.Comment).offset(skip).limit(limit).all()
+    
+    return{"success":True,"data":comments}
+
+
+def get_comment_in_topic(db: Session, topic_id: str):
+    """ Get a comment under a topic  """
+    
+    comments = db.query(model.Comment).filter(model.Comment.topic_id == topic_id).all()
+    if not comments :
+        return{"success":True,"message":"No comment available "}
+    return {"success":True, "data" : comments}
+
+
+def get_comment_user(db: Session, user_id: str):
+    """ Get all topics a user created from the database based on their id  """
+    
+    users = db.query(model.User).filter(model.User.user_id ==user_id).first()   
+    comments = db.query(model.Comment).filter(model.Comment.user_id == user_id).all()
+    if not users:
+        return{"success":True,"message":"User doesn't exist"}   
+    if not comments:
+        return{"success":True,"message":"User has not made any comments"}        
+    return {"success":True, "data" : comments}
+
+
+def delete_comment(db :Session,comment_id:str,current_user : str ):
+    """ Delete a comment (only the user who made the comment or an admin can delete a comment)"""
+
+    delete_comment = db.query(model.Comment).filter(model.Comment.comment_id == comment_id).first()
+ 
+    if delete_comment:
+        if delete_comment.user_id == current_user.user_id or current_user.is_admin:
+            db.delete(delete_comment)
+            db.commit()
+            return {"success": True, "message": "comment deleted succesfully"}
+        else:
+            return {"success": False, "message": "You're not authorized to perform this operation"}
+    else:
+        return {"success": False, "message": "Comment does not exist"}
