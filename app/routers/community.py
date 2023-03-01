@@ -229,7 +229,9 @@ def get_topic_user(user_id:str,db: Session = Depends(get_db), current_user: str 
 def add_comment(request:schema.AddComment,topic_id:str,db: Session = Depends(get_db),current_user:str = Depends(get_current_user)):
     """ Add a comment  """
     topic = db.query(model.Topic).filter(model.Topic.topic_id==topic_id).first()
-
+    comment = db.query(model.Comment).filter(model.Comment.topic_id == topic_id).all()
+    total_comments = len(comment) + 1
+    
     if topic :
         add_comment = model.Comment(
             comment_id = uuid4(),
@@ -238,7 +240,7 @@ def add_comment(request:schema.AddComment,topic_id:str,db: Session = Depends(get
             content = request.content,
             image_url = request.image_url
         )
-
+        topic.total_comments = total_comments
         db.add(add_comment)
         db.commit()
         db.refresh(add_comment)
