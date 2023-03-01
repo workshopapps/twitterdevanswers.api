@@ -129,10 +129,11 @@ def approve_blog_post(blog_id, db: Session = Depends(get_db), current_user: str 
             if blog_post.is_approved == True:
                 return HTTPException(status_code=401, detail="Blog post has been reviewed")
             else:
-                blog_post.is_approved == True
+                blog_post.is_approved = True
                 db.add(blog_post)
                 db.commit()
                 db.refresh(blog_post)
+                return{"success":True,"message":"Blog Post has been Approved"}
         else:
             return HTTPException(status_code=401, detail="Action can only be performed by an admin")
     else:
