@@ -139,15 +139,6 @@ def approve_blog_post(blog_id, db: Session = Depends(get_db), current_user: str 
         return HTTPException(status_code=404, detail=f"Blog post with ID {blog_id} not found")
 
 
-"""
-@router.delete("/{user_id}/user", status_code=status.HTTP_200_OK)
-def delete_post_by_user_id(user_id, db: Session = Depends(get_db)):
-    post_delete = db.query(model.Blog).filter(
-        model.Blog.blog_user_id == user_id).delete(synchronize_session=False)
-    return {"sucess": True, "data": f"{user_id} deleted"}
-"""
-
-
 @router.delete("/{blog_id}/admin")
 def delete_post_by_user_id(blog_id, db: Session = Depends(get_db),
                            current_user: str = Depends(oauth.get_current_user)):
