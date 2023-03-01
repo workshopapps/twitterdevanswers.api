@@ -261,6 +261,7 @@ class Topic(Base):
     total_comments = Column(Integer, nullable=True)
     created_at = Column(TIMESTAMP(timezone=True),
                          nullable=False, server_default=text('now()'))
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
 
     user = relationship('model.User')
     community = relationship('model.Community')
@@ -279,6 +280,7 @@ class Comment(Base):
     image_url = Column(String(300), default="default.jpg")
     created_at = Column(TIMESTAMP(timezone=True),
                          nullable=False, server_default=text('now()'))
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
 
     user = relationship('model.User')
     topic = relationship('model.Topic')
