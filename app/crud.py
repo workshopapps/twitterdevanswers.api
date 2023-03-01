@@ -294,3 +294,18 @@ def get_topic_in_community(db: Session, community_id: str):
     if topics is None:
         return{"success":True,"message":"No topic under this Community"}
     return {"success":True, "data" : topics}
+
+
+def get_topic_user(db: Session, user_id: str):
+    """ Get all topics a user created from the database based on their id  """
+    
+    users = db.query(model.User).filter(model.User.user_id ==user_id).first()   
+    topics = db.query(model.Topic).filter(model.Topic.user_id == user_id).all()
+    if not users:
+        return{"success":True,"message":"User doesn't exist"}   
+    if not topics:
+        return{"success":True,"message":"No topic created under this User"}        
+    return {"success":True, "data" : topics}
+
+
+#  COMMENT ENDPOINTS 
