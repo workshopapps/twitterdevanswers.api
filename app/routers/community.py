@@ -165,3 +165,12 @@ def post_topic(request: schema.PostTopic, community_id : str , db: Session = Dep
     else:
         raise HTTPException(
             status_code=404, detail=f"Community not found ")
+
+@router.get('/topics/user/{user_id}')
+def get_topic_user(user_id:str,db: Session = Depends(get_db), current_user: str = Depends(get_current_user)):
+    """ Get all topics a user created from the database based on their id  """
+    
+    return crud.get_topic_user(db,user_id=user_id)
+
+
+# COMMENTS            
