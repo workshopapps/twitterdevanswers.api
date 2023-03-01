@@ -156,7 +156,7 @@ def post_topic(request: schema.PostTopic, community_id : str , db: Session = Dep
         db.add(add_topic)
         db.commit()
         db.refresh(add_topic)
-        return {"success": True, "data":{ 
+        return {"success": True, "message":"Topic yet to be reviewed", "data":{ 
         "topic_id": add_topic.topic_id,
         "title":add_topic.title,
         "content": add_topic.content,
@@ -165,6 +165,27 @@ def post_topic(request: schema.PostTopic, community_id : str , db: Session = Dep
     else:
         raise HTTPException(
             status_code=404, detail=f"Community not found ")
+
+
+@router.patch("/approve_topic/{topic_id}")
+def approve_topic(topic_id:str,db:Session = Depends(get_db),current_user : str = Depends(oauth.get_current_user)):
+    topic = db.query(Topic).filter(Topic.topic_id == topic_id).first()
+
+    if topic :
+        if current_user.is_admin == True:
+            if topic.is_approved == True:
+                return HTTPException(status_code=401, detail="Topic has been reviewed")
+            else:
+                topic.is_approved = True
+                db.add(topic)
+                db.commit()
+                db.refresh(topic)
+                return{"success":True,"message":"Topic has been Approved"}
+        else:
+            return HTTPException(status_code=401, detail="Action can only be performed by an admin")
+    else:
+        return HTTPException(status_code=404, detail=f"Topic not found")
+
 
 
 @router.patch('/topic/edit/{topic_id}',status_code=status.HTTP_200_OK)
