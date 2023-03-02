@@ -50,18 +50,14 @@ def join_community(community_id: str, db: Session = Depends(get_db), current_use
         model.Community.community_id == community_id).first()
     present = db.query(model.Community).filter().first()    
     if community:
-        for i, user in enumerate(community.users):
-            if user.user_id != current_user.user_id:
-                new_total = community.total_members + 1
-                community.total_members = new_total
-                community.users.append(current_user)
-                db.add(community)
-                db.commit()
-                db.refresh(community)
-                return {"success": True,
-                        "message": f" You have successfully joined {community.name}"}
-        
-            return{"success":False,"message":f"You are already a member of {community.name}"}
+        new_total = community.total_members + 1
+        community.total_members = new_total
+        community.users.append(current_user)
+        db.add(community)
+        db.commit()
+        db.refresh(community)
+        return {"success": True,
+                "message": f" You have successfully joined {community.name}"}
     else:
         raise HTTPException(
             status_code=404, detail=f" Community not found")
@@ -72,14 +68,11 @@ def leave_community(community_id: str, db: Session = Depends(get_db), current_us
     community = db.query(model.Community).filter(
         model.Community.community_id == community_id).first()
     if community:
+        new_total = community.total_members - 1
+        community.total_members = new_total
         for i, user in enumerate(community.users):
             if user.user_id == current_user.user_id:
-                new_total = community.total_members - 1
-                community.total_members = new_total
-                community.users.pop(i)
-            else:
-                return{"success":False,
-                        "message":f"Already left {community.name}"}    
+                community.users.pop(i)   
         db.add(community)
         db.commit()
         db.refresh(community)
