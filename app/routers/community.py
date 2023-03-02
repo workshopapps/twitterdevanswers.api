@@ -35,29 +35,33 @@ def add_community(request: schema.AddCommunity, db: Session = Depends(get_db), c
         db.add(add_community)
         db.commit()
         db.refresh(add_community)
-        return {"success": True,
+        return {"success": True, "data" :{
                 "community_id": add_community.community_id,
                 "name": add_community.name,
-                "description": add_community.description,
-                }
+                "description": add_community.description
+                }}
     else:
         return {"success": False, "message": "You're not authorized to perform this operation"}
 
 
-# coming back for you (Logic Not written properly )
 @router.post("/join_community/{community_id}")
 def join_community(community_id: str, db: Session = Depends(get_db), current_user: str = Depends(get_current_user)):
     community = db.query(model.Community).filter(
         model.Community.community_id == community_id).first()
+    present = db.query(model.Community).filter().first()    
     if community:
-        new_total = community.total_members + 1
-        community.total_members = new_total
-        community.users.append(current_user)
-        db.add(community)
-        db.commit()
-        db.refresh(community)
-        return {"success": True,
-                "message": "community_joined"}
+        for i, user in enumerate(community.users):
+            if user.user_id != current_user.user_id:
+                new_total = community.total_members + 1
+                community.total_members = new_total
+                community.users.append(current_user)
+                db.add(community)
+                db.commit()
+                db.refresh(community)
+                return {"success": True,
+                        "message": f" You have successfully joined {community.name}"}
+        
+            return{"success":False,"message":f"You are already a member of {community.name}"}
     else:
         raise HTTPException(
             status_code=404, detail=f" Community not found")
@@ -68,16 +72,19 @@ def leave_community(community_id: str, db: Session = Depends(get_db), current_us
     community = db.query(model.Community).filter(
         model.Community.community_id == community_id).first()
     if community:
-        new_total = community.total_members - 1
-        community.total_members = new_total
         for i, user in enumerate(community.users):
             if user.user_id == current_user.user_id:
+                new_total = community.total_members - 1
+                community.total_members = new_total
                 community.users.pop(i)
+            else:
+                return{"success":False,
+                        "message":f"Already left {community.name}"}    
         db.add(community)
         db.commit()
         db.refresh(community)
         return {"success": True,
-                "message": "Left community successfully"}
+                "message": f"Left {community.name} successfully"}
     else:
         raise HTTPException(
             status_code=404, detail=f" Community not found")
@@ -89,6 +96,19 @@ def fetch_a_community(community_id: str, db: Session = Depends(get_db), current_
 
     community = db.query(model.Community).filter(
         model.Community.community_id == community_id).first()
+    if not community:
+        raise HTTPException(
+            status_code=404, detail=f" Community not found")
+    users = community.users
+    return {"success": True, 'data': community}
+
+
+@router.get('/search/{community_name}', status_code=status.HTTP_200_OK)
+def fetch_by_community_name(community_name: str, db: Session = Depends(get_db), current_user: str = Depends(get_current_user)):
+    """ Fetch a Community by Name  """
+
+    community = db.query(model.Community).filter(
+        model.Community.name == community_name).first()
     if not community:
         raise HTTPException(
             status_code=404, detail=f" Community not found")
@@ -125,16 +145,12 @@ def update_community(community: schema.UpdateCommunity, _id: str, db: Session = 
         return {"success": False, "message":  "You're not authorized to perform this update "}
 
 
-# @router.delete('/delete/{community_id}',status_code=status.HTTP_200_OK)
-# def delete_community(community_id: str, db: Session = Depends(get_db), current_user: str = Depends(get_current_user)):
-#     """ Delete a user by username  """
-#     delete_community = crud.delete_community(
-#         db, community_id=community_id, current_user=current_user)
-#     if not delete_community:
-#         raise HTTPException(
-#             status=404, detail=f" Community does not exist")
-#     return delete_user
-
+@router.delete('/delete/{community_id}',status_code=status.HTTP_200_OK)
+def delete_community(community_id: str, db: Session = Depends(get_db), current_user: str = Depends(get_current_user)):
+    """ Delete a user by id  """
+    return crud.delete_community(
+        db, community_id=community_id, current_user=current_user)
+    
 
 #  TOPICS
 
@@ -162,7 +178,7 @@ def fetch_topics_by_community(community_id: str, db: Session = Depends(get_db), 
     return crud.get_topic_in_community(db, community_id=community_id)
 
 
-@router.post("/post_topic", status_code=status.HTTP_201_CREATED)
+@router.post("/post_topic/", status_code=status.HTTP_201_CREATED)
 def post_topic(request: schema.PostTopic, community_id: str, db: Session = Depends(get_db), current_user: str = Depends(get_current_user)):
     """ Add a topics in a community """
 
@@ -170,23 +186,27 @@ def post_topic(request: schema.PostTopic, community_id: str, db: Session = Depen
         Community.community_id == community_id).first()
 
     if community:
-        add_topic = model.Topic(
-            topic_id=uuid4(),
-            user_id=current_user.user_id,
-            community_id=community_id,
-            title=request.title,
-            content=request.content,
-            image_url=request.image_url,
-        )
-        db.add(add_topic)
-        db.commit()
-        db.refresh(add_topic)
-        return {"success": True, "message":"Topic yet to be reviewed", "data":{ 
-        "topic_id": add_topic.topic_id,
-        "title":add_topic.title,
-        "content": add_topic.content,
-        "image_url" : add_topic.image_url
-       }}
+        for i, user in enumerate(community.users):
+            if user.user_id == current_user.user_id:   
+                add_topic = model.Topic(
+                    topic_id=uuid4(),
+                    user_id=current_user.user_id,
+                    community_id=community_id,
+                    title=request.title,
+                    content=request.content,
+                    image_url=request.image_url,
+                )
+                db.add(add_topic)
+                db.commit()
+                db.refresh(add_topic)
+                return {"success": True, "message":"Topic yet to be reviewed", "data":{ 
+                "topic_id": add_topic.topic_id,
+                "title":add_topic.title,
+                "content": add_topic.content,
+                "image_url" : add_topic.image_url
+                }}
+        raise HTTPException(
+            status_code=404, detail=f" User has not joined {community.name}")                    
     else:
         raise HTTPException(
             status_code=404, detail=f"Community not found ")
@@ -255,7 +275,7 @@ def add_comment(request:schema.AddComment,topic_id:str,db: Session = Depends(get
     """ Add a comment  """
     topic = db.query(model.Topic).filter(model.Topic.topic_id==topic_id).first()
     comment = db.query(model.Comment).filter(model.Comment.topic_id == topic_id).all()
-    total_comments = len(comment) + 1
+    total_comments = len(comment)
     
     if topic :
         add_comment = model.Comment(
