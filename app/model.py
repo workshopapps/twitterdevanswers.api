@@ -266,7 +266,7 @@ class Topic(Base):
     content = Column(String(10000), nullable=False)
     image_url = Column(String(300), default="default.jpg")
     is_approved = Column(Boolean, default=False, nullable=False)
-    total_comments = Column(Integer, nullable=True)
+    total_comments = Column(Integer, nullable=True , default=0)
     created_at = Column(TIMESTAMP(timezone=True),
                          nullable=False, server_default=text('now()'))
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
