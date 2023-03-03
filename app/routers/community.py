@@ -154,7 +154,7 @@ def fetch_topics(skip: int = 0, limit: int = 100, db: Session = Depends(get_db),
     return crud.get_topics(db, skip=skip, limit=limit)
 
 
-@router.get('/topics/{topic_id}', status_code=status.HTTP_200_OK)
+@router.get('/topic/{topic_id}', status_code=status.HTTP_200_OK)
 def fetch_a_topic(topic_id: str, db: Session = Depends(get_db), current_user: str = Depends(get_current_user)):
     """ Fetch a topic from the database """
     topic = db.query(model.Topic).filter(
@@ -261,14 +261,20 @@ def get_topic_user(user_id:str,db: Session = Depends(get_db), current_user: str 
     return crud.get_topic_user(db,user_id=user_id)
 
 
+@router.delete('/delete/topic/{topic_id}',status_code=status.HTTP_200_OK)
+def delete_topic(topic_id:str,db :Session = Depends(get_db),current_user : str = Depends(get_current_user)):
+    """ Delete a topic """
+
+    return crud.delete_topic(db,topic_id=topic_id,current_user=current_user)
+
 # COMMENTS            
 
-@router.post('/comment/{topic_id}')
+@router.post('/add_comment/')
 def add_comment(request:schema.AddComment,topic_id:str,db: Session = Depends(get_db),current_user:str = Depends(get_current_user)):
     """ Add a comment  """
     topic = db.query(model.Topic).filter(model.Topic.topic_id==topic_id).first()
     comment = db.query(model.Comment).filter(model.Comment.topic_id == topic_id).all()
-    total_comments = len(comment)
+    total_comments = len(comment) + 1
     
     if topic :
         add_comment = model.Comment(
@@ -342,7 +348,7 @@ def fetch_a_comment( comment_id:str, db: Session = Depends(get_db),current_user:
 @router.get('/comments/topic/{topic_id}',status_code=status.HTTP_200_OK)
 def fetch_comment_by_topic( topic_id:str, db: Session = Depends(get_db),current_user: str = Depends(get_current_user)):
     """ Fetch comments by a topic"""
-    
+
     return crud.get_comment_in_topic(db,topic_id=topic_id)    
 
 
