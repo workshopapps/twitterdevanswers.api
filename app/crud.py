@@ -244,8 +244,8 @@ def get_questions_and_likes(question_id:str,db:Session):
                 }
     return {"success": True, "message": "user have not asked any questions"}            
 
-#  Community Endponts
 
+#  Community Endponts
 
 def get_communities(db: Session, skip: int = 0, limit: int = 100):
     """ Get all communities in the database  """
@@ -254,29 +254,21 @@ def get_communities(db: Session, skip: int = 0, limit: int = 100):
     return {"success": True, 'data': communities}
 
 
-# def delete_community(db: Session, community_id: str, current_user: str):
-#     """ Delete a user Profile  """
+def delete_community(db :Session,community_id:str,current_user : str ):
+    """ Delete a community (only an admin can delete a community)"""
 
-#     delete_community= db.query(model.Community).filter(
-#         model.Community.community_id == community_id).first()
-#     if delete_community:
-#         topic = db.query(model.Topic).filter(
-#             model.Topic.community_id == delete_community.community_id).all()
-#         comment = db.query(model.Comment).filter(
-#                        model.Topic.community_id == delete_community.community_id).all()
-
-#         if delete_community.community_id == current_user.community_id or current_user.is_admin == True:
-#             db.delete(topic)
-#             db.delete(comment)
-#             db.commit()
-#             db.delete(delete_community)
-#             db.commit()
-#             return {"success": True, "message": "Community had been succesfully deleted"}
-#         else:
-#             return {"success": False, "message": "You're not authorized to perform this operation"}
-#     else:
-#         raise HTTPException(
-            # status_code=404, detail=f" Community {community_id} not found")
+    delete_community = db.query(model.Community).filter(model.Community.community_id == community_id).first()
+ 
+    if delete_community:
+        if current_user.is_admin :
+            db.delete(delete_community)
+            db.commit()
+            return {"success": True, "message": "community deleted succesfully"}
+        else:
+            return {"success": False, "message": "You're not authorized to perform this operation"}
+    else:
+        raise HTTPException(
+            status_code=404, detail=f"Community does not exist ")
 
 
 #  TOPIC ENDPOINTS 
@@ -306,6 +298,23 @@ def get_topic_user(db: Session, user_id: str):
     if not topics:
         return{"success":True,"message":"No topic created by this User"}        
     return {"success":True, "data" : topics}
+
+
+def delete_topic(db :Session,topic_id:str,current_user : str ):
+    """ Delete a topic (only the user who made the topic or an admin can delete a comment)"""
+
+    delete_topic = db.query(model.Topic).filter(model.Topic.topic_id == topic_id).first()
+
+    if delete_topic:
+        if delete_topic.user_id == current_user.user_id or current_user.is_admin:
+            db.delete(delete_topic)
+            db.commit()
+            return {"success": True, "message": " Topic deleted succesfully"}
+        else:
+            return {"success": False, "message": "You're not authorized to perform this operation"}
+    else:
+        raise HTTPException(
+            status_code=404, detail=f" Topic does not exist ")
 
 
 #  COMMENT ENDPOINTS 
@@ -343,7 +352,7 @@ def delete_comment(db :Session,comment_id:str,current_user : str ):
     """ Delete a comment (only the user who made the comment or an admin can delete a comment)"""
 
     delete_comment = db.query(model.Comment).filter(model.Comment.comment_id == comment_id).first()
- 
+
     if delete_comment:
         if delete_comment.user_id == current_user.user_id or current_user.is_admin:
             db.delete(delete_comment)
@@ -352,4 +361,5 @@ def delete_comment(db :Session,comment_id:str,current_user : str ):
         else:
             return {"success": False, "message": "You're not authorized to perform this operation"}
     else:
-        return {"success": False, "message": "Comment does not exist"}
+        raise HTTPException(
+            status_code=404, detail=f"Comment does not exist ")
