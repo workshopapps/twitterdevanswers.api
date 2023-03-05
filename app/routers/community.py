@@ -30,7 +30,8 @@ def add_community(request: schema.AddCommunity, db: Session = Depends(get_db), c
             name=request.name,
             description=request.description,
             image_url=request.image_url,
-            users=[]
+            users=[],
+            admins=[]
         )
         db.add(add_community)
         db.commit()
@@ -43,44 +44,51 @@ def add_community(request: schema.AddCommunity, db: Session = Depends(get_db), c
     else:
         return {"success": False, "message": "You're not authorized to perform this operation"}
 
-
 @router.post("/join_community/{community_id}")
 def join_community(community_id: str, db: Session = Depends(get_db), current_user: str = Depends(get_current_user)):
     community = db.query(model.Community).filter(
         model.Community.community_id == community_id).first()
-    present = db.query(model.Community).filter().first()    
-    if community:
+
+    if not community:
+        raise HTTPException(
+            status_code=404, detail=f"Community not found")
+
+    if current_user not in community.users:
         new_total = community.total_members + 1
         community.total_members = new_total
         community.users.append(current_user)
         db.add(community)
+
+        if current_user.user_id == community.user_id:
+            community.admins.append(current_user)
+
         db.commit()
         db.refresh(community)
-        return {"success": True,
-                "message": f" You have successfully joined {community.name}"}
+        return {"success": True, "message": f"You have successfully joined {community.name}"}
+
     else:
-        raise HTTPException(
-            status_code=404, detail=f" Community not found")
+        raise HTTPException(status_code=400, detail=f"You are already a member of {community.name}")
 
 
 @router.post("/leave_community/{community_id}")
 def leave_community(community_id: str, db: Session = Depends(get_db), current_user: str = Depends(get_current_user)):
     community = db.query(model.Community).filter(
         model.Community.community_id == community_id).first()
-    if community:
-        new_total = community.total_members - 1
-        community.total_members = new_total
-        for i, user in enumerate(community.users):
-            if user.user_id == current_user.user_id:
-                community.users.pop(i)   
-        db.add(community)
-        db.commit()
-        db.refresh(community)
-        return {"success": True,
-                "message": f"Left {community.name} successfully"}
-    else:
-        raise HTTPException(
-            status_code=404, detail=f" Community not found")
+    
+    if not community:
+        raise HTTPException(status_code=404, detail="Community not found")
+    
+    if current_user not in community.users:
+        raise HTTPException(status_code=404, detail="You are not a member of this community")
+
+    community.users.remove(current_user)
+    community.total_members -= 1
+
+    db.add(community)
+    db.commit()
+    db.refresh(community)
+
+    return {"success": True, "message": f"Left {community.name} successfully"}
 
 
 @router.get('/get/{community_id}', status_code=status.HTTP_200_OK)
@@ -93,6 +101,7 @@ def fetch_a_community(community_id: str, db: Session = Depends(get_db), current_
         raise HTTPException(
             status_code=404, detail=f" Community not found")
     users = community.users
+    admins = community.admins
     return {"success": True, 'data': community}
 
 
@@ -106,6 +115,7 @@ def fetch_by_community_name(community_name: str, db: Session = Depends(get_db), 
         raise HTTPException(
             status_code=404, detail=f" Community not found")
     users = community.users
+    admins = community.admins
     return {"success": True, 'data': community}
 
 
@@ -136,6 +146,28 @@ def update_community(community: schema.UpdateCommunity, _id: str, db: Session = 
         return {"success": True, "message": "Community Updated", "data": update_data}
     else:
         return {"success": False, "message":  "You're not authorized to perform this update "}
+
+@router.post("/{community_id}/add_admin/{user_id}")
+def add_admin_to_community(community_id: str, user_id: str, current_user: str = Depends(get_current_user), db: Session = Depends(get_db)):
+    community = db.query(model.Community).filter(model.Community.community_id == community_id).first()
+    user = db.query(model.User).filter(model.User.user_id == user_id).first()
+
+    if not community:
+        raise HTTPException(status_code=404, detail="Community not found")
+
+    crud.is_community_admin(community, current_user)
+    return crud.add_admin_to_community(community, user, current_user, db)
+
+@router.delete("/{community_id}/remove_admin/{user_id}")
+def remove_admin_from_community(community_id: str, user_id: str, current_user: str = Depends(get_current_user), db: Session = Depends(get_db)):
+    community = db.query(model.Community).filter(model.Community.community_id == community_id).first()
+    user = db.query(model.User).filter(model.User.user_id == user_id).first()
+    
+    if not community:
+        raise HTTPException(status_code=404, detail="Community not found")
+        
+    crud.is_community_admin(community, current_user)
+    return crud.remove_admin_community(community, user, current_user, db)
 
 
 @router.delete('/delete/{community_id}',status_code=status.HTTP_200_OK)
