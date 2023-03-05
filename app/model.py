@@ -243,12 +243,20 @@ class Community(Base):
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
     users = relationship(
         'model.User', secondary="community_members", backref="user")
+    admins = relationship('model.User',secondary="community_admins",backref="user_admin")
 
 
 community_members = Table('community_members', Base.metadata,
                           Column('community_id', ForeignKey(
                               'community.community_id'), primary_key=True),
                           Column('users', ForeignKey(
+                              'user.user_id'), primary_key=True)
+                          )
+
+community_admins = Table('community_admins', Base.metadata,
+                          Column('community_id', ForeignKey(
+                              'community.community_id'), primary_key=True),
+                          Column('admins', ForeignKey(
                               'user.user_id'), primary_key=True)
                           )
 
