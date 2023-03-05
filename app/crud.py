@@ -258,7 +258,7 @@ def delete_community(db :Session,community_id:str,current_user : str ):
     """ Delete a community (only an admin can delete a community)"""
 
     delete_community = db.query(model.Community).filter(model.Community.community_id == community_id).first()
- 
+
     if delete_community:
         if current_user.is_admin :
             db.delete(delete_community)
@@ -269,6 +269,49 @@ def delete_community(db :Session,community_id:str,current_user : str ):
     else:
         raise HTTPException(
             status_code=404, detail=f"Community does not exist ")
+
+
+# check if user is a community admin
+def is_community_admin(community: model.Community, current_user: str):
+    if current_user not in community.admins:
+        raise HTTPException(status_code=403, detail="You're not authorized to perform this operation")
+
+
+# Function to add admin to community
+def add_admin_to_community(community: model.Community, user: model.User, current_user: str, db: Session):
+    if not user or user not in community.users :
+        raise HTTPException(status_code=404, detail="User not in community")
+
+    if user in community.admins:
+        raise HTTPException(status_code=400, detail="User is already an admin of the community")
+
+    if current_user not in community.admins:
+        raise HTTPException(status_code=403, detail="You're not authorized to perform this operation")
+
+    community.admins.append(user)
+    db.add(community)
+    db.commit()
+    db.refresh(community)
+
+    return {"success": True,
+            "message": f"{user.username} has been added as an admin of {community.name}"}
+
+
+# Function to remove admin to community
+def remove_admin_community(community: model.Community, user: model.User, current_user: str, db: Session):
+    if not user or user not in community.users:
+        raise HTTPException(status_code=404, detail="User not in community")
+
+    if user not in community.admins:
+        raise HTTPException(status_code=404, detail="User is not an admin of the community")
+
+    if current_user not in community.admins:
+        raise HTTPException(status_code=403, detail="You're not authorized to perform this operation")
+
+    community.admins.remove(user)
+    db.commit()
+
+    return {"success": True, "message": f"{user.username} has been removed as an admin of {community.name}"}
 
 
 #  TOPIC ENDPOINTS 
