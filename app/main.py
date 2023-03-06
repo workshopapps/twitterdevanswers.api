@@ -1,5 +1,5 @@
 import sentry_sdk
-from app.routers import user, notification, questions, auth, like, answer, following, tag, blog, wallet, admin, admin_utils
+from app.routers import user, notification, questions, auth, like, answer, following, tag, blog, wallet, admin, admin_utils , community
 from fastapi import FastAPI, status
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -72,3 +72,5 @@ app.include_router(tag.router)
 app.include_router(user.router)
 # app.include_router(googleauth.router)
 app.include_router(wallet.router)
+app.include_router(community.router)
+

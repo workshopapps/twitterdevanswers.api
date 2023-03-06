@@ -128,7 +128,7 @@ class UserUpdate(BaseModel):
     image_url: Optional[str] = None
     location: Optional[str] = None
 
-    
+
 class UserSignInResponse(BaseModel):
     pass
 
@@ -319,3 +319,75 @@ class Blog(BaseModel):
     author: str
     image_url: str
     post_category: str
+
+
+class Community(BaseModel):
+    community_id: str
+    user_id: str
+    name: str
+    description: str
+    image_url: str
+    total_members: int
+    created_at: str
+    updated_at: str
+    members: List[UserOut]
+
+
+class AddCommunity(BaseModel):
+    name: str
+    description: str
+    image_url: str
+
+
+class UpdateCommunity(BaseModel):
+    name: Optional[str] = None
+    description: Optional[str] = None
+    image_url: Optional[str] = None
+
+
+class Topic(BaseModel):
+    community_id: str
+    user_id: str
+    topic_id: str
+    title: str
+    content: str
+    image_url: str
+    is_approved: bool
+    total_comments: int
+    created_at: str
+    updated_at:str
+
+
+
+class PostTopic(BaseModel):
+    title: str
+    content: str
+    image_url: str
+
+
+
+class UpdateTopic(BaseModel):
+    title: Optional[str] = None
+    content: Optional[str] = None
+    image_url: Optional[str] = None
+
+
+class Comment(BaseModel):
+    topic_id: str
+    user_id: str
+    comment_id: str
+    content: str
+    image_url: str
+    created_at: str
+    updated_at:str
+
+
+class AddComment(BaseModel):
+    content: str
+    image_url :str
+
+
+class UpdateComment(BaseModel):
+    content: Optional[str] = None
+    image_url: Optional[str] = None
+    
