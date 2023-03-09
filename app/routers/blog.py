@@ -129,23 +129,15 @@ def approve_blog_post(blog_id, db: Session = Depends(get_db), current_user: str 
             if blog_post.is_approved == True:
                 return HTTPException(status_code=401, detail="Blog post has been reviewed")
             else:
-                blog_post.is_approved == True
+                blog_post.is_approved = True
                 db.add(blog_post)
                 db.commit()
                 db.refresh(blog_post)
+                return{"success":True,"message":"Blog Post has been Approved"}
         else:
             return HTTPException(status_code=401, detail="Action can only be performed by an admin")
     else:
         return HTTPException(status_code=404, detail=f"Blog post with ID {blog_id} not found")
-
-
-"""
-@router.delete("/{user_id}/user", status_code=status.HTTP_200_OK)
-def delete_post_by_user_id(user_id, db: Session = Depends(get_db)):
-    post_delete = db.query(model.Blog).filter(
-        model.Blog.blog_user_id == user_id).delete(synchronize_session=False)
-    return {"sucess": True, "data": f"{user_id} deleted"}
-"""
 
 
 @router.delete("/{blog_id}/admin")

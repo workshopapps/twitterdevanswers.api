@@ -243,3 +243,166 @@ def get_questions_and_likes(question_id:str,db:Session):
                 }]
                 }
     return {"success": True, "message": "user have not asked any questions"}            
+
+
+#  Community Endponts
+
+def get_communities(db: Session, skip: int = 0, limit: int = 100):
+    """ Get all communities in the database  """
+
+    communities = db.query(model.Community).offset(skip).limit(limit).all()
+    return {"success": True, 'data': communities}
+
+
+def delete_community(db :Session,community_id:str,current_user : str ):
+    """ Delete a community (only an admin can delete a community)"""
+
+    delete_community = db.query(model.Community).filter(model.Community.community_id == community_id).first()
+
+    if delete_community:
+        if current_user.is_admin :
+            db.delete(delete_community)
+            db.commit()
+            return {"success": True, "message": "community deleted succesfully"}
+        else:
+            return {"success": False, "message": "You're not authorized to perform this operation"}
+    else:
+        raise HTTPException(
+            status_code=404, detail=f"Community does not exist ")
+
+
+# check if user is a community admin
+def is_community_admin(community: model.Community, current_user: str):
+    if current_user not in community.admins:
+        raise HTTPException(status_code=403, detail="You're not authorized to perform this operation")
+
+
+# Function to add admin to community
+def add_admin_to_community(community: model.Community, user: model.User, current_user: str, db: Session):
+    if not user or user not in community.users :
+        raise HTTPException(status_code=404, detail="User not in community")
+
+    if user in community.admins:
+        raise HTTPException(status_code=400, detail="User is already an admin of the community")
+
+    if current_user not in community.admins:
+        raise HTTPException(status_code=403, detail="You're not authorized to perform this operation")
+
+    community.admins.append(user)
+    db.add(community)
+    db.commit()
+    db.refresh(community)
+
+    return {"success": True,
+            "message": f"{user.username} has been added as an admin of {community.name}"}
+
+
+# Function to remove admin to community
+def remove_admin_community(community: model.Community, user: model.User, current_user: str, db: Session):
+    if not user or user not in community.users:
+        raise HTTPException(status_code=404, detail="User not in community")
+
+    if user not in community.admins:
+        raise HTTPException(status_code=404, detail="User is not an admin of the community")
+
+    if current_user not in community.admins:
+        raise HTTPException(status_code=403, detail="You're not authorized to perform this operation")
+
+    community.admins.remove(user)
+    db.commit()
+
+    return {"success": True, "message": f"{user.username} has been removed as an admin of {community.name}"}
+
+
+#  TOPIC ENDPOINTS 
+
+def get_topics(db: Session, skip: int = 0, limit: int = 100):
+    """ Get all topics in the database  """
+
+    topics = db.query(model.Topic).offset(skip).limit(limit).all()
+    return {"success": True, 'data': topics}
+
+def get_topic_in_community(db: Session, community_id: str):
+    """ Get a topic in a community """
+    
+    topics = db.query(model.Topic).filter(model.Topic.community_id == community_id).all()
+    if topics is None:
+        return{"success":True,"message":"No topic under this Community"}
+    return {"success":True, "data" : topics}
+
+
+def get_topic_user(db: Session, user_id: str):
+    """ Get all topics a user created from the database based on their id  """
+    
+    users = db.query(model.User).filter(model.User.user_id ==user_id).first()   
+    topics = db.query(model.Topic).filter(model.Topic.user_id == user_id).all()
+    if not users:
+        return{"success":True,"message":"User doesn't exist"}   
+    if not topics:
+        return{"success":True,"message":"No topic created by this User"}        
+    return {"success":True, "data" : topics}
+
+
+def delete_topic(db :Session,topic_id:str,current_user : str ):
+    """ Delete a topic (only the user who made the topic or an admin can delete a comment)"""
+
+    delete_topic = db.query(model.Topic).filter(model.Topic.topic_id == topic_id).first()
+
+    if delete_topic:
+        if delete_topic.user_id == current_user.user_id or current_user.is_admin:
+            db.delete(delete_topic)
+            db.commit()
+            return {"success": True, "message": " Topic deleted succesfully"}
+        else:
+            return {"success": False, "message": "You're not authorized to perform this operation"}
+    else:
+        raise HTTPException(
+            status_code=404, detail=f" Topic does not exist ")
+
+
+#  COMMENT ENDPOINTS 
+
+def get_comments(db: Session, skip: int = 0, limit: int = 100):
+    """ Get all comments in a database  """
+
+    comments = db.query(model.Comment).offset(skip).limit(limit).all()
+    
+    return{"success":True,"data":comments}
+
+
+def get_comment_in_topic(db: Session, topic_id: str):
+    """ Get a comment under a topic  """
+    
+    comments = db.query(model.Comment).filter(model.Comment.topic_id == topic_id).all()
+    if not comments :
+        return{"success":True,"message":"No comment available "}
+    return {"success":True, "data" : comments}
+
+
+def get_comment_user(db: Session, user_id: str):
+    """ Get all topics a user created from the database based on their id  """
+    
+    users = db.query(model.User).filter(model.User.user_id ==user_id).first()   
+    comments = db.query(model.Comment).filter(model.Comment.user_id == user_id).all()
+    if not users:
+        return{"success":True,"message":"User doesn't exist"}   
+    if not comments:
+        return{"success":True,"message":"User has not made any comments"}        
+    return {"success":True, "data" : comments}
+
+
+def delete_comment(db :Session,comment_id:str,current_user : str ):
+    """ Delete a comment (only the user who made the comment or an admin can delete a comment)"""
+
+    delete_comment = db.query(model.Comment).filter(model.Comment.comment_id == comment_id).first()
+
+    if delete_comment:
+        if delete_comment.user_id == current_user.user_id or current_user.is_admin:
+            db.delete(delete_comment)
+            db.commit()
+            return {"success": True, "message": "comment deleted succesfully"}
+        else:
+            return {"success": False, "message": "You're not authorized to perform this operation"}
+    else:
+        raise HTTPException(
+            status_code=404, detail=f"Comment does not exist ")
