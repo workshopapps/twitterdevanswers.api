@@ -30,19 +30,21 @@ def add_community(request: schema.AddCommunity, db: Session = Depends(get_db), c
             name=request.name,
             description=request.description,
             image_url=request.image_url,
-            users=[],
-            admins=[]
+            users=[current_user],
+            admins=[current_user, ],
+            total_members=1
         )
         db.add(add_community)
         db.commit()
         db.refresh(add_community)
-        return {"success": True, "data" :{
+        return {"success": True, "data": {
                 "community_id": add_community.community_id,
                 "name": add_community.name,
                 "description": add_community.description
                 }}
     else:
         return {"success": False, "message": "You're not authorized to perform this operation"}
+
 
 @router.post("/join_community/{community_id}")
 def join_community(community_id: str, db: Session = Depends(get_db), current_user: str = Depends(get_current_user)):
@@ -59,29 +61,33 @@ def join_community(community_id: str, db: Session = Depends(get_db), current_use
         community.users.append(current_user)
         db.add(community)
 
-        if current_user.user_id == community.user_id:
-            community.admins.append(current_user)
+        # if current_user.user_id == community.user_id:
+        # community.admins.append(current_user)
 
         db.commit()
         db.refresh(community)
         return {"success": True, "message": f"You have successfully joined {community.name}"}
 
     else:
-        raise HTTPException(status_code=400, detail=f"You are already a member of {community.name}")
+        raise HTTPException(
+            status_code=400, detail=f"You are already a member of {community.name}")
 
 
 @router.post("/leave_community/{community_id}")
 def leave_community(community_id: str, db: Session = Depends(get_db), current_user: str = Depends(get_current_user)):
     community = db.query(model.Community).filter(
         model.Community.community_id == community_id).first()
-    
+
     if not community:
         raise HTTPException(status_code=404, detail="Community not found")
-    
+
     if current_user not in community.users:
-        raise HTTPException(status_code=404, detail="You are not a member of this community")
+        raise HTTPException(
+            status_code=404, detail="You are not a member of this community")
 
     community.users.remove(current_user)
+    if current_user in community.admins:
+        community.admins.remove(current_user)
     community.total_members -= 1
 
     db.add(community)
@@ -147,9 +153,11 @@ def update_community(community: schema.UpdateCommunity, _id: str, db: Session = 
     else:
         return {"success": False, "message":  "You're not authorized to perform this update "}
 
+
 @router.post("/{community_id}/add_admin/{user_id}")
 def add_admin_to_community(community_id: str, user_id: str, current_user: str = Depends(get_current_user), db: Session = Depends(get_db)):
-    community = db.query(model.Community).filter(model.Community.community_id == community_id).first()
+    community = db.query(model.Community).filter(
+        model.Community.community_id == community_id).first()
     user = db.query(model.User).filter(model.User.user_id == user_id).first()
 
     if not community:
@@ -158,24 +166,26 @@ def add_admin_to_community(community_id: str, user_id: str, current_user: str = 
     crud.is_community_admin(community, current_user)
     return crud.add_admin_to_community(community, user, current_user, db)
 
+
 @router.delete("/{community_id}/remove_admin/{user_id}")
 def remove_admin_from_community(community_id: str, user_id: str, current_user: str = Depends(get_current_user), db: Session = Depends(get_db)):
-    community = db.query(model.Community).filter(model.Community.community_id == community_id).first()
+    community = db.query(model.Community).filter(
+        model.Community.community_id == community_id).first()
     user = db.query(model.User).filter(model.User.user_id == user_id).first()
-    
+
     if not community:
         raise HTTPException(status_code=404, detail="Community not found")
-        
+
     crud.is_community_admin(community, current_user)
     return crud.remove_admin_community(community, user, current_user, db)
 
 
-@router.delete('/delete/{community_id}',status_code=status.HTTP_200_OK)
+@router.delete('/delete/{community_id}', status_code=status.HTTP_200_OK)
 def delete_community(community_id: str, db: Session = Depends(get_db), current_user: str = Depends(get_current_user)):
     """ Delete a user by id  """
     return crud.delete_community(
         db, community_id=community_id, current_user=current_user)
-    
+
 
 #  TOPICS
 
@@ -212,7 +222,7 @@ def post_topic(request: schema.PostTopic, community_id: str, db: Session = Depen
 
     if community:
         for i, user in enumerate(community.users):
-            if user.user_id == current_user.user_id:   
+            if user.user_id == current_user.user_id:
                 add_topic = model.Topic(
                     topic_id=uuid4(),
                     user_id=current_user.user_id,
@@ -224,24 +234,24 @@ def post_topic(request: schema.PostTopic, community_id: str, db: Session = Depen
                 db.add(add_topic)
                 db.commit()
                 db.refresh(add_topic)
-                return {"success": True, "message":"Topic yet to be reviewed", "data":{ 
-                "topic_id": add_topic.topic_id,
-                "title":add_topic.title,
-                "content": add_topic.content,
-                "image_url" : add_topic.image_url
+                return {"success": True, "message": "Topic yet to be reviewed", "data": {
+                    "topic_id": add_topic.topic_id,
+                    "title": add_topic.title,
+                    "content": add_topic.content,
+                    "image_url": add_topic.image_url
                 }}
         raise HTTPException(
-            status_code=404, detail=f" User has not joined {community.name}")                    
+            status_code=404, detail=f" User has not joined {community.name}")
     else:
         raise HTTPException(
             status_code=404, detail=f"Community not found ")
 
 
 @router.patch("/approve_topic/{topic_id}")
-def approve_topic(topic_id:str,db:Session = Depends(get_db),current_user : str = Depends(oauth.get_current_user)):
+def approve_topic(topic_id: str, db: Session = Depends(get_db), current_user: str = Depends(oauth.get_current_user)):
     topic = db.query(Topic).filter(Topic.topic_id == topic_id).first()
 
-    if topic :
+    if topic:
         if current_user.is_admin == True:
             if topic.is_approved == True:
                 return HTTPException(status_code=401, detail="Topic has been reviewed")
@@ -250,15 +260,14 @@ def approve_topic(topic_id:str,db:Session = Depends(get_db),current_user : str =
                 db.add(topic)
                 db.commit()
                 db.refresh(topic)
-                return{"success":True,"message":"Topic has been Approved"}
+                return{"success": True, "message": "Topic has been Approved"}
         else:
             return HTTPException(status_code=401, detail="Action can only be performed by an admin")
     else:
         return HTTPException(status_code=404, detail=f"Topic not found")
 
 
-
-@router.patch('/topic/edit/{topic_id}',status_code=status.HTTP_200_OK)
+@router.patch('/topic/edit/{topic_id}', status_code=status.HTTP_200_OK)
 def update_topic(topic: schema.UpdateTopic, _id: str, db: Session = Depends(get_db), current_user=Depends(get_current_user)):
     """ Update a Topic by it's id  """
 
@@ -287,34 +296,37 @@ def update_topic(topic: schema.UpdateTopic, _id: str, db: Session = Depends(get_
 
 
 @router.get('/topics/user/{user_id}')
-def get_topic_user(user_id:str,db: Session = Depends(get_db), current_user: str = Depends(get_current_user)):
+def get_topic_user(user_id: str, db: Session = Depends(get_db), current_user: str = Depends(get_current_user)):
     """ Get all topics a user created from the database based on their id  """
-    
-    return crud.get_topic_user(db,user_id=user_id)
+
+    return crud.get_topic_user(db, user_id=user_id)
 
 
-@router.delete('/delete/topic/{topic_id}',status_code=status.HTTP_200_OK)
-def delete_topic(topic_id:str,db :Session = Depends(get_db),current_user : str = Depends(get_current_user)):
+@router.delete('/delete/topic/{topic_id}', status_code=status.HTTP_200_OK)
+def delete_topic(topic_id: str, db: Session = Depends(get_db), current_user: str = Depends(get_current_user)):
     """ Delete a topic """
 
-    return crud.delete_topic(db,topic_id=topic_id,current_user=current_user)
+    return crud.delete_topic(db, topic_id=topic_id, current_user=current_user)
 
-# COMMENTS            
+# COMMENTS
+
 
 @router.post('/add_comment/')
-def add_comment(request:schema.AddComment,topic_id:str,db: Session = Depends(get_db),current_user:str = Depends(get_current_user)):
+def add_comment(request: schema.AddComment, topic_id: str, db: Session = Depends(get_db), current_user: str = Depends(get_current_user)):
     """ Add a comment  """
-    topic = db.query(model.Topic).filter(model.Topic.topic_id==topic_id).first()
-    comment = db.query(model.Comment).filter(model.Comment.topic_id == topic_id).all()
+    topic = db.query(model.Topic).filter(
+        model.Topic.topic_id == topic_id).first()
+    comment = db.query(model.Comment).filter(
+        model.Comment.topic_id == topic_id).all()
     total_comments = len(comment) + 1
-    
-    if topic :
+
+    if topic:
         add_comment = model.Comment(
-            comment_id = uuid4(),
-            topic_id = topic_id,
-            user_id = current_user.user_id,
-            content = request.content,
-            image_url = request.image_url
+            comment_id=uuid4(),
+            topic_id=topic_id,
+            user_id=current_user.user_id,
+            content=request.content,
+            image_url=request.image_url
         )
         topic.total_comments = total_comments
         db.add(add_comment)
@@ -322,17 +334,17 @@ def add_comment(request:schema.AddComment,topic_id:str,db: Session = Depends(get
         db.refresh(add_comment)
 
         return{
-            "success" : True, "data":{
-            "comment_id" : add_comment.comment_id,
-            "content": add_comment.content,
-            "image_url" : add_comment.image_url
-        }}
+            "success": True, "data": {
+                "comment_id": add_comment.comment_id,
+                "content": add_comment.content,
+                "image_url": add_comment.image_url
+            }}
     else:
         raise HTTPException(
-            status_code=404, detail=f"Topic not found , add a topic first")    
+            status_code=404, detail=f"Topic not found , add a topic first")
 
 
-@router.patch('/comment/edit/{comment_id}',status_code=status.HTTP_200_OK)
+@router.patch('/comment/edit/{comment_id}', status_code=status.HTTP_200_OK)
 def update_comment(comment: schema.UpdateComment, _id: str, db: Session = Depends(get_db), current_user=Depends(get_current_user)):
     """ Update a comment by it's id  """
 
@@ -360,39 +372,40 @@ def update_comment(comment: schema.UpdateComment, _id: str, db: Session = Depend
         return {"success": False, "message":  "You're not authorized to perform this update "}
 
 
-@router.get('/comments/',status_code=status.HTTP_200_OK)
-def fetch_comments( skip: int = 0, limit: int = 100, db: Session = Depends(get_db),current_user: str = Depends(get_current_user)):
+@router.get('/comments/', status_code=status.HTTP_200_OK)
+def fetch_comments(skip: int = 0, limit: int = 100, db: Session = Depends(get_db), current_user: str = Depends(get_current_user)):
     """ List to get all comments  """
 
     return crud.get_comments(db, skip=skip, limit=limit)
 
 
-@router.get('/comments/{comment_id}',status_code=status.HTTP_200_OK)
-def fetch_a_comment( comment_id:str, db: Session = Depends(get_db),current_user: str = Depends(get_current_user)):
+@router.get('/comments/{comment_id}', status_code=status.HTTP_200_OK)
+def fetch_a_comment(comment_id: str, db: Session = Depends(get_db), current_user: str = Depends(get_current_user)):
     """ Fetch a comment from the database """
-    comment = db.query(model.Comment).filter(model.Comment.comment_id==comment_id).first()
+    comment = db.query(model.Comment).filter(
+        model.Comment.comment_id == comment_id).first()
     if comment is None:
         raise HTTPException(
             status_code=404, detail=f" Comment not found")
-    return {"success":True,"data":comment}
+    return {"success": True, "data": comment}
 
 
-@router.get('/comments/topic/{topic_id}',status_code=status.HTTP_200_OK)
-def fetch_comment_by_topic( topic_id:str, db: Session = Depends(get_db),current_user: str = Depends(get_current_user)):
+@router.get('/comments/topic/{topic_id}', status_code=status.HTTP_200_OK)
+def fetch_comment_by_topic(topic_id: str, db: Session = Depends(get_db), current_user: str = Depends(get_current_user)):
     """ Fetch comments by a topic"""
 
-    return crud.get_comment_in_topic(db,topic_id=topic_id)    
+    return crud.get_comment_in_topic(db, topic_id=topic_id)
 
 
-@router.get('/comments/user/{user_id}',status_code=status.HTTP_200_OK)
-def get_comment_user( user_id:str, db: Session = Depends(get_db),current_user: str = Depends(get_current_user)):
+@router.get('/comments/user/{user_id}', status_code=status.HTTP_200_OK)
+def get_comment_user(user_id: str, db: Session = Depends(get_db), current_user: str = Depends(get_current_user)):
     """ Fetch comments by a User"""
-    
-    return crud.get_comment_user(db,user_id=user_id)    
+
+    return crud.get_comment_user(db, user_id=user_id)
 
 
-@router.delete('/delete/comment/{comment_id}',status_code=status.HTTP_200_OK)
-def delete_comment(comment_id:str,db :Session = Depends(get_db),current_user : str = Depends(get_current_user)):
+@router.delete('/delete/comment/{comment_id}', status_code=status.HTTP_200_OK)
+def delete_comment(comment_id: str, db: Session = Depends(get_db), current_user: str = Depends(get_current_user)):
     """ Delete a comment """
 
-    return crud.delete_comment(db,comment_id=comment_id,current_user=current_user)
+    return crud.delete_comment(db, comment_id=comment_id, current_user=current_user)
