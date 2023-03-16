@@ -313,35 +313,65 @@ def delete_topic(topic_id: str, db: Session = Depends(get_db), current_user: str
 
 @router.post('/add_comment/')
 def add_comment(request: schema.AddComment, topic_id: str, db: Session = Depends(get_db), current_user: str = Depends(get_current_user)):
-    """ Add a comment  """
-    topic = db.query(model.Topic).filter(
-        model.Topic.topic_id == topic_id).first()
-    comment = db.query(model.Comment).filter(
-        model.Comment.topic_id == topic_id).all()
-    total_comments = len(comment) + 1
+    # Check if the topic exists
+    topic = db.query(model.Topic).filter_by(topic_id=topic_id).first()
+    if not topic:
+        raise HTTPException(status_code=404, detail=f"Topic not found, please add a topic first")
 
-    if topic:
-        add_comment = model.Comment(
-            comment_id=uuid4(),
-            topic_id=topic_id,
-            user_id=current_user.user_id,
-            content=request.content,
-            image_url=request.image_url
-        )
-        topic.total_comments = total_comments
-        db.add(add_comment)
-        db.commit()
-        db.refresh(add_comment)
+    # Create a new comment
+    comment = model.Comment(
+        comment_id=uuid4(),
+        topic_id=topic_id,
+        user_id=current_user.user_id,
+        content=request.content,
+        image_url=request.image_url
+    )
+    db.add(comment)
+    db.commit()
+    db.refresh(comment)
 
-        return{
-            "success": True, "data": {
-                "comment_id": add_comment.comment_id,
-                "content": add_comment.content,
-                "image_url": add_comment.image_url
-            }}
-    else:
-        raise HTTPException(
-            status_code=404, detail=f"Topic not found , add a topic first")
+    # Update the topic's total_comments count
+    topic.total_comments += 1
+    db.commit()
+
+    # Return the new comment
+    return {"success": True, "data": {
+        "comment_id": comment.comment_id,
+        "content": comment.content,
+        "image_url": comment.image_url
+    }}
+
+
+#  Reply a comment
+@router.post('/reply_comment/')
+def add_reply(request: schema.AddComment, comment_id: str, db: Session = Depends(get_db), current_user: str = Depends(get_current_user)):
+    # Check if the comment exists
+    comment = db.query(model.Comment).filter_by(comment_id=comment_id).first()
+
+    if not comment:
+        raise HTTPException(status_code=404, detail=f"Comment not found, please add a comment first")
+
+    # Create a new reply
+    reply = model.Comment(
+        topic_id= comment.topic_id,
+        comment_id=uuid4(),
+        parent_comment_id=comment_id,
+        user_id=current_user.user_id,
+        content=request.content,
+        image_url=request.image_url
+    )
+    db.add(reply)
+    db.commit()
+    db.refresh(reply)
+
+    # Return the new reply data as a JSON response
+    return {"success": True, "data": {
+        "comment_id": reply.comment_id,
+        "parent_comment_id": reply.parent_comment_id,
+        "content": reply.content,
+        "image_url": reply.image_url
+    }}
+
 
 
 @router.patch('/comment/edit/{comment_id}', status_code=status.HTTP_200_OK)
@@ -409,3 +439,4 @@ def delete_comment(comment_id: str, db: Session = Depends(get_db), current_user:
     """ Delete a comment """
 
     return crud.delete_comment(db, comment_id=comment_id, current_user=current_user)
+    
