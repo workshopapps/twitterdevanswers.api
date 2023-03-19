@@ -37,8 +37,9 @@ def list_like_comment(comment_id, db: Session = Depends(get_db),current_user: st
     return db.query(model.Like).filter(model.Like.item_id == comment_id).all()
 
 
-@router.post('/add_like/')
-def add_like(id: str, item_type: str, background_task: BackgroundTasks, db: Session = Depends(get_db), current_user: str = Depends(oauth.get_current_user)):
+# combined endpoints(like & unlike)
+@router.post('/toggle_like/') 
+def toggle_like(id: str, item_type: str, background_task: BackgroundTasks, db: Session = Depends(get_db), current_user: str = Depends(oauth.get_current_user)):
     # Check if the specified ID and item_type exist in the database
     
     if item_type == 'question':
@@ -54,44 +55,49 @@ def add_like(id: str, item_type: str, background_task: BackgroundTasks, db: Sess
         raise HTTPException(status_code=404, detail=f"{item_type.capitalize()} not found")
 
     # Check if the user has already liked the item
-    if db.query(model.Like).filter_by(user_id=current_user.user_id, item_id=id, item_type=item_type).first():
-        raise HTTPException(status_code=400, detail=f"You have already liked this {item_type}")
+    like = db.query(model.Like).filter_by(user_id=current_user.user_id, item_id=id, item_type=item_type).first()
 
-    # Add a new like
-    like = model.Like(
-        like_id=uuid4(),
-        item_id=id,
-        user_id=current_user.user_id,
-        item_type=item_type
-    )
-    # Update the item's like count
-    if item_type == 'question':
-        item.total_like += 1
-    elif item_type == 'topic':
-        item.total_likes += 1    
-    elif item_type == 'comment':    
-        item.total_reactions += 1
+    if like:
+        # Remove the existing like
+        db.delete(like)
 
-    db.add(like)
-    db.commit()
+        # Update the item's like count
+        if item_type == 'question':
+            item.total_like -= 1
+        elif item_type == 'topic':
+            item.total_likes -= 1    
+        elif item_type == 'comment':    
+            item.total_reactions -= 1
+        db.commit()
 
-    
-    # This automatically creates a notification by calling create_notification as a background function which
-    # runs after returning a response
-    notification = schema.NotificationCreate(
-        owner_id=like.user_id,
-        content_id=like.item_id,
-        type=like.item_type,
-        title=f"@{current_user.username} liked your {item_type}.",
-    )
-    background_task.add_task(
-        create_notification, notification=notification, db=db)
+        # Return the updated like count as a JSON response
+        return {"success": True, "data":"Item Unliked Successfully" }
 
-    # Return the new like data as a JSON response
-    return {"success": True, "data": {
-        "like_id": like.like_id,
-        "item_id": like.item_id,
-        "user_id": like.user_id,
-        "item_type": like.item_type
-    }}
+    else:
+        # Add a new like
+        like = model.Like(
+            like_id=uuid4(),
+            item_id=id,
+            user_id=current_user.user_id,
+            item_type=item_type
+        )
+        db.add(like)
+        db.commit()
+        db.refresh(like)
 
+        # Update the item's like count
+        if item_type == 'question':
+            item.total_like += 1
+        elif item_type == 'topic':
+            item.total_likes += 1    
+        elif item_type == 'comment':    
+            item.total_reactions += 1
+        db.commit()
+
+        # Return the new like data as a JSON response
+        return {"success": True, "message":"Item Liked Successfully", "data": {
+            "like_id": like.like_id,
+            "item_id": like.item_id,
+            "user_id": like.user_id,
+            "item_type": like.item_type,
+        }}
