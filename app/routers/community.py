@@ -125,6 +125,31 @@ def fetch_by_community_name(community_name: str, db: Session = Depends(get_db), 
     return {"success": True, 'data': community}
 
 
+@router.get('/user/{user_id}/communities', status_code=status.HTTP_200_OK)
+def fetch_communities_by_user(user_id: str, db: Session = Depends(get_db), current_user: str = Depends(get_current_user)):
+    """Fetch communities created by a user"""
+
+    communities = db.query(model.Community).filter(
+        model.Community.user_id == user_id).all()
+    if not communities:
+        raise HTTPException(
+            status_code=404, detail=f"No community created by user")
+    return {"success": True, 'data': communities}
+
+
+@router.get('/{community_id}/users', status_code=status.HTTP_200_OK)
+def fetch_users_in_community(community_id: str, db: Session = Depends(get_db)):
+    """Fetch the users and number of users in a community"""
+
+    community = db.query(model.Community).filter(
+        model.Community.community_id == community_id).first()
+    if not community:
+        raise HTTPException(
+            status_code=404, detail=f"commmunity doesn't exist")
+    users = community.users
+    return {"success": True, 'data': {'users': users, 'user_count': len(users)}}
+
+
 @router.patch('/edit/{community_id}', status_code=status.HTTP_200_OK)
 def update_community(community: schema.UpdateCommunity, _id: str, db: Session = Depends(get_db), current_user=Depends(get_current_user)):
     """ Update a community by it's id  """
@@ -316,7 +341,8 @@ def add_comment(request: schema.AddComment, topic_id: str, db: Session = Depends
     # Check if the topic exists
     topic = db.query(model.Topic).filter_by(topic_id=topic_id).first()
     if not topic:
-        raise HTTPException(status_code=404, detail=f"Topic not found, please add a topic first")
+        raise HTTPException(
+            status_code=404, detail=f"Topic not found, please add a topic first")
 
     # Create a new comment
     comment = model.Comment(
@@ -349,11 +375,12 @@ def add_reply(request: schema.AddComment, comment_id: str, db: Session = Depends
     comment = db.query(model.Comment).filter_by(comment_id=comment_id).first()
 
     if not comment:
-        raise HTTPException(status_code=404, detail=f"Comment not found, please add a comment first")
+        raise HTTPException(
+            status_code=404, detail=f"Comment not found, please add a comment first")
 
     # Create a new reply
     reply = model.Comment(
-        topic_id= comment.topic_id,
+        topic_id=comment.topic_id,
         comment_id=uuid4(),
         parent_comment_id=comment_id,
         user_id=current_user.user_id,
@@ -371,7 +398,6 @@ def add_reply(request: schema.AddComment, comment_id: str, db: Session = Depends
         "content": reply.content,
         "image_url": reply.image_url
     }}
-
 
 
 @router.patch('/comment/edit/{comment_id}', status_code=status.HTTP_200_OK)
@@ -439,4 +465,3 @@ def delete_comment(comment_id: str, db: Session = Depends(get_db), current_user:
     """ Delete a comment """
 
     return crud.delete_comment(db, comment_id=comment_id, current_user=current_user)
-    
