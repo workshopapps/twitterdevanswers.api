@@ -150,14 +150,15 @@ class AnswerVote(Base):
 
 
 class Like(Base):
-    __tablename__ = "likes"
+    __tablename__ = 'likes'
     __table_args__ = {'extend_existing': True}
-    like_id = Column(Integer, primary_key=True)
-    like_type = Column(String(100), nullable=False)
-    user_id = Column(String(50), ForeignKey(
-        'user.user_id', ondelete="CASCADE"), primary_key=True)
-    question_id = Column(String(50), ForeignKey(
-        'question.question_id', ondelete="CASCADE"), primary_key=True)
+
+    like_id = Column(String(50), primary_key=True)
+    item_type = Column(String(20), nullable=False , default = "None")
+    item_id = Column(String(50), nullable=False)
+    user_id = Column(String(50), ForeignKey('user.user_id', ondelete='CASCADE'), nullable=False)
+
+    user = relationship('User') 
 
 
 class Notification(Base):
@@ -234,7 +235,7 @@ class Community(Base):
     community_id = Column(String(50), primary_key=True, nullable=False)
     user_id = Column(String(50), ForeignKey(
         "user.user_id", ondelete="CASCADE"), nullable=False)
-    name = Column(String(300), nullable=False)
+    name = Column(String(300), nullable=False,unique=True)
     description = Column(String(700), nullable=False)
     image_url = Column(String(300), default="default.jpg")
     total_members = Column(Integer, nullable=True, default=0)
@@ -275,6 +276,7 @@ class Topic(Base):
     image_url = Column(String(300), default="default.jpg")
     is_approved = Column(Boolean, default=False, nullable=False)
     total_comments = Column(Integer, nullable=True , default=0)
+    total_likes = Column(Integer, nullable=True , default=0)
     created_at = Column(TIMESTAMP(timezone=True),
                          nullable=False, server_default=text('now()'))
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
@@ -292,6 +294,8 @@ class Comment(Base):
     user_id = Column(String(50), ForeignKey(
         "user.user_id", ondelete="CASCADE"), nullable=False)
     comment_id = Column(String(50), primary_key=True, nullable=False)
+    parent_comment_id = Column(String(50),nullable=False,default="None")
+    total_reactions = Column(Integer, nullable=True , default=0)
     content = Column(String(700), nullable=False)
     image_url = Column(String(300), default="default.jpg")
     created_at = Column(TIMESTAMP(timezone=True),
@@ -300,6 +304,9 @@ class Comment(Base):
 
     user = relationship('model.User')
     topic = relationship('model.Topic')
+
+
+
 
 
 # create tables
