@@ -26,7 +26,7 @@ def get_question(question_id: str, db: Session = Depends(get_db)):
     get_question_db = db.query(model.Question).filter(
         model.Question.question_id == question_id).first()
     get_answer_db = db.query(model.Answer).filter(model.Answer.question_id == question_id).first()
-    get_likes_db = db.query(model.Like).filter(model.Like.question_id == question_id).first()
+    get_likes_db = db.query(model.Like).filter(model.Like.item_id == question_id).first()
 
     if get_question_db:
         if not get_answer_db and not get_likes_db:
@@ -56,7 +56,7 @@ def get_all_questions_and_answers(db: Session = Depends(get_db)):
     for question in get_all_questions_db:
         q_dict = {}
         answers = db.query(model.Answer).filter(model.Answer.question_id == question.question_id).all()
-        likes = db.query(model.Like).filter(model.Like.question_id == question.question_id).all()
+        likes = db.query(model.Like).filter(model.Like.item_id == question.question_id).all()
         q_dict["question"] = question
         q_dict["answers"] = answers
         q_dict["likes"] = likes
