@@ -137,6 +137,18 @@ def fetch_communities_by_user(user_id: str, db: Session = Depends(get_db), curre
     return {"success": True, 'data': communities}
 
 
+@router.get('/user/joined', status_code=status.HTTP_200_OK)
+def fetch_communities_user_joined(user_id :str,db: Session = Depends(get_db), current_user: str = Depends(get_current_user)):
+    """Fetch communities User has joined"""
+
+    user = db.query(model.User).filter(model.User.user_id == user_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    communities_joined = db.query(model.Community).join(model.Community.users).filter(model.User.user_id == user_id).all()
+    return {"success":True,"data":{"num_communities": len(communities_joined) , "communities" : communities_joined}}
+
+
 @router.get('/{community_id}/users', status_code=status.HTTP_200_OK)
 def fetch_users_in_community(community_id: str, db: Session = Depends(get_db)):
     """Fetch the users and number of users in a community"""
@@ -333,8 +345,8 @@ def delete_topic(topic_id: str, db: Session = Depends(get_db), current_user: str
 
     return crud.delete_topic(db, topic_id=topic_id, current_user=current_user)
 
-# COMMENTS
 
+# COMMENTS
 
 @router.post('/add_comment/')
 def add_comment(request: schema.AddComment, topic_id: str, db: Session = Depends(get_db), current_user: str = Depends(get_current_user)):
