@@ -137,7 +137,7 @@ def fetch_communities_by_user(user_id: str, db: Session = Depends(get_db), curre
     return {"success": True, 'data': communities}
 
 
-@router.get('/user/joined', status_code=status.HTTP_200_OK)
+@router.get('/user/{user_id}/joined', status_code=status.HTTP_200_OK)
 def fetch_communities_user_joined(user_id :str,db: Session = Depends(get_db), current_user: str = Depends(get_current_user)):
     """Fetch communities User has joined"""
 
